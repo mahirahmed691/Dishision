@@ -3,7 +3,7 @@ import Drawer from 'react-native-drawer';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { signOut } from 'firebase/auth';
 import { auth } from '../config';
-import { restaurantData } from '../data/restuarantData';
+import { restaurantData } from '../data/restuarantData'; // Correct the import path
 import {
   View,
   StyleSheet,
@@ -15,7 +15,7 @@ import {
   Animated,
   Image,
 } from 'react-native';
-import { TextInput, Avatar, IconButton, Card } from 'react-native-paper';
+import { TextInput, Avatar, IconButton, Card } from 'react-native-paper'; // Import IconButton from react-native-paper
 
 export const HomeScreen = ({ navigation }) => {
   const [inputText, setInputText] = useState('');
@@ -73,6 +73,10 @@ export const HomeScreen = ({ navigation }) => {
       useNativeDriver: false,
     }).start();
   }, [isDrawerOpen]);
+
+  const handleItemPress = (restaurantName) => {
+    navigation.navigate('FoodMenu', { restaurantName });
+  };
 
   return (
     <View style={styles.container}>
@@ -137,24 +141,6 @@ export const HomeScreen = ({ navigation }) => {
                 ]}
               >
                 Profile
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('Search')}
-            >
-              <Icon
-                name="search"
-                size={20}
-                color={activeTab === 'Search' ? '#60BA62' : '#333'}
-              />
-              <Text
-                style={[
-                  styles.menuListText,
-                  { color: activeTab === 'Search' ? '#60BA62' : '#333' },
-                ]}
-              >
-                Search
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -230,21 +216,26 @@ export const HomeScreen = ({ navigation }) => {
             onChangeText={handleInputChange}
             style={styles.searchInput}
           />
-          <ScrollView style={styles.scrollableContent}>
-            {filteredRestaurants.map((restaurant, index) => (
-              <Card key={index} style={styles.foodCard}>
-                <Image
-                  source={{ uri: restaurant.image }}
-                  style={styles.restaurantImage}
-                  onError={(error) => console.error('Image loading error:', error)}
-                />
-                <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                <Text style={styles.cuisine}>{restaurant.cuisine}</Text>
-                <Text style={styles.rating}>Rating: {restaurant.rating}</Text>
-                <Text style={styles.location}>Location: {restaurant.location}</Text>
-              </Card>
-            ))}
-          </ScrollView>
+        <ScrollView style={styles.scrollableContent}>
+          {filteredRestaurants.map((restaurant, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.foodCard}
+              onPress={() => navigation.navigate('Menu', { foodItem: restaurant })}
+
+            >
+              <Image
+                source={{ uri: restaurant.image }}
+                style={styles.restaurantImage}
+                onError={(error) => console.error('Image loading error:', error)}
+              />
+              <Text style={styles.restaurantName}>{restaurant.name}</Text>
+              <Text style={styles.cuisine}>{restaurant.cuisine}</Text>
+              <Text style={styles.rating}>Rating: {restaurant.rating}</Text>
+              <Text style={styles.location}>Location: {restaurant.location}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
         </View>
       </Drawer>
       <View style={styles.bottomNav}>
@@ -266,16 +257,6 @@ export const HomeScreen = ({ navigation }) => {
             name="user"
             size={24}
             color={activeTab === 'Profile' ? '#60BA62' : '#333'}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tabItem, activeTab === 'Search' && styles.activeTab]}
-          onPress={() => navigation.navigate('Search')}
-        >
-          <Icon
-            name="search"
-            size={24}
-            color={activeTab === 'Search' ? '#60BA62' : '#333'}
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -387,20 +368,21 @@ const styles = StyleSheet.create({
   },
   restaurantImage: {
     width: '100%',
-    height: 300,
+    height: 400,
     marginBottom: 10,
     resizeMode: 'contain',
     borderRadius: 8,
   },
   restaurantName: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: '900',
     color: '#333',
     marginBottom: 5,
   },
   cuisine: {
     fontSize: 18,
-    color: '#777',
+    color: '#111',
+    fontWeight:'700',
     marginBottom: 5,
   },
   rating: {
@@ -427,6 +409,11 @@ const styles = StyleSheet.create({
   activeTab: {},
   scrollableContent: {
     flex: 1,
+  },
+  cardRightChevron: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
   },
 });
 

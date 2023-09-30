@@ -5,6 +5,7 @@ export const restaurantData = [
       image:"https://media-cdn.tripadvisor.com/media/photo-p/22/b4/85/13/nando-s-logo.jpg",
       rating: 4.5,
       location: '123 Main Street',
+      description:"Nando's (/ˈnændoʊz/; Afrikaans: [ˈnandœs]) is a South African multinational fast casual chain that specialises in Portuguese flame-grilled peri-peri style chicken. Founded in Johannesburg in 1987, Nando's operates over 1,200 outlets in 30 countries."
     },
     {
       name: 'Gusto',
@@ -46,14 +47,14 @@ export const restaurantData = [
       cuisine: 'Indian',
       image:"https://content.app-sources.com/s/44102870289545622/uploads/Logos/IVY_SPINNINGFIELDS_Asia_Logo_GOLD-8312097.jpg",
       rating: 4.1,
-      location: '789 Oak Street',
+      location: '124 sjckjh',
     },
     {
       name: 'Tattu',
       cuisine: 'Indian',
       image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR56U0QwQFSu38eLJQ8Bwtnm7VBSugCHWW6UAjWhG-jnEWAUqf0_0l6Iu4NMppaq0lkCho&usqp=CAU",
       rating: 3.8,
-      location: '789 Oak Street',
+      location: '23e kdkd',
     },
     {
       name: 'Pizza Express',
