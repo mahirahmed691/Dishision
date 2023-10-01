@@ -16,6 +16,7 @@ import {
   Image,
 } from 'react-native';
 import { TextInput, Avatar, IconButton, Card } from 'react-native-paper';
+import DropDownPicker from 'react-native-dropdown-picker'; // Import the dropdown picker
 
 export const HomeScreen = ({ navigation }) => {
   const [inputText, setInputText] = useState('');
@@ -26,8 +27,7 @@ export const HomeScreen = ({ navigation }) => {
   const [filteredRestaurants, setFilteredRestaurants] = useState(restaurantData);
 
   const [selectedRating, setSelectedRating] = useState(null);
-const [selectedFoodType, setSelectedFoodType] = useState(null);
-
+  const [selectedFoodType, setSelectedFoodType] = useState(null);
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -47,9 +47,20 @@ const [selectedFoodType, setSelectedFoodType] = useState(null);
   };
 
   const filterRestaurants = (text) => {
-    const filtered = restaurantData.filter((restaurant) =>
+    let filtered = restaurantData.filter((restaurant) =>
       restaurant.name.toLowerCase().includes(text.toLowerCase())
     );
+
+    if (selectedRating) {
+      filtered = filtered.filter((restaurant) => restaurant.rating >= selectedRating);
+    }
+
+    if (selectedFoodType) {
+      filtered = filtered.filter((restaurant) =>
+        restaurant.cuisine.toLowerCase() === selectedFoodType.toLowerCase()
+      );
+    }
+
     setFilteredRestaurants(filtered);
   };
 
@@ -196,23 +207,49 @@ const [selectedFoodType, setSelectedFoodType] = useState(null);
               />
             </TouchableOpacity>
           </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <View>
               <Text style={styles.userName}>Hello, {userName}</Text>
               <Text style={styles.dateTime}>What do you want to eat today?</Text>
             </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text>Filter</Text>
               <IconButton mode="contained-tonal" icon="chevron-down" color="black" />
             </View>
           </View>
-          <TextInput
-            mode="outlined"
-            placeholder="Search for food place"
-            value={inputText}
-            onChangeText={handleInputChange}
-            style={styles.searchInput}
-          />
+          <View style={styles.filterContainer}>
+            <TextInput
+              mode="outlined"
+              label="Search for food place"
+              value={inputText}
+              onChangeText={handleInputChange}
+              style={styles.searchInput}
+            />
+             <View style={styles.filterDropdowns}>
+              <DropDownPicker
+                items={[
+                  { label: 'Rating 1', value: 1 },
+                  { label: 'Rating 2', value: 2 },
+                  { label: 'Rating 3', value: 3 },
+                  { label: 'Rating 4', value: 4 },
+                  { label: 'Rating 5', value: 5 },
+                ]}
+                placeholder="Select Rating"
+                containerStyle={styles.dropdown}
+                onChangeItem={(item) => setSelectedRating(item.value)}
+              />
+              <DropDownPicker
+                items={[
+                  { label: 'Type 1', value: 'Type 1' },
+                  { label: 'Type 2', value: 'Type 2' },
+                  { label: 'Type 3', value: 'Type 3' },
+                ]}
+                placeholder="Select Food Type"
+                containerStyle={styles.dropdown}
+                onChangeItem={(item) => setSelectedFoodType(item.value)}
+              />
+            </View>
+          </View>
           <ScrollView style={styles.scrollableContent}>
             {filteredRestaurants.map((restaurant, index) => (
               <TouchableOpacity
@@ -237,9 +274,8 @@ const [selectedFoodType, setSelectedFoodType] = useState(null);
                     />
                   </View>
                   <View style={styles.leftContent}>
-                    
                     <View style={styles.favoriteAndReviews}>
-                    <Text style={styles.restaurantName}>{restaurant.name}</Text>
+                      <Text style={styles.restaurantName}>{restaurant.name}</Text>
                       <TouchableOpacity
                         style={styles.favoriteButton}
                         onPress={() => toggleFavorite(restaurant)}
@@ -261,6 +297,7 @@ const [selectedFoodType, setSelectedFoodType] = useState(null);
                         starSize={18}
                       />
                       <Text style={styles.rating}>
+                        {restaurant.rating}
                       </Text>
                     </View>
                     <Text style={styles.location}>
@@ -269,7 +306,6 @@ const [selectedFoodType, setSelectedFoodType] = useState(null);
                     <Text style={styles.priceRange}>
                       Price Range: {restaurant.priceRange}
                     </Text>
-
                   </View>
                 </View>
               </TouchableOpacity>
@@ -338,7 +374,23 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#999',
     marginTop: 5,
-    marginBottom:10
+    marginBottom: 10,
+  },
+  filterContainer: {
+    marginBottom: 10,
+  },
+  filterDropdowns: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  dropdown: {
+    flex: 1,
+    marginRight: 10,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
   },
   searchInput: {
     marginBottom: 10,
@@ -424,13 +476,13 @@ const styles = StyleSheet.create({
   rating: {
     fontSize: 16,
     color: '#444',
-    marginTop:10
+    marginTop: 10,
   },
   location: {
     fontSize: 16,
     color: '#444',
     marginBottom: 5,
-    marginTop:5
+    marginTop: 5,
   },
   bottomNav: {
     flexDirection: 'row',
@@ -474,11 +526,11 @@ const styles = StyleSheet.create({
   cardContent: {
     flexDirection: 'row',
   },
-  favoriteButton:{
-    position:'absolute',
-    top:0,
-    right:10,
-  }
+  favoriteButton: {
+    position: 'absolute',
+    top: 0,
+    right: 10,
+  },
 });
 
 export default HomeScreen;
