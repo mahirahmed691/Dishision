@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { TextInput, Card, IconButton } from 'react-native-paper';
 
 export const FoodMenuScreen = ({ navigation, route }) => {
@@ -19,22 +19,17 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           onPress={() => navigation.goBack()}
           color="#333"
         />
-    
+        <Text style={styles.pageTitle}>{foodItem.name}</Text>
       </View>
       <View style={styles.restaurantCard}>
-        <View style={{flexDirection:'row',}}>
-      <View>
-        <Text style={styles.restaurantName}>{foodItem.name}</Text>
-        <Text style={styles.restaurantLocation}>{foodItem.location}</Text>
-        </View>
         <Image
           source={{ uri: foodItem.image }}
           style={styles.restaurantImage}
           onError={(error) => console.error('Image loading error:', error)}
         />
-        </View>
-
-        <Text style={styles.restaurantLocation}>{foodItem.description}</Text>
+        <Text style={styles.restaurantName}>{foodItem.name}</Text>
+        <Text style={styles.restaurantLocation}>{foodItem.location}</Text>
+        <Text style={styles.restaurantDescription}>{foodItem.description}</Text>
         <TextInput
           style={styles.searchInput}
           mode="outlined"
@@ -69,7 +64,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
-    elevation: 2, // Add elevation for a card-like effect
+    elevation: 2,
   },
   restaurantName: {
     fontSize: 24,
@@ -80,8 +75,12 @@ const styles = StyleSheet.create({
   restaurantLocation: {
     fontSize: 18,
     color: '#777',
+    marginBottom: 10,
+  },
+  restaurantDescription: {
+    fontSize: 16,
+    color: '#777',
     marginBottom: 20,
-    marginVertical:5
   },
   searchInput: {
     backgroundColor: '#FFFFFF',
@@ -90,7 +89,7 @@ const styles = StyleSheet.create({
   },
   restaurantImage: {
     width: '100%',
-    height: 100,
+    height: 200,
     marginBottom: 20,
     resizeMode: 'contain',
     borderRadius: 8,

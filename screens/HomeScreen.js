@@ -3,7 +3,8 @@ import Drawer from 'react-native-drawer';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { signOut } from 'firebase/auth';
 import { auth } from '../config';
-import { restaurantData } from '../data/restuarantData'; // Correct the import path
+import { restaurantData } from '../data/restuarantData'; // Make sure the import path is correct
+import StarRating from 'react-native-star-rating';
 import {
   View,
   StyleSheet,
@@ -11,23 +12,22 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  TouchableWithoutFeedback,
   Animated,
   Image,
 } from 'react-native';
-import { TextInput, Avatar, IconButton, Card } from 'react-native-paper'; // Import IconButton from react-native-paper
+import { TextInput, Avatar, IconButton, Card } from 'react-native-paper';
 
 export const HomeScreen = ({ navigation }) => {
   const [inputText, setInputText] = useState('');
   const [userName, setUserName] = useState('');
   const [userPhotoURL, setUserPhotoURL] = useState('');
-  const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Home');
-  const [darkMode, setDarkMode] = useState(false);
   const [filteredRestaurants, setFilteredRestaurants] = useState(restaurantData);
 
-  const animatedValue = new Animated.Value(0);
+  const [selectedRating, setSelectedRating] = useState(null);
+const [selectedFoodType, setSelectedFoodType] = useState(null);
+
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -43,7 +43,7 @@ export const HomeScreen = ({ navigation }) => {
 
   const handleInputChange = (text) => {
     setInputText(text);
-    filterRestaurants(text); // Call the filtering function when the input changes
+    filterRestaurants(text);
   };
 
   const filterRestaurants = (text) => {
@@ -54,28 +54,20 @@ export const HomeScreen = ({ navigation }) => {
   };
 
   const toggleDrawer = () => {
-    if (isDrawerOpen) {
-      this.drawer.close();
-    } else {
-      this.drawer.open();
-    }
+    setDrawerOpen(!isDrawerOpen);
   };
 
-  const slideIn = animatedValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-100, 0],
-  });
-
-  useEffect(() => {
-    Animated.timing(animatedValue, {
-      toValue: isDrawerOpen ? 1 : 0,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  }, [isDrawerOpen]);
-
   const handleItemPress = (restaurantName) => {
-    navigation.navigate('FoodMenu', { restaurantName });
+    navigation.navigate('Menu', { restaurantName });
+  };
+
+  const toggleFavorite = (restaurant) => {
+    const updatedRestaurants = [...filteredRestaurants];
+    const index = updatedRestaurants.findIndex((r) => r.id === restaurant.id);
+
+    updatedRestaurants[index].isFavorite = !updatedRestaurants[index].isFavorite;
+
+    setFilteredRestaurants(updatedRestaurants);
   };
 
   return (
@@ -83,7 +75,7 @@ export const HomeScreen = ({ navigation }) => {
       <Drawer
         ref={(ref) => (this.drawer = ref)}
         content={
-          <Animated.View style={[styles.drawerContent, { marginLeft: slideIn }]}>
+          <View style={styles.drawerContent}>
             <View style={styles.userInfoContainer}>
               <Avatar.Image
                 size={80}
@@ -161,10 +153,7 @@ export const HomeScreen = ({ navigation }) => {
                 Settings
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={handleLogout}
-            >
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
               <Icon
                 name="power-off"
                 size={20}
@@ -179,11 +168,12 @@ export const HomeScreen = ({ navigation }) => {
                 Logout
               </Text>
             </TouchableOpacity>
-          </Animated.View>
+          </View>
         }
         openDrawerOffset={0.3}
         panCloseMask={0.3}
         closedDrawerOffset={0}
+        open={isDrawerOpen}
         onOpen={() => setDrawerOpen(true)}
         onClose={() => setDrawerOpen(false)}
       >
@@ -191,7 +181,7 @@ export const HomeScreen = ({ navigation }) => {
           <View style={styles.header}>
             <IconButton
               icon="menu"
-              iconColor="#E6AD00"
+              iconColor="grey"
               size={40}
               onPress={toggleDrawer}
             />
@@ -206,9 +196,16 @@ export const HomeScreen = ({ navigation }) => {
               />
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.userName}>Hello, {userName}</Text>
-          <Text style={styles.dateTime}>What do you want to eat today?</Text>
+          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+            <View>
+              <Text style={styles.userName}>Hello, {userName}</Text>
+              <Text style={styles.dateTime}>What do you want to eat today?</Text>
+            </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text>Filter</Text>
+              <IconButton mode="contained-tonal" icon="chevron-down" color="black" />
+            </View>
+          </View>
           <TextInput
             mode="outlined"
             placeholder="Search for food place"
@@ -216,26 +213,68 @@ export const HomeScreen = ({ navigation }) => {
             onChangeText={handleInputChange}
             style={styles.searchInput}
           />
-        <ScrollView style={styles.scrollableContent}>
-          {filteredRestaurants.map((restaurant, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.foodCard}
-              onPress={() => navigation.navigate('Menu', { foodItem: restaurant })}
+          <ScrollView style={styles.scrollableContent}>
+            {filteredRestaurants.map((restaurant, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.foodCard}
+                onPress={() =>
+                  navigation.navigate(
+                    'Menu',
+                    { foodItem: restaurant },
+                    toggleFavorite(restaurant)
+                  )
+                }
+              >
+                <View style={styles.cardContent}>
+                  <View style={styles.rightContent}>
+                    <Image
+                      source={{ uri: restaurant.image }}
+                      style={styles.restaurantImage}
+                      onError={(error) =>
+                        console.error('Image loading error:', error)
+                      }
+                    />
+                  </View>
+                  <View style={styles.leftContent}>
+                    
+                    <View style={styles.favoriteAndReviews}>
+                    <Text style={styles.restaurantName}>{restaurant.name}</Text>
+                      <TouchableOpacity
+                        style={styles.favoriteButton}
+                        onPress={() => toggleFavorite(restaurant)}
+                      >
+                        <Icon
+                          name={restaurant.isFavorite ? 'heart' : 'heart-o'}
+                          size={20}
+                          color={restaurant.isFavorite ? 'red' : 'gray'}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.cuisine}>{restaurant.cuisine}</Text>
+                    <View style={styles.ratingContainer}>
+                      <StarRating
+                        disabled={true}
+                        maxStars={5}
+                        rating={restaurant.rating}
+                        fullStarColor="#111"
+                        starSize={18}
+                      />
+                      <Text style={styles.rating}>
+                      </Text>
+                    </View>
+                    <Text style={styles.location}>
+                      Location: {restaurant.location}
+                    </Text>
+                    <Text style={styles.priceRange}>
+                      Price Range: {restaurant.priceRange}
+                    </Text>
 
-            >
-              <Image
-                source={{ uri: restaurant.image }}
-                style={styles.restaurantImage}
-                onError={(error) => console.error('Image loading error:', error)}
-              />
-              <Text style={styles.restaurantName}>{restaurant.name}</Text>
-              <Text style={styles.cuisine}>{restaurant.cuisine}</Text>
-              <Text style={styles.rating}>Rating: {restaurant.rating}</Text>
-              <Text style={styles.location}>Location: {restaurant.location}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
       </Drawer>
       <View style={styles.bottomNav}>
@@ -299,6 +338,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#999',
     marginTop: 5,
+    marginBottom:10
   },
   searchInput: {
     marginBottom: 10,
@@ -310,9 +350,6 @@ const styles = StyleSheet.create({
     paddingTop: 0,
     width: 300,
     marginTop: 80,
-  },
-  userInfoContainer: {
-    alignItems: 'center',
   },
   menuHeaderText: {
     marginBottom: 10,
@@ -346,7 +383,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginTop: 10,
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '900',
   },
   menuItem: {
     marginBottom: 10,
@@ -368,8 +405,7 @@ const styles = StyleSheet.create({
   },
   restaurantImage: {
     width: '100%',
-    height: 400,
-    marginBottom: 10,
+    height: 150,
     resizeMode: 'contain',
     borderRadius: 8,
   },
@@ -382,17 +418,19 @@ const styles = StyleSheet.create({
   cuisine: {
     fontSize: 18,
     color: '#111',
-    fontWeight:'700',
+    fontWeight: '700',
     marginBottom: 5,
   },
   rating: {
     fontSize: 16,
     color: '#444',
+    marginTop:10
   },
   location: {
     fontSize: 16,
     color: '#444',
-    marginBottom: 10,
+    marginBottom: 5,
+    marginTop:5
   },
   bottomNav: {
     flexDirection: 'row',
@@ -415,6 +453,32 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
+  priceRange: {
+    fontSize: 16,
+    color: '#444',
+  },
+  viewMenuButton: {
+    marginTop: 10,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rightContent: {
+    width: '50%',
+    marginRight: 10,
+  },
+  leftContent: {
+    width: '50%',
+  },
+  cardContent: {
+    flexDirection: 'row',
+  },
+  favoriteButton:{
+    position:'absolute',
+    top:0,
+    right:10,
+  }
 });
 
 export default HomeScreen;

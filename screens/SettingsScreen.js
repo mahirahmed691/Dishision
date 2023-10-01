@@ -19,7 +19,6 @@ export const SettingsScreen = ({ navigation }) => {
 
   const settingsItems = [
     { icon: 'language', text: 'Language' },
-    { icon: 'edit',     text: 'Edit Profile' },
     { icon: 'notifications',     text: 'Notifications' },
     { icon: 'lock',     text: 'Security' },
     { icon: 'question-answer',     text: 'Ask a Question' },
