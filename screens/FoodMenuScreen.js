@@ -27,7 +27,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
       setLoading(true)
       const response = await axiosInstance.post("", requestData);
       console.log(response.data.choices[0].message)
-      // setApiResponse(response.data);
+      setApiResponse(JSON.stringify( response.data.choices[0].message));
       setLoading(false)
 
 
