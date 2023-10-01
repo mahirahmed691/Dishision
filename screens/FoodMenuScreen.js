@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
 import { TextInput, IconButton, Button } from 'react-native-paper';
 import axios from 'axios';
+import { axiosInstance } from '../utils/request';
 
 export const FoodMenuScreen = ({ navigation, route }) => {
   const [searchText, setSearchText] = useState('');
@@ -12,51 +13,31 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   const [apiResponse, setApiResponse] = useState('');
   const { foodItem } = route.params;
 
-  const handleSearch = () => {
-    if (searchText) {
-      setLoading(true);
-      const apiKey = '';
-      const requestData = {
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a helpful assistant.',
-          },
-          {
-            role: 'user',
-            content: `Search for information about ${searchText}`,
-          },
-        ],
-      };
 
-      axios
-        .post('https://api.openai.com/v1/chat/completions', requestData, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-          },
-        })
-        .then((response) => {
-          console.log('API Response:', response);
-          if (response.status === 200) {
-            const chatGptResponse = response.data.choices[0].text;
-            setApiResponse(chatGptResponse);
-            setSearchResults([]);
-            setError(null);
-          } else {
-            setError('API request failed. Please try again later.');
-          }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-          setError('An error occurred. Please try again later.');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+  const handdlePrompt = async () => {
+
+    const requestData = {
+      "model": "gpt-4",
+      "messages": [{ "role": "user", "content": `Based on this prompt:  ${searchText} 
+      give me a menu in 20 word` }],
+      "temperature": 0.7
     }
-  };
+
+    try {
+      setLoading(true)
+      const response = await axiosInstance.post("", requestData);
+      console.log(response.data.choices[0].message)
+      // setApiResponse(response.data);
+      setLoading(false)
+
+
+    } catch (error) {
+      setLoading(false)
+      console.log(error)
+    }
+
+  }
+
 
   const toggleReviewExpansion = () => {
     setIsExpanded(!isExpanded);
@@ -149,7 +130,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
               icon="magnify"
               color="#555"
               size={20}
-              onPress={handleSearch}
+              onPress={handdlePrompt}
               style={styles.searchButton}
             />
           ) : null}
