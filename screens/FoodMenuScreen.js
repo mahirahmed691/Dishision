@@ -15,7 +15,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   const handleSearch = () => {
     if (searchText) {
       setLoading(true);
-      const apiKey = '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';
+      const apiKey = '';
       const requestData = {
         model: 'gpt-4',
         messages: [
