@@ -32,7 +32,7 @@ export const RootNavigator = () => {
 
   return (
     <NavigationContainer>
-      { <AppStack /> }
+      {user ? <AppStack /> : <AuthStack />}
     </NavigationContainer>
   );
 };

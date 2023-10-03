@@ -1,7 +1,7 @@
 // navigation/BottomTabNavigator.js
 import React from 'react';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { HomeScreen, ProfileScreen, SearchScreen, SettingsScreen } from '../screens';
+import { FavouritesScreen, HomeScreen, ProfileScreen, SettingsScreen, } from '../screens';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Tab = createMaterialBottomTabNavigator();
@@ -31,11 +31,11 @@ const bottomNavigation= () => {
         }}
       />
       <Tab.Screen
-        name="Search"
-        component={SearchScreen}
+        name="Favourites"
+        component={FavouritesScreen}
         options={{
           tabBarIcon: ({ color }) => (
-            <Icon name="search" size={25} color={color} />
+            <Icon name="favorites" size={25} color={color} />
           ),
         }}
       />

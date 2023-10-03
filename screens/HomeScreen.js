@@ -3,7 +3,7 @@ import Drawer from 'react-native-drawer';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { signOut } from 'firebase/auth';
 import { auth } from '../config';
-import { restaurantData } from '../data/restuarantData'; // Make sure the import path is correct
+import { restaurantData } from '../data/restuarantData';
 import StarRating from 'react-native-star-rating';
 import {
   View,
@@ -12,11 +12,27 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  Animated,
   Image,
 } from 'react-native';
-import { TextInput, Avatar, IconButton, Card } from 'react-native-paper';
-import DropDownPicker from 'react-native-dropdown-picker'; // Import the dropdown picker
+import { TextInput, Avatar, Card, Button, IconButton } from 'react-native-paper';
+import FilterModal from '../components/FilterModal';
+
+const EmptyResultsMessage = ({ clearFilters }) => {
+  return (
+    <View style={styles.emptyResultsContainer}>
+      <Image
+        source={require('../assets/no-food.gif')}
+        style={styles.gif}
+      />
+      <Text style={styles.emptyResultsText}>
+        No results found. Try clearing filters.
+      </Text>
+      <Button mode='outlined' onPress={clearFilters}>
+        Clear filters
+      </Button>
+    </View>
+  );
+};
 
 export const HomeScreen = ({ navigation }) => {
   const [inputText, setInputText] = useState('');
@@ -25,9 +41,14 @@ export const HomeScreen = ({ navigation }) => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Home');
   const [filteredRestaurants, setFilteredRestaurants] = useState(restaurantData);
-
+  const [isFilterModalVisible, setFilterModalVisible] = useState(false);
+  const [filterResultsEmpty, setFilterResultsEmpty] = useState(false);
   const [selectedRating, setSelectedRating] = useState(null);
   const [selectedFoodType, setSelectedFoodType] = useState(null);
+  const [isHalal, setIsHalal] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -36,6 +57,10 @@ export const HomeScreen = ({ navigation }) => {
       setUserPhotoURL(user.photoURL || '');
     }
   }, []);
+
+  useEffect(() => {
+    filterRestaurantsByFavorites();
+  }, [favorites, showFavoritesOnly]);
 
   const handleLogout = () => {
     signOut(auth).catch((error) => console.log('Error logging out: ', error));
@@ -62,24 +87,111 @@ export const HomeScreen = ({ navigation }) => {
     }
 
     setFilteredRestaurants(filtered);
+    setFilterResultsEmpty(filtered.length === 0);
   };
 
   const toggleDrawer = () => {
+    if (isDrawerOpen) {
+      const activeTab = 'Home';
+      setActiveTab(activeTab);
+    }
     setDrawerOpen(!isDrawerOpen);
   };
 
-  const handleItemPress = (restaurantName) => {
-    navigation.navigate('Menu', { restaurantName });
+  const openFilterModal = () => {
+    console.log('Opening filter modal');
+    setFilterModalVisible(true);
   };
 
-  const toggleFavorite = (restaurant) => {
-    const updatedRestaurants = [...filteredRestaurants];
-    const index = updatedRestaurants.findIndex((r) => r.id === restaurant.id);
-
-    updatedRestaurants[index].isFavorite = !updatedRestaurants[index].isFavorite;
-
-    setFilteredRestaurants(updatedRestaurants);
+  const closeFilterModal = () => {
+    setFilterModalVisible(false);
   };
+
+  const applyFilters = (rating, foodType, isHalal) => {
+  let filtered = [...restaurantData];
+
+  if (rating !== null) {
+    filtered = filtered.filter((restaurant) => restaurant.rating >= rating);
+  }
+
+  if (foodType !== null) {
+    filtered = filtered.filter(
+      (restaurant) =>
+        restaurant.cuisine.toLowerCase() === foodType.toLowerCase()
+    );
+  }
+
+  if (isHalal) {
+    filtered = filtered.filter((restaurant) => restaurant.isHalal);
+  }
+
+  if (inputText) {
+    filtered = filtered.filter((restaurant) =>
+      restaurant.name.toLowerCase().includes(inputText.toLowerCase())
+    );
+  }
+
+  if (showFavoritesOnly) {
+    filtered = filtered.filter((restaurant) =>
+      favorites.includes(restaurant.name)
+    );
+  }
+
+  setFilteredRestaurants(filtered);
+  setFilterResultsEmpty(filtered.length === 0);
+  closeFilterModal();
+};
+
+  const HalalBanner = ({ isHalal }) => {
+    if (isHalal) {
+      return (
+        <View style={styles.ribbonContainer}>
+          <Text style={styles.ribbonText}>Halal</Text>
+        </View>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  const clearFilters = () => {
+    setSelectedRating(null);
+    setSelectedFoodType(null);
+    setIsHalal(false);
+    setInputText('');
+    filterRestaurants('');
+  };
+
+  const toggleFavorite = () => {
+    if (selectedRestaurant) { // Check if a restaurant is selected
+      setFavorites((prevFavorites) => {
+        if (prevFavorites.includes(selectedRestaurant)) {
+          return prevFavorites.filter((name) => name !== selectedRestaurant);
+        } else {
+          return [...prevFavorites, selectedRestaurant];
+        }
+      });
+    }
+  };
+
+  const filterRestaurantsByFavorites = () => {
+    let filtered = showFavoritesOnly
+      ? restaurantData.filter((restaurant) => favorites.includes(restaurant.name))
+      : [...restaurantData];
+
+    if (inputText) {
+      filtered = filtered.filter((restaurant) =>
+        restaurant.name.toLowerCase().includes(inputText.toLowerCase())
+      );
+    }
+
+    setFilteredRestaurants(filtered);
+    setFilterResultsEmpty(filtered.length === 0);
+  };
+
+  const favoriteRestaurants = restaurantData.filter((restaurant) =>
+  favorites.includes(restaurant.name)
+);
 
   return (
     <View style={styles.container}>
@@ -212,10 +324,29 @@ export const HomeScreen = ({ navigation }) => {
               <Text style={styles.userName}>Hello, {userName}</Text>
               <Text style={styles.dateTime}>What do you want to eat today?</Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text>Filter</Text>
-              <IconButton mode="contained-tonal" icon="chevron-down" color="black" />
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            <TouchableOpacity onPress={toggleFavorite}>
+                <Icon
+                  name={favorites.includes(selectedRestaurant) ? 'heart' : 'heart-o'}
+                  size={24}
+                  color={favorites.includes(selectedRestaurant) ? 'red' : 'gray'}
+                />
+              </TouchableOpacity>
+              <IconButton
+                icon="filter"
+                onPress={openFilterModal}
+                style={{ marginBottom: 10, marginLeft: 10 }}
+              >
+                Filter
+              </IconButton>
             </View>
+            <FilterModal
+              visible={isFilterModalVisible}
+              onClose={closeFilterModal}
+              isHalal={isHalal}
+              setIsHalal={setIsHalal}
+              onApplyFilters={applyFilters}
+            />
           </View>
           <View style={styles.filterContainer}>
             <TextInput
@@ -225,30 +356,6 @@ export const HomeScreen = ({ navigation }) => {
               onChangeText={handleInputChange}
               style={styles.searchInput}
             />
-             <View style={styles.filterDropdowns}>
-              <DropDownPicker
-                items={[
-                  { label: 'Rating 1', value: 1 },
-                  { label: 'Rating 2', value: 2 },
-                  { label: 'Rating 3', value: 3 },
-                  { label: 'Rating 4', value: 4 },
-                  { label: 'Rating 5', value: 5 },
-                ]}
-                placeholder="Select Rating"
-                containerStyle={styles.dropdown}
-                onChangeItem={(item) => setSelectedRating(item.value)}
-              />
-              <DropDownPicker
-                items={[
-                  { label: 'Type 1', value: 'Type 1' },
-                  { label: 'Type 2', value: 'Type 2' },
-                  { label: 'Type 3', value: 'Type 3' },
-                ]}
-                placeholder="Select Food Type"
-                containerStyle={styles.dropdown}
-                onChangeItem={(item) => setSelectedFoodType(item.value)}
-              />
-            </View>
           </View>
           <ScrollView style={styles.scrollableContent}>
             {filteredRestaurants.map((restaurant, index) => (
@@ -259,33 +366,26 @@ export const HomeScreen = ({ navigation }) => {
                   navigation.navigate(
                     'Menu',
                     { foodItem: restaurant },
-                    toggleFavorite(restaurant)
+                    () => setSelectedRestaurant(restaurant.name) 
                   )
                 }
               >
                 <View style={styles.cardContent}>
                   <View style={styles.rightContent}>
-                    <Image
-                      source={{ uri: restaurant.image }}
-                      style={styles.restaurantImage}
-                      onError={(error) =>
-                        console.error('Image loading error:', error)
-                      }
-                    />
+                    <View>
+                      <HalalBanner isHalal={restaurant.isHalal} />
+                      <Image
+                        source={{ uri: restaurant.image }}
+                        style={styles.restaurantImage}
+                        onError={(error) =>
+                          console.error('Image loading error:', error)
+                        }
+                      />
+                    </View>
                   </View>
                   <View style={styles.leftContent}>
                     <View style={styles.favoriteAndReviews}>
                       <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                      <TouchableOpacity
-                        style={styles.favoriteButton}
-                        onPress={() => toggleFavorite(restaurant)}
-                      >
-                        <Icon
-                          name={restaurant.isFavorite ? 'heart' : 'heart-o'}
-                          size={20}
-                          color={restaurant.isFavorite ? 'red' : 'gray'}
-                        />
-                      </TouchableOpacity>
                     </View>
                     <Text style={styles.cuisine}>{restaurant.cuisine}</Text>
                     <View style={styles.ratingContainer}>
@@ -296,9 +396,6 @@ export const HomeScreen = ({ navigation }) => {
                         fullStarColor="#111"
                         starSize={18}
                       />
-                      <Text style={styles.rating}>
-                        {restaurant.rating}
-                      </Text>
                     </View>
                     <Text style={styles.location}>
                       Location: {restaurant.location}
@@ -307,8 +404,32 @@ export const HomeScreen = ({ navigation }) => {
                       Price Range: {restaurant.priceRange}
                     </Text>
                   </View>
+                  <TouchableOpacity
+                    style={styles.favoriteButton}
+                    onPress={() => toggleFavorite(restaurant.name)}
+                  >
+                    <Icon
+                      name={favorites.includes(restaurant.name) ? 'heart' : 'heart-o'}
+                      size={20}
+                      color={favorites.includes(restaurant.name) ? 'red' : 'gray'}
+                    />
+                  </TouchableOpacity>
                 </View>
               </TouchableOpacity>
+            ))}
+            {filteredRestaurants.length < restaurantData.length && (
+              <>
+                {filteredRestaurants.length === 0 ? (
+                  <EmptyResultsMessage clearFilters={clearFilters} />
+                ) : (
+                  <Button mode='contained' onPress={clearFilters}>
+                    Show all restaurants
+                  </Button>
+                )}
+              </>
+            )}
+            {favoriteRestaurants.map((restaurant, index) => (
+              <TouchableOpacity key={index} /* Rest of your favorite restaurant rendering code */ />
             ))}
           </ScrollView>
         </View>
@@ -335,6 +456,19 @@ export const HomeScreen = ({ navigation }) => {
           />
         </TouchableOpacity>
         <TouchableOpacity
+          style={[styles.tabItem, activeTab === 'Favourites' && styles.activeTab]}
+          onPress={() => {
+            navigation.navigate('Favourites');
+            setShowFavoritesOnly(!showFavoritesOnly);
+          }}
+        >
+          <Icon
+            name="heart"
+            size={24}
+            color={activeTab === 'Favourites' ? '#60BA62' : '#333'}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
           style={[styles.tabItem, activeTab === 'Settings' && styles.activeTab]}
           onPress={() => navigation.navigate('Settings')}
         >
@@ -349,14 +483,15 @@ export const HomeScreen = ({ navigation }) => {
   );
 };
 
+
+const width = Dimensions.get('window').width;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF',
     padding: 20,
     paddingTop: 30,
-    alignSelf: 'center',
-    width: Dimensions.get('window').width,
   },
   header: {
     flexDirection: 'row',
@@ -526,11 +661,43 @@ const styles = StyleSheet.create({
   cardContent: {
     flexDirection: 'row',
   },
-  favoriteButton: {
+  ribbonContainer: {
     position: 'absolute',
     top: 0,
-    right: 10,
+    left: 7.5,
+    zIndex: 100,
+    backgroundColor: 'orange', // Ribbon background color (you can adjust it)
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderBottomWidth: 2,
+    borderBottomColor: 'pink', // Border color matching the background color
+    overflow: 'hidden',
   },
+  ribbonText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: 'white', // Text color
+    position: 'relative',
+  },
+  emptyResultsText:{
+    top: width,
+    color:'#111',
+    fontWeight:'700'
+  },
+  gif: {
+    width: width,
+    height: width,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 100,
+  },
+  
 });
 
 export default HomeScreen;

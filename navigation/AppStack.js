@@ -6,6 +6,7 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { PaymentsScreen } from '../screens/PaymentsScreen';
 import { FoodMenuScreen } from '../screens/FoodMenuScreen';
+import { FavouritesScreen } from '../screens/FavouritesScreen';
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,7 @@ export const AppStack = () => {
       <Stack.Screen name='Settings' component={SettingsScreen} />
       <Stack.Screen name='Payments' component={PaymentsScreen} />
       <Stack.Screen name='Menu' component={FoodMenuScreen} />
+      <Stack.Screen name='Favourites' component={FavouritesScreen} />
     </Stack.Navigator>
   );
 };
