@@ -26,6 +26,7 @@ import Animated, {
   useAnimatedReaction,
   useDerivedValue,
 } from 'react-native-reanimated';
+import { axiosGPT } from '../utils/request';
 
 export const FoodMenuScreen = ({ navigation, route }) => {
   const [searchText, setSearchText] = useState('');
@@ -70,7 +71,9 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     };
   });
 
-  const handleSearch = () => {
+
+
+  const handleSearch = async () => {
     if (searchText) {
       // Check if the query contains food-related keywords
       const containsFoodKeyword = foodKeywords.some((keyword) =>
@@ -101,42 +104,17 @@ export const FoodMenuScreen = ({ navigation, route }) => {
         ],
       };
 
-      axios
-        .post('https://api.openai.com/v1/chat/completions', requestData, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
-        })
-        .then((response) => {
-          console.log('API Response:', response);
-          if (response.status === 200) {
-            const choices = response.data.choices;
-            if (choices && choices.length > 0) {
-              const message = choices[0]?.message;
-              if (message) {
-                const chatGptResponse = message.content;
-                console.log('chatGptResponse:', chatGptResponse); // Log the content
-                setApiResponse(chatGptResponse);
-                setSearchResults([]);
-                setError(null);
-              } else {
-                setError('API response does not contain a message.');
-              }
-            } else {
-              setError('API response does not contain choices.');
-            }
-          } else {
-            setError('API request failed. Please try again later.');
-          }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-          setError('An error occurred. Please try again later.');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      try {
+        setLoading(true);
+        const response = await axiosGPT.post("", requestData);
+        const choices = response.data.choices[0].message.content;
+        setApiResponse(choices)
+
+        setLoading(false);
+      } catch (error) {
+        console.log(error)
+        setLoading(false);
+      }
     }
   };
 
