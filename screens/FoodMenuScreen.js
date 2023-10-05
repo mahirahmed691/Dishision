@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,39 +7,33 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import {
   TextInput,
   IconButton,
   Button,
   Snackbar,
-  Card
+  Card,
+  Checkbox,
 } from 'react-native-paper';
-import axios from 'axios';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Animated, {
-  Easing,
   withSpring,
-  withRepeat,
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedReaction,
-  useDerivedValue,
 } from 'react-native-reanimated';
 import { axiosGPT } from '../utils/request';
 
 export const FoodMenuScreen = ({ navigation, route }) => {
   const [searchText, setSearchText] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [apiResponse, setApiResponse] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
-  
+  const hasSearchResults = searchText.length > 0 && !apiResponse;
   const { foodItem } = route.params;
-
-  const apiKey = '';
 
   // An extended list of food-related keywords
   const foodKeywords = [
@@ -53,7 +47,11 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     'eating',
     'dining',
     'meal',
-    // ... (other keywords)
+    'chicken',
+    'lamb',
+    'pasta',
+    'curry',
+    'rice',
   ];
 
   // Animated values
@@ -71,7 +69,48 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     };
   });
 
+  // Define keyword prompts
+  const startersKeywords = ['appetizers', 'starters', 'entrées'];
 
+  const mainsKeywords = ['chicken', 'lamb', 'pasta', 'curry', 'rice'];
+
+  const dessertsKeywords = ['cake', 'milkshake', 'ice-cream'];
+
+  const drinksKeywords = ['soft drink', 'juice', 'fizzy-drinks', 'mocktails'];
+
+  const spiceLevelKeywords = ['hot', 'medium', 'mild'];
+
+  // State to track selected keywords
+  const [selectedKeywords, setSelectedKeywords] = useState([]);
+
+  // Function to handle the selection of a keyword
+  const handleSelectPrompt = (prompt) => {
+    // Toggle the selected state of the prompt
+    if (selectedKeywords.includes(prompt)) {
+      setSelectedKeywords((prevSelectedKeywords) =>
+        prevSelectedKeywords.filter((keyword) => keyword !== prompt)
+      );
+    } else {
+      setSelectedKeywords((prevSelectedKeywords) => [
+        ...prevSelectedKeywords,
+        prompt,
+      ]);
+    }
+  };
+
+  // Function to add selected keywords to the search text
+  const addSelectedKeywords = () => {
+    const keywordsText = selectedKeywords.join(' ');
+    setSearchText((prevSearchText) => {
+      if (prevSearchText) {
+        // If there is existing search text, append the keywords
+        return `${prevSearchText} ${keywordsText}`;
+      } else {
+        return keywordsText;
+      }
+    });
+    setSelectedKeywords([]); // Clear selected keywords
+  };
 
   const handleSearch = async () => {
     if (searchText) {
@@ -95,24 +134,22 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           },
           {
             role: 'user',
-            content: `Search for information about ${searchText}`,
             content: `Search for the menu of ${foodItem.name}: ${searchText}
-             output the content as list of max 5 items don't print out big paragraph,
-             dont not bullet point list only number.
-             `,
+            output the content as a list of max 5 items, don't print out a big paragraph,
+            don't use bullet points, only numbers.`,
           },
         ],
       };
 
       try {
         setLoading(true);
-        const response = await axiosGPT.post("", requestData);
+        const response = await axiosGPT.post('', requestData);
         const choices = response.data.choices[0].message.content;
-        setApiResponse(choices)
+        setApiResponse(choices);
 
         setLoading(false);
       } catch (error) {
-        console.log(error)
+        console.log(error);
         setLoading(false);
       }
     }
@@ -120,9 +157,9 @@ export const FoodMenuScreen = ({ navigation, route }) => {
 
   const handleClearSearch = () => {
     setSearchText('');
-    setSearchResults([]);
     setApiResponse('');
     setError(null);
+    setSelectedKeywords([]); // Clear selected keywords
   };
 
   const toggleReviewExpansion = () => {
@@ -137,14 +174,11 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   const renderApiResponse = () => {
     if (apiResponse) {
       const responseLines = apiResponse.split('\t');
-      let lineNumber = 1;
       return (
         <ScrollView style={styles.apiResponseScrollView}>
           {responseLines.map((line, index) => (
-            <Card style={{padding:20, elevation:10}}>
-            <Text key={index} style={styles.apiResponseText}>
-             {line.trim()}
-            </Text>
+            <Card key={index} style={{ padding: 20, elevation: 10 }}>
+              <Text style={styles.apiResponseText}>{line.trim()}</Text>
             </Card>
           ))}
         </ScrollView>
@@ -153,60 +187,157 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     return null;
   };
 
-  // Determine if there are search results
-  const hasSearchResults = searchResults.length > 0 || apiResponse;
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <View style={styles.header}>
-          <IconButton
-            icon="arrow-left"
-            size={30}
-            onPress={() => navigation.goBack()}
-            color="#333"
-          />
-        </View>
-        <View style={styles.searchInputContainer}>
-            <TextInput
-              style={styles.searchInput}
-              mode="contained"
-              placeholder="Search the menu"
-              value={searchText}
-              onChangeText={(text) => setSearchText(text)}
-            />
-            {searchText.length > 0 ? (
-              <IconButton
-                icon="close"
-                color="#555"
-                size={20}
-                onPress={handleClearSearch}
-                style={styles.clearButton}
+  // Render keyword categories
+  const renderKeywords = () => {
+    return (
+      <>
+        <Text style={styles.sectionTitle}>Starters Keywords:</Text>
+        <View style={styles.keywordContainer}>
+          {startersKeywords.map((prompt, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.checkboxContainer}
+              onPress={() => handleSelectPrompt(prompt)}
+            >
+              <Checkbox
+                status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
+                color="#007AFF"
               />
-            ) : null}
-            {searchText.length > 0 ? (
-              <TouchableOpacity
-                onPress={handleSearch}
-                activeOpacity={0.7}
-                style={styles.searchButtonTouchable}
-              >
-                <Animated.View style={[styles.searchButton, searchButtonStyle]}>
-                  <IconButton icon="magnify" name="search" />
-                </Animated.View>
-              </TouchableOpacity>
-            ) : null}
-          </View>
-          {loading ? (
-            <ActivityIndicator size="large" color="#333" style={styles.loadingIndicator} />
-          ) : error ? (
-            <Text style={styles.errorText}>{error}</Text>
-          ) : renderApiResponse()}
-          <Snackbar
-            visible={snackbarVisible}
-            onDismiss={() => setSnackbarVisible(false)}
+              <Text style={styles.keywordText}>{prompt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Mains Keywords:</Text>
+        <View style={styles.keywordContainer}>
+          {mainsKeywords.map((prompt, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.checkboxContainer}
+              onPress={() => handleSelectPrompt(prompt)}
+            >
+              <Checkbox
+                status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
+                color="#007AFF"
+              />
+              <Text style={styles.keywordText}>{prompt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Desserts Keywords:</Text>
+        <View style={styles.keywordContainer}>
+          {dessertsKeywords.map((prompt, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.checkboxContainer}
+              onPress={() => handleSelectPrompt(prompt)}
+            >
+              <Checkbox
+                status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
+                color="#007AFF"
+              />
+              <Text style={styles.keywordText}>{prompt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Drinks Keywords:</Text>
+        <View style={styles.keywordContainer}>
+          {drinksKeywords.map((prompt, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.checkboxContainer}
+              onPress={() => handleSelectPrompt(prompt)}
+            >
+              <Checkbox
+                status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
+                color="#007AFF"
+              />
+              <Text style={styles.keywordText}>{prompt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Spice Level Keywords:</Text>
+        <View style={styles.keywordContainer}>
+          {spiceLevelKeywords.map((prompt, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.checkboxContainer}
+              onPress={() => handleSelectPrompt(prompt)}
+            >
+              <Checkbox
+                status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
+                color="#007AFF"
+              />
+              <Text style={styles.keywordText}>{prompt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </>
+    );
+  };
+
+return (
+  <SafeAreaView style={styles.container}>
+    <ScrollView>
+      <View style={styles.header}>
+        <IconButton
+          icon="arrow-left"
+          size={30}
+          onPress={() => navigation.goBack()}
+          color="#333"
+        />
+      </View>
+      {(!apiResponse || searchText.length > 0) && ( // Show the search bar when apiResponse is not shown or when searchText is not empty
+        <View style={styles.searchInputContainer}>
+        <TextInput
+          style={styles.searchInput}
+          mode="contained"
+          placeholder="Search the menu"
+          value={searchText}
+          onChangeText={(text) => setSearchText(text)}
+        />
+        {searchText.length > 0 ? (
+          <IconButton
+            icon="close"
+            color="#555"
+            size={20}
+            onPress={handleClearSearch}
+            style={styles.clearButton}
+          />
+        ) : null}
+        {searchText.length > 0 ? (
+          <TouchableOpacity
+            onPress={handleSearch}
+            activeOpacity={0.7}
+            style={styles.searchButtonTouchable}
           >
-            Please enter a food-related query.
-          </Snackbar>
+            <Animated.View style={[styles.searchButton, searchButtonStyle]}>
+              <IconButton icon="magnify" name="search" />
+            </Animated.View>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+      )}
+      {loading ? (
+        <ActivityIndicator size="large" color="#333" style={styles.loadingIndicator} />
+      ) : error ? (
+        <Text style={styles.errorText}>{error}</Text>
+      ) : (
+        renderApiResponse()
+      )}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+      >
+        Please enter a food-related query.
+      </Snackbar>
+      {searchText.length > 0 && !apiResponse ? (
+        renderKeywords()
+      ) : null}
+      {!apiResponse && searchText.length <= 0 && ( // Conditionally render the restaurant card when apiResponse is not shown and searchText is empty
         <View style={styles.restaurantCard}>
           {hasSearchResults ? null : (
             <>
@@ -272,10 +403,13 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             </>
           )}
         </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+      )}
+    </ScrollView>
+  </SafeAreaView>
+);
+
+}
+width = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
   container: {
@@ -336,14 +470,14 @@ const styles = StyleSheet.create({
   reviewName: {
     fontSize: 18,
     fontWeight: 'bold',
-    fontFamily:'Futura',
+    fontFamily: 'Futura',
     color: '#333',
   },
   reviewText: {
     fontSize: 16,
     fontWeight: '500',
     color: '#111',
-    fontFamily:'Futura',
+    fontFamily: 'Futura',
     marginTop: 5,
   },
   reviewScrollView: {
@@ -367,8 +501,8 @@ const styles = StyleSheet.create({
   },
   apiResponseText: {
     fontSize: 15,
-    fontWeight:'200',
-    fontFamily:'Futura',
+    fontWeight: '200',
+    fontFamily: 'Futura',
     color: '#111',
   },
   loadingIndicator: {
@@ -376,7 +510,37 @@ const styles = StyleSheet.create({
   },
   snackbar: {
     backgroundColor: '#111',
-    marginTop:20,
+    marginTop: 20,
+  },
+  keywordContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 0,
+    marginBottom: 0,
+    alignSelf: 'center',
+  },
+  keywordText: {
+    fontSize: 14,
+    marginLeft: 0,
+  },
+  addKeywordsButton: {
+    marginTop: 10,
+    borderRadius: 0,
+    width: width * 0.8,
+    alignSelf: 'center',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 0,
+    marginLeft: 10,
+    fontFamily: 'Avenir',
   },
 });
 
