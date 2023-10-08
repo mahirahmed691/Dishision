@@ -251,7 +251,7 @@ export const SignupScreen = ({ navigation }) => {
                   onPress={() => navigation.navigate('Login')}
                 >
 
-                <Text style={{marginTop:20, textAlign:'center'}}>Already have an account? <Text style={{color:"#60BA62", fontWeight:'800'}}>Login</Text></Text>
+                <Text style={{marginTop:20, textAlign:'center'}}>Already have an account? <Text style={{color:"#00CDBC", fontWeight:'800'}}>Login</Text></Text>
                 </TouchableOpacity>
                 
                 <View>
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     marginTop: 8,
-    backgroundColor: "#60BA62",
+    backgroundColor: "#00CDBC",
     padding: 15,
     borderRadius: 8
   },

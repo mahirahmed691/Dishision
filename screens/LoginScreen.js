@@ -145,7 +145,7 @@ const handleLogin = values => {
                   style={styles.touchableOpacityButton}
                   onPress={() => navigation.navigate('Signup')}
                 >
-                  <Text style={styles.createAccountText}>Don't have account?<Text style={{color:'#60BA62', fontWeight:'800'}}> Signup</Text></Text>
+                  <Text style={styles.createAccountText}>Don't have account?<Text style={{color:'#00CDBC', fontWeight:'800'}}> Signup</Text></Text>
                 </TouchableOpacity>
                 <Text style={{textAlign:'center', marginTop:40}}> Or</Text> 
                 <View style={styles.socialBtnContainer}>
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode:'contain',
     height:280,
-    backgroundColor:'#E6AD00'//#60BA62
+    backgroundColor:'#00CDBC'
   },
   container: {
     flex: 1,
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   loginButton:{
-    backgroundColor:'#60BA62',
+    backgroundColor:'#00CDBC',
     marginTop:40,
     padding:10
   },

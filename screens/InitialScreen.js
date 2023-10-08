@@ -9,7 +9,7 @@ export const InitialScreen = ({ navigation }) => {
     imageStyle={{resizeMode:'contain'}}
   >
     <View style={styles.container}>
-      <Text style={styles.title}>Dishision</Text>
+      <Text style={styles.title}>Dish{"\n"}Decide</Text>
       <Text style={styles.tagline}>Decision Easier</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -33,7 +33,7 @@ export const InitialScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    backgroundColor:"#E6AD00",
+    backgroundColor:"#00CDBC",
   },
   container: {
     flex: 1,
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 10,
     position: 'absolute',
-    top: 140,
+    top: 220,
     left: 23,
   },
   buttonContainer: {
