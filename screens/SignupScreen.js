@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Text, StyleSheet, Image, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import {Card, IconButton} from 'react-native-paper'
 import { Formik } from 'formik';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { OAuthButtons } from "../components/oAuth";
+import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider } from 'firebase/auth';
 import { addDoc, collection } from 'firebase/firestore';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { TextInput } from 'react-native-paper';
@@ -11,7 +12,6 @@ import defaultAvatar from '../assets/avatar.png';
 
 import {
   View,
-  Logo,
   Button,
   FormErrorMessage,
 } from '../components';
@@ -51,10 +51,25 @@ export const SignupScreen = ({ navigation }) => {
     }
   };
   
+  const handleGoogleSignIn = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const { user } = await signInWithCredential(auth, provider);
+  
+      // If Google Sign-In is successful, you can handle the user data here
+      // For example, you can access user.displayName, user.email, and user.photoURL
+  
+      // Redirect or navigate to the desired screen
+      navigation.navigate('Profile'); // Replace with your desired destination screen
+    } catch (error) {
+      setErrorState(error.message);
+    }
+  };
+  
   
 
   const handleSignup = async values => {
-    const { email, password, firstName, lastName } = values;
+    const { email, password, username } = values;
   
     // Check if the profile image is the default avatar
     const isDefaultAvatar = profileImage === defaultAvatar;
@@ -65,7 +80,7 @@ export const SignupScreen = ({ navigation }) => {
   
       // Set the displayName here
       await updateProfile(user, {
-        displayName: `${firstName} ${lastName}`,
+        displayName: `${username}`,
         photoURL: isDefaultAvatar ? null : profileImage.uri, // Set photoURL to null if it's the default avatar
       });
   
@@ -83,7 +98,7 @@ export const SignupScreen = ({ navigation }) => {
   
       await addDoc(collection(db, 'users'), {
         uid: user.uid,
-        displayName: `${firstName} ${lastName}`,
+        displayName: `${username}`,
         // Add other user data as needed
       });
   
@@ -111,8 +126,7 @@ export const SignupScreen = ({ navigation }) => {
           <View style={{width: width * 0.8, alignSelf:'center'}}>
           <Formik
             initialValues={{
-              firstName: '',
-              lastName: '',
+              username: '',
               email: '',
               password: '',
               confirmPassword: '',
@@ -142,7 +156,7 @@ export const SignupScreen = ({ navigation }) => {
                     },
                     
                   }}
-                  onChangeText={handleChange('firstName')}
+                  onChangeText={handleChange('username')}
                   left={<TextInput.Icon icon="account-outline"/>}
                   onBlur={handleBlur('firstName')}
                   style={styles.textInput}
@@ -271,7 +285,7 @@ export const SignupScreen = ({ navigation }) => {
                     onPress={() => console.log('Pressed')}
                 />
               </View>
-        </View>
+            </View>
                 </View>
               </>
             )}
@@ -365,10 +379,8 @@ const styles = StyleSheet.create({
 });
 
 const signupValidationSchema = Yup.object().shape({
-  firstName: Yup.string()
-    .required('First name is required'),
-  lastName: Yup.string()
-    .required('Last name is required'),
+  username: Yup.string()
+    .required('username is required'),
   email: Yup.string()
     .email('Invalid email address')
     .required('Email is required'),

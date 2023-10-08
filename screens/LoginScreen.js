@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Text,
   StyleSheet,
@@ -11,8 +11,28 @@ import { Formik } from 'formik';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { TextInput, Button as PaperButton, IconButton, Card } from 'react-native-paper';
-import Modal from 'react-native-modal'; // Import react-native-modal
-import * as Animatable from 'react-native-animatable';
+import { SocialIcon } from 'react-native-elements'
+
+
+// useEffect(() => {
+//   GoogleSignin.configure({
+//     iosClientId: '151956588290-ja8v0v2lorl4d0b90kqmuqeoh1q86nfr.apps.googleusercontent.com'
+//   });
+// }, []);
+
+const handleGoogleSignIn = async () => {
+  try {
+    await GoogleSignin.hasPlayServices();
+    const userInfo = await GoogleSignin.signIn();
+    const { idToken } = userInfo;
+
+    // Sign in with Firebase using Google ID token
+    const credential = GoogleAuthProvider.credential(idToken);
+    await auth().signInWithCredential(credential);
+  } catch (error) {
+    console.error('Google Sign-In Error', error);
+  }
+};
 
 import {
   Button,
@@ -21,20 +41,19 @@ import {
 import { Colors, auth } from '../config';
 import { useTogglePasswordVisibility } from '../hooks';
 import { loginValidationSchema } from '../utils';
-import { colors } from 'react-native-elements';
 
 export const LoginScreen = ({ navigation }) => {
   const [errorState, setErrorState] = useState('');
-  const { passwordVisibility, handlePasswordVisibility, rightIcon } =
-    useTogglePasswordVisibility();
 
-  const handleLogin = values => {
-    const { email, password } = values;
+const { passwordVisibility, handlePasswordVisibility, rightIcon } =
+  useTogglePasswordVisibility();
+
+const handleLogin = values => {
+  const { email, password } = values;
     signInWithEmailAndPassword(auth, email, password).catch(error =>
-      setErrorState(error.message)
-    );
-  };
-
+    setErrorState(error.message)
+  );
+};
 
   return (
     <ImageBackground
@@ -128,35 +147,18 @@ export const LoginScreen = ({ navigation }) => {
                 >
                   <Text style={styles.createAccountText}>Don't have account?<Text style={{color:'#60BA62', fontWeight:'800'}}> Signup</Text></Text>
                 </TouchableOpacity>
-                <Text style={{textAlign:'center', marginTop:40}}> Or Login With</Text> 
+                <Text style={{textAlign:'center', marginTop:40}}> Or</Text> 
                 <View style={styles.socialBtnContainer}>
-                <IconButton
-                    style={styles.socialBtn}
-                    icon="google"
-                    iconColor='red'
-                    backgroundColor={Colors.white}
-                    size={30}
-                    onPress={() => console.log('Pressed')}
-                />
-                <IconButton
-                    style={styles.socialBtn}
-                    icon="twitter"
-                    iconColor={Colors.blue}
-                    backgroundColor={Colors.white}
-                    size={30}
-                    onPress={() => console.log('Pressed')}
-                />
-                <IconButton
-                    style={styles.socialBtn}
-                    icon="apple"
-                    iconColor='black'
-                    animated={true}
-                    mode="contained-tonal"
-                    backgroundColor={Colors.white}
-                    size={30}
-                    onPress={() => console.log('Pressed')}
-                />
-              </View>
+                    
+
+                <SocialIcon
+                type='google'
+                title='Sign In With Google'
+                button
+                light
+                onPress={handleGoogleSignIn} // Call the Google Sign-In function
+              />
+                </View>
         </View>
       </Card>
       </KeyboardAwareScrollView>
@@ -209,8 +211,8 @@ const styles = StyleSheet.create({
     padding:10
   },
   socialBtnContainer:{
-    flexDirection:'row',
-    justifyContent:'center'
+    width:width * .7,
+    alignSelf:'center',
   },
   socialBtn:{
     margin:20,
@@ -231,5 +233,4 @@ const styles = StyleSheet.create({
     fontWeight:'500',
     marginLeft:20,
   },
-  
 });

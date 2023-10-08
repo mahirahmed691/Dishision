@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,  } from 'react';
 import Drawer from 'react-native-drawer';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { signOut } from 'firebase/auth';
 import { auth } from '../config';
 import { restaurantData } from '../data/restuarantData';
 import StarRating from 'react-native-star-rating';
+import * as Location from 'expo-location'; 
+import axios from 'axios';
+
 import {
   View,
   StyleSheet,
@@ -13,6 +16,7 @@ import {
   ScrollView,
   Dimensions,
   Image,
+  Platform 
 } from 'react-native';
 import { TextInput, Avatar, Card, Button, IconButton } from 'react-native-paper';
 import FilterModal from '../components/FilterModal';
@@ -49,6 +53,10 @@ export const HomeScreen = ({ navigation }) => {
   const [favorites, setFavorites] = useState([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [locationName, setLocationName] = useState(null);
+  const apiKey = '9a05000aa2177a72a4a01ddafd1bc03c';
+
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -57,6 +65,7 @@ export const HomeScreen = ({ navigation }) => {
       setUserPhotoURL(user.photoURL || '');
     }
   }, []);
+
 
   useEffect(() => {
     filterRestaurantsByFavorites();
@@ -163,7 +172,7 @@ export const HomeScreen = ({ navigation }) => {
   };
 
   const toggleFavorite = () => {
-    if (selectedRestaurant) { // Check if a restaurant is selected
+    if (selectedRestaurant) { 
       setFavorites((prevFavorites) => {
         if (prevFavorites.includes(selectedRestaurant)) {
           return prevFavorites.filter((name) => name !== selectedRestaurant);
@@ -192,6 +201,59 @@ export const HomeScreen = ({ navigation }) => {
   const favoriteRestaurants = restaurantData.filter((restaurant) =>
   favorites.includes(restaurant.name)
 );
+
+useEffect(() => {
+  // Request location permission and fetch the user's location
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Location permission denied');
+        return;
+      }
+
+      const userLocation = await Location.getCurrentPositionAsync();
+      const { latitude, longitude } = userLocation.coords;
+
+      // Call reverseGeocode to get the location name
+      const name = await reverseGeocode(latitude, longitude, apiKey);
+      console.log('Location Name:', name);
+
+      // Set the location name in the state
+      setLocationName(name);
+    } catch (error) {
+      console.error('Error requesting location permission:', error);
+    }
+  };
+
+  requestLocationPermission();
+}, []);
+
+const reverseGeocode = async (latitude, longitude, apiKey) => {
+  try {
+    const response = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+    );
+
+    if (response.status === 200) {
+      const results = response.data.results;
+      if (results.length > 0) {
+        const locationName = results[0].formatted_address;
+        console.log('Reverse geocoding response:', locationName);
+        return locationName;
+      } else {
+        console.log('No results found for reverse geocoding');
+        return 'Location Not Available';
+      }
+    } else {
+      console.error('Reverse geocoding request failed');
+      return 'Location Not Available';
+    }
+  } catch (error) {
+    console.error('Error during reverse geocoding:', error);
+    return 'Location Not Available';
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -304,59 +366,71 @@ export const HomeScreen = ({ navigation }) => {
           <View style={styles.header}>
             <IconButton
               icon="menu"
-              iconColor="grey"
+              iconColor="#111"
               size={40}
               onPress={toggleDrawer}
             />
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-              <Avatar.Image
-                size={60}
-                source={
-                  userPhotoURL
-                    ? { uri: userPhotoURL }
-                    : require('../assets/avatar.png')
-                }
-              />
-            </TouchableOpacity>
-          </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <View>
-              <Text style={styles.userName}>Hello, {userName}</Text>
-              <Text style={styles.dateTime}>What do you want to eat today?</Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-            <TouchableOpacity onPress={toggleFavorite}>
-                <Icon
-                  name={favorites.includes(selectedRestaurant) ? 'heart' : 'heart-o'}
-                  size={24}
-                  color={favorites.includes(selectedRestaurant) ? 'red' : 'gray'}
-                />
+          <View style={{flexDirection:'row'}}>
+              <TouchableOpacity onPress={toggleFavorite}>
+                  <Icon
+                    style={{marginLeft:10}}
+                    name={favorites.includes(selectedRestaurant) ? 'heart' : 'heart-o'}
+                    size={24}
+                    color={favorites.includes(selectedRestaurant) ? 'red' : 'gray'}
+                  />
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+              <Icon
+                    style={{marginLeft:10}}
+                    name="user"
+                    size={24}
+                    color="#00CDBC"
+                  />
+              </TouchableOpacity>
+          </View>
+          </View>
+          <View>
+        {locationName ? (
+          <Text>Location: {locationName}</Text>
+        ) : (
+          <Text>Loading location...</Text>
+        )}
+      </View>
+            
+          <View style={styles.filterContainer}>
+            <TextInput
+              theme={{
+                roundness:30,
+                colors: {
+                  primary: '#00CDBC', underlineColor: 'transparent'
+                }         
+              }}
+              mode="outlined"
+              label="Search for food place"
+              value={inputText}
+              onChangeText={handleInputChange}
+              style={styles.searchInput}
+              clearButtonMode="always"
+              clearButtonModeStyle={{backgroundColor:'red'}}
+            />
               <IconButton
-                icon="filter"
+                icon="tune"
                 onPress={openFilterModal}
                 style={{ marginBottom: 10, marginLeft: 10 }}
+                iconColor='#00CDBC'
+                size={30}
+                collapsable={true}
               >
                 Filter
               </IconButton>
-            </View>
-            <FilterModal
+              <FilterModal
               visible={isFilterModalVisible}
               onClose={closeFilterModal}
               isHalal={isHalal}
               setIsHalal={setIsHalal}
               onApplyFilters={applyFilters}
             />
-          </View>
-          <View style={styles.filterContainer}>
-            <TextInput
-              mode="outlined"
-              label="Search for food place"
-              value={inputText}
-              onChangeText={handleInputChange}
-              style={styles.searchInput}
-            />
-          </View>
+            </View>
           <ScrollView style={styles.scrollableContent}>
             {filteredRestaurants.map((restaurant, index) => (
               <TouchableOpacity
@@ -400,8 +474,8 @@ export const HomeScreen = ({ navigation }) => {
                     <Text style={styles.location}>
                       Location: {restaurant.location}
                     </Text>
-                    <Text style={styles.priceRange}>
-                      Price Range: {restaurant.priceRange}
+                    <Text>
+                      Price: £{restaurant.price}
                     </Text>
                   </View>
                   <TouchableOpacity
@@ -429,10 +503,11 @@ export const HomeScreen = ({ navigation }) => {
               </>
             )}
             {favoriteRestaurants.map((restaurant, index) => (
-              <TouchableOpacity key={index} /* Rest of your favorite restaurant rendering code */ />
-            ))}
+              <TouchableOpacity key={index} />
+            ))}            
           </ScrollView>
         </View>
+        
       </Drawer>
       <View style={styles.bottomNav}>
         <TouchableOpacity
@@ -483,7 +558,6 @@ export const HomeScreen = ({ navigation }) => {
   );
 };
 
-
 const width = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
@@ -497,22 +571,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
   },
   userName: {
     fontSize: 25,
     fontWeight: '500',
     color: '#333',
   },
-  dateTime: {
-    fontSize: 17,
-    fontWeight: '400',
-    color: '#999',
-    marginTop: 5,
-    marginBottom: 10,
-  },
   filterContainer: {
     marginBottom: 10,
+    flexDirection:'row'
   },
   filterDropdowns: {
     flexDirection: 'row',
@@ -529,6 +596,9 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     marginBottom: 10,
+    backgroundColor:'#f9f9f9',
+    borderRadius:20,
+    width: width * .8
   },
   drawerContent: {
     flex: 1,
@@ -588,7 +658,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 10,
     borderRadius: 8,
-    backgroundColor: '#FFF',
   },
   restaurantImage: {
     width: '100%',
@@ -664,19 +733,19 @@ const styles = StyleSheet.create({
   ribbonContainer: {
     position: 'absolute',
     top: 0,
-    left: 7.5,
+    left: 0,
     zIndex: 100,
-    backgroundColor: 'orange', // Ribbon background color (you can adjust it)
+    backgroundColor: 'darkgreen',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderBottomWidth: 2,
-    borderBottomColor: 'pink', // Border color matching the background color
+    borderBottomColor: 'pink', 
     overflow: 'hidden',
   },
   ribbonText: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: 'white', // Text color
+    color: 'white',
     position: 'relative',
   },
   emptyResultsText:{

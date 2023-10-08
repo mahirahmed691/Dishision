@@ -1,16 +1,14 @@
-import 'dotenv/config';
-
 export default {
   expo: {
-    name: 'Expo Firebase Starter',
-    slug: 'expo-firebase',
+    name: 'DishDecide',
+    slug: 'DishDecide',
     privacy: 'public',
     platforms: ['ios', 'android'],
     version: '0.15.0',
     orientation: 'portrait',
-    icon: './assets/flame.png',
+    icon: './assets/iconApp.png',
     splash: {
-      image: './assets/splash.png',
+      image: './assets/bigburger.png',
       resizeMode: 'cover',
       backgroundColor: '#F57C00'
     },
@@ -19,20 +17,13 @@ export default {
     },
     assetBundlePatterns: ['**/*'],
     ios: {
-      supportsTablet: true,
-      bundleIdentifier: "com.mahir93.expofirebase"
+      infoPlist: {
+        "NSLocationWhenInUseUsageDescription": "Your location is required to provide you with the best experience."
+      }
     },
-
     android: {
-      package: "com.mahir93.expofirebase" 
+      package: "com.mahir93.expofirebase", 
+      permissions: ["LOCATION"]
     },
-    extra: {
-      apiKey: process.env.API_KEY,
-      authDomain: process.env.AUTH_DOMAIN,
-      projectId: process.env.PROJECT_ID,
-      storageBucket: process.env.STORAGE_BUCKET,
-      messagingSenderId: process.env.MESSAGING_SENDER_ID,
-      appId: process.env.APP_ID
-    }
   }
 };

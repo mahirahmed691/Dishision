@@ -205,6 +205,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
               />
               <Text style={styles.keywordText}>{prompt}</Text>
             </TouchableOpacity>
+            
           ))}
         </View>
 
@@ -275,6 +276,15 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             </TouchableOpacity>
           ))}
         </View>
+        <TouchableOpacity
+        onPress={addSelectedKeywords}
+        activeOpacity={0.7}
+        style={styles.addKeywordsButton}
+      >
+        <Button mode="contained" onPress={addSelectedKeywords}>
+          Add Keywords
+        </Button>
+      </TouchableOpacity>
       </>
     );
   };
@@ -527,6 +537,13 @@ const styles = StyleSheet.create({
   keywordText: {
     fontSize: 14,
     marginLeft: 0,
+    backgroundColor: '#F48037',
+    padding:10,
+    margin:5,
+    borderRadius:10,
+    color:'white',
+
+    
   },
   addKeywordsButton: {
     marginTop: 10,

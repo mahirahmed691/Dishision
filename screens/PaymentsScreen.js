@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Button, TextInput, Card, Paragraph } from 'react-native-paper';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, FlatList } from 'react-native';
+import { Button, TextInput, Card, Paragraph, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useStripe } from '@stripe/stripe-react-native';
 import * as Animatable from 'react-native-animatable';
 import Modal from 'react-native-modal';
 
@@ -9,6 +10,7 @@ export const PaymentsScreen = () => {
   const [userBalance, setUserBalance] = useState(100);
   const [isPaymentSuccess, setPaymentSuccess] = useState(false);
   const [purchaseAmount, setPurchaseAmount] = useState('');
+  const { handleURLCallback } = useStripe();
   const [defaultCard, setDefaultCard] = useState('**** **** **** 1234'); // Last 4 digits of the card
 
   // Modal state for card management
@@ -34,9 +36,9 @@ export const PaymentsScreen = () => {
   const isPaymentButtonDisabled = !purchaseAmount || parseFloat(purchaseAmount) <= 0;
 
   const [bundles] = useState([
-    { amount: 10, label: '£10 Bundle' },
-    { amount: 20, label: '£20 Bundle' },
-    { amount: 50, label: '£50 Bundle' },
+    { amount: 5, label: '£5 Bundle', description:'500 Searches' },
+    { amount: 10, label: '£10 Bundle', description:'1000 Searches' },
+    { amount: 20, label: '£20 Bundle', description:'2000 Searches' },
   ]);
 
   const handleBundleSelection = (amount) => {
@@ -79,6 +81,53 @@ export const PaymentsScreen = () => {
     to: { translateY: 300 },
   };
 
+  const handleDeepLink = useCallback(
+    async (url: string | null) => {
+      if (url) {
+        const stripeHandled = await handleURLCallback(url);
+        if (stripeHandled) {
+          // This was a Stripe URL - you can return or add extra handling here as you see fit
+        } else {
+          // This was NOT a Stripe URL – handle as you normally would
+        }
+      }
+    },
+    [handleURLCallback]
+  );
+
+  useEffect(() => {
+    const getUrlAsync = async () => {
+      const initialUrl = await Linking.getInitialURL();
+      handleDeepLink(initialUrl);
+    };
+  
+    getUrlAsync();
+  
+    const deepLinkListener = Linking.addEventListener(
+      'url',
+      (event: { url: string }) => {
+        handleDeepLink(event.url);
+        console.log('Stripe URL callback handled:', url);
+      }
+    );
+      
+    return () => deepLinkListener.remove();
+  }, []);
+
+  // Function to render each payment bundle card with animation
+  const renderPaymentBundle = ({ item }) => {
+    return (
+      <TouchableOpacity onPress={() => handleBundleSelection(item.amount)}>
+        <Card style={styles.bundleCard}>
+          <Card.Content>
+            <Paragraph style={styles.bundleAmount}>£{item.amount.toFixed(2)}</Paragraph>
+            <Paragraph style={styles.bundleDescription}>{item.description}</Paragraph>
+          </Card.Content>
+        </Card>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
@@ -90,42 +139,54 @@ export const PaymentsScreen = () => {
             </Animatable.View>
           ) : (
             <>
-              <Text style={styles.paymentTitle}>Make a Payment</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <TouchableOpacity
+                  onPress={() => setTransactionHistoryVisible(true)}
+                  style={styles.transactionHistoryButton}
+                >
+                  <IconButton icon="history" size={30} />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setNewCardNumber('');
+                    setAddCardModalVisible(true);
+                  }}
+                  style={styles.addCardButtonTopRight}
+                >
+                  <IconButton icon="card-plus" size={30} />
+                </TouchableOpacity>
+              </View>
 
               <TextInput
-                label="Purchase Amount (£)"
+                label="Amount (£)"
                 placeholder="Enter Purchase Amount"
                 value={purchaseAmount}
                 onChangeText={(text) => setPurchaseAmount(text)}
                 style={styles.input}
                 keyboardType="numeric"
+                mode='contained'
               />
 
               <Text style={styles.bundlesTitle}>Payment Bundles</Text>
               <View style={styles.bundlesContainer}>
-                {bundles.map((bundle, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => handleBundleSelection(bundle.amount)}
-                  >
-                    <Card style={styles.bundleCard}>
-                      <Card.Content>
-                        <Paragraph style={styles.bundleLabel}>{bundle.label}</Paragraph>
-                        <Paragraph style={styles.bundleAmount}>£{bundle.amount.toFixed(2)}</Paragraph>
-                      </Card.Content>
-                    </Card>
-                  </TouchableOpacity>
-                ))}
+                <FlatList
+                  data={bundles}
+                  horizontal
+                  renderItem={renderPaymentBundle}
+                  keyExtractor={(item) => item.amount.toString()}
+                />
               </View>
 
               <Animatable.Text animation="fadeIn" style={styles.defaultCardText}>
-                Default Card: {defaultCard}
+                Default Card: 
+                <Text style={{color:"#00CDBC"}}>{defaultCard}</Text>
               </Animatable.Text>
 
               <View style={styles.buttonContainer}>
                 <Button
                   mode="contained"
-                  onPress={handlePurchase}
+                  onPress={handleDeepLink}
                   style={styles.purchaseButton}
                   disabled={isPaymentButtonDisabled}
                 >
@@ -135,15 +196,6 @@ export const PaymentsScreen = () => {
             </>
           )}
 
-          {/* Transaction History Button */}
-          <TouchableOpacity
-            onPress={() => setTransactionHistoryVisible(true)}
-            style={styles.transactionHistoryButton}
-          >
-            <Text style={styles.transactionHistoryButtonText}>Transaction History</Text>
-          </TouchableOpacity>
-
-          {/* Transaction Card */}
           <Modal
             isVisible={isTransactionHistoryVisible}
             onSwipeComplete={() => setTransactionHistoryVisible(false)}
@@ -173,59 +225,47 @@ export const PaymentsScreen = () => {
               </ScrollView>
             </View>
           </Modal>
-
-          {/* Card Management Section */}
-          <TouchableOpacity
-            onPress={() => {
-              setNewCardNumber('');
-              modalRef.current?.fadeIn();
-            }}
-            style={styles.addCardButton}
-          >
-            <Text style={styles.addCardButtonText}>Add/Replace Card</Text>
-          </TouchableOpacity>
-
-          {/* Add Card Modal */}
-          <Modal
-            visible={isAddCardModalVisible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={() => setAddCardModalVisible(false)}
-          >
-            <Animatable.View ref={modalRef} animation={fadeIn} style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Add/Replace Card</Text>
-                <TextInput
-                  label="New Card Number"
-                  placeholder="Enter 16-digit Card Number"
-                  value={newCardNumber}
-                  onChangeText={(text) => setNewCardNumber(text)}
-                  style={styles.input}
-                  keyboardType="numeric"
-                />
-                <Button mode="contained" onPress={handleAddCard} style={styles.modalButton}>
-                  Save Card
-                </Button>
-                <Button
-                  mode="outlined"
-                  onPress={() => setAddCardModalVisible(false)}
-                  style={styles.modalButton}
-                >
-                  Cancel
-                </Button>
-              </View>
-            </Animatable.View>
-          </Modal>
         </View>
       </ScrollView>
+      <Modal
+        visible={isAddCardModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setAddCardModalVisible(false)}
+      >
+        <Animatable.View ref={modalRef} animation={fadeIn} style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add/Replace Card</Text>
+            <TextInput
+              label="New Card Number"
+              placeholder="Enter 16-digit Card Number"
+              value={newCardNumber}
+              onChangeText={(text) => setNewCardNumber(text)}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            <Button mode="contained" onPress={handleAddCard} style={styles.modalButton}>
+              Save Card
+            </Button>
+            <Button
+              mode="outlined"
+              onPress={() => setAddCardModalVisible(false)}
+              style={styles.modalButton}
+            >
+              Cancel
+            </Button>
+          </View>
+        </Animatable.View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF', // Light gray background
+    backgroundColor: '#FFFFFF', // White background
   },
   scrollView: {
     flexGrow: 1,
@@ -257,8 +297,11 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     marginBottom: 20,
-    backgroundColor: '#FFF', // White background for input
+    backgroundColor: '#F5F5F5', // Light gray background for input
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DDD', // Light gray border
+    paddingHorizontal: 10,
   },
   bundlesTitle: {
     fontSize: 20,
@@ -270,30 +313,41 @@ const styles = StyleSheet.create({
   bundlesContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 30,
+    height:100
   },
   bundleCard: {
     flex: 1,
     marginHorizontal: 5,
-    borderRadius: 8,
+    height: 100,
+    margin:10,
+    padding:10,
     elevation: 2,
-    borderColor: '#DDD', // Light gray border
-    backgroundColor: '#FFF', // White background for cards
+    backgroundColor: '#FFFFFF', 
+    shadowColor: '#111',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    alignItems:'center'
   },
   bundleLabel: {
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#333', // Dark text color
   },
   bundleAmount: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#111', 
+  },
+  bundleDescription: {
     fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: '#00C853', // Green color for amount
+    fontWeight: '500',
+    color: '#111', 
   },
   defaultCardText: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
     marginBottom: 10,
     color: '#333', // Dark text color
@@ -302,7 +356,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   purchaseButton: {
-    backgroundColor: '#007AFF', // Blue color for a professional look
+    backgroundColor: '#00CDBC', 
     width: '100%',
     paddingVertical: 14,
   },
@@ -310,20 +364,20 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333', // Dark text color
+    color: '#111', // Dark text color
   },
   transactionCardContainer: {
     marginBottom: 20,
     alignItems: 'center',
   },
   transactionCard: {
-    width: '90%',
+    width: '100%',
     marginBottom: 10,
     borderRadius: 16,
-    backgroundColor: '#FFF', // White background for cards
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#FFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0,
     shadowRadius: 2,
     elevation: 10,
   },
@@ -339,27 +393,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  addCardButton: {
-    backgroundColor: '#007AFF', // Blue color for button
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  addCardButtonText: {
-    color: '#FFF', // White text color
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width: "100%",
+    backgroundColor: 'rgba(0, 245, 245, 0.1)',
   },
   modalContent: {
     width: '80%',
-    backgroundColor: '#FFF', // White background for modal
+    backgroundColor: '#FFFFFF', // White background for modal
     borderRadius: 8,
     padding: 20,
     elevation: 4,
@@ -368,37 +411,54 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#333', // Dark text color
+    color: '#111', 
+    
   },
   modalButton: {
     marginVertical: 10,
   },
-  transactionHistoryButton: {
-    backgroundColor: '#007AFF', // Blue color for button
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginTop: 20,
-  },
   transactionHistoryButtonText: {
-    color: '#FFF', // White text color
+    color: '#FFFFFF', // White text color
     fontSize: 18,
     fontWeight: 'bold',
   },
   transactionHistoryModal: {
     justifyContent: 'flex-end',
     margin: 0,
-  },
-  transactionHistoryContainer: {
-    backgroundColor: '#FFF',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    padding: 20,
-    minHeight: 300,
+    width:'100%',
   },
   transactionHistoryContent: {
     flexGrow: 1,
+    width:'100%',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5', // Light gray background
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
+  content: {
+    padding: 20,
+  },
+  paymentSuccess: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  success: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#00C853', // Green color for success
+    marginBottom: 10,
+  },
+
+  purchaseButton: {
+    backgroundColor: '#00C853', // Green button
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 8,
   },
 });
+
 
 export default PaymentsScreen;
