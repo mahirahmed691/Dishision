@@ -291,12 +291,12 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
               <Icon
                 name="home"
                 size={20}
-                color={activeTab === 'Home' ? '#60BA62' : '#333'}
+                color={activeTab === 'Home' ? '#00CDBC' : '#333'}
               />
               <Text
                 style={[
                   styles.menuListText,
-                  { color: activeTab === 'Home' ? '#60BA62' : '#333' },
+                  { color: activeTab === 'Home' ? '#00CDBC' : '#333' },
                 ]}
               >
                 Home
@@ -309,12 +309,12 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
               <Icon
                 name="user"
                 size={20}
-                color={activeTab === 'Profile' ? '#60BA62' : '#333'}
+                color={activeTab === 'Profile' ? '#00CDBC' : '#333'}
               />
               <Text
                 style={[
                   styles.menuListText,
-                  { color: activeTab === 'Profile' ? '#60BA62' : '#333' },
+                  { color: activeTab === 'Profile' ? '#00CDBC' : '#333' },
                 ]}
               >
                 Profile
@@ -517,7 +517,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
           <Icon
             name="home"
             size={24}
-            color={activeTab === 'Home' ? '#60BA62' : '#333'}
+            color={activeTab === 'Home' ? '#00CDBC' : '#333'}
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -540,7 +540,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
           <Icon
             name="heart"
             size={24}
-            color={activeTab === 'Favourites' ? '#60BA62' : '#333'}
+            color={activeTab === 'Favourites' ? '#00CDBC' : '#333'}
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -550,7 +550,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
           <Icon
             name="cog"
             size={24}
-            color={activeTab === 'Settings' ? '#60BA62' : '#333'}
+            color={activeTab === 'Settings' ? '#00CDBC' : '#333'}
           />
         </TouchableOpacity>
       </View>
@@ -733,13 +733,11 @@ const styles = StyleSheet.create({
   ribbonContainer: {
     position: 'absolute',
     top: 0,
-    left: 0,
+    left: 8,
     zIndex: 100,
-    backgroundColor: 'darkgreen',
+    backgroundColor: 'teal',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderBottomWidth: 2,
-    borderBottomColor: 'pink', 
     overflow: 'hidden',
   },
   ribbonText: {

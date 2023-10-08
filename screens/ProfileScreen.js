@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   iconContainer: {
-    backgroundColor: '#60BA62',
+    backgroundColor: '#00CDBC',
     borderRadius: 50, // Make the container circular
     marginRight: 20,
     padding: 10,

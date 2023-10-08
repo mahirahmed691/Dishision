@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
   },
 
   purchaseButton: {
-    backgroundColor: '#00C853', // Green button
+    backgroundColor: '#00CDBC', // Green button
     width: '100%',
     paddingVertical: 16,
     borderRadius: 8,

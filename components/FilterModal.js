@@ -49,7 +49,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
               maxStars={5}
               rating={selectedRating}
               selectedStar={(rating) => setSelectedRating(rating)}
-              fullStarColor="#60BA62"
+              fullStarColor="#00CDBC"
               starSize={30}
             />
           </View>
@@ -84,7 +84,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
               <Checkbox.Android
                 status={isHalal ? 'checked' : 'unchecked'}
                 onPress={() => setIsHalal(!isHalal)}
-                color="#60BA62"
+                color="#00CDBC"
               />
               <Text>Halal</Text>
             </View>
