@@ -13,17 +13,27 @@ export const RootNavigator = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Simulate a delay of 2 seconds (adjust as needed)
+    const delay = 5000;
+
+    // Start a timer to hide the loading indicator after the delay
+    const delayTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, delay);
+
     // onAuthStateChanged returns an unsubscriber
     const unsubscribeAuthStateChanged = onAuthStateChanged(
       auth,
       authenticatedUser => {
         authenticatedUser ? setUser(authenticatedUser) : setUser(null);
-        setIsLoading(false);
       }
     );
 
-    // unsubscribe auth listener on unmount
-    return unsubscribeAuthStateChanged;
+    // Cleanup timers and unsubscribe on unmount
+    return () => {
+      clearTimeout(delayTimer);
+      unsubscribeAuthStateChanged();
+    };
   }, [user]);
 
   if (isLoading) {
@@ -31,9 +41,8 @@ export const RootNavigator = () => {
   }
 
   return (
-    <NavigationContainer >
+    <NavigationContainer>
       {user ? <AppStack /> : <AuthStack />}
-      {/* <AppStack /> */}
     </NavigationContainer>
   );
 };

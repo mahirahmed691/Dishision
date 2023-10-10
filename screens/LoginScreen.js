@@ -147,7 +147,7 @@ const handleLogin = values => {
                 >
                   <Text style={styles.createAccountText}>Don't have account?<Text style={{color:'#00CDBC', fontWeight:'800'}}> Signup</Text></Text>
                 </TouchableOpacity>
-                <Text style={{textAlign:'center', marginTop:40}}> Or</Text> 
+                <Text style={{textAlign:'center', marginTop:40, marginBottom:20,}}> Or</Text> 
                 <View style={styles.socialBtnContainer}>
                     
 

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
@@ -17,6 +16,7 @@ import {
   Card,
   Checkbox,
 } from 'react-native-paper';
+import {Icon} from "react-native-elements"
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Animated, {
   withSpring,
@@ -136,7 +136,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             role: 'user',
             content: `Search for the menu of ${foodItem.name}: ${searchText}
             output the content as a list of max 5 items, don't print out a big paragraph,
-            don't use bullet points, only numbers.`,
+            don't use bullet points, only numbers. do not display any other text besides the list of 5`,
           },
         ],
       };
@@ -162,13 +162,6 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     setSelectedKeywords([]); // Clear selected keywords
   };
 
-  const toggleReviewExpansion = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const capitalizeFirstWord = (sentence) => {
-    return sentence.charAt(0).toUpperCase() + sentence.slice(1).toLowerCase();
-  };
 
   // Render API response as list items
   const renderApiResponse = () => {
@@ -201,7 +194,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             >
               <Checkbox
                 status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
-                color="#007AFF"
+                color="#00CDBC"
               />
               <Text style={styles.keywordText}>{prompt}</Text>
             </TouchableOpacity>
@@ -219,7 +212,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             >
               <Checkbox
                 status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
-                color="#007AFF"
+                color="#00CDBC"
               />
               <Text style={styles.keywordText}>{prompt}</Text>
             </TouchableOpacity>
@@ -236,7 +229,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             >
               <Checkbox
                 status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
-                color="#007AFF"
+                color="#00CDBC"
               />
               <Text style={styles.keywordText}>{prompt}</Text>
             </TouchableOpacity>
@@ -253,7 +246,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             >
               <Checkbox
                 status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
-                color="#007AFF"
+                color="#00CDBC"
               />
               <Text style={styles.keywordText}>{prompt}</Text>
             </TouchableOpacity>
@@ -270,7 +263,8 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             >
               <Checkbox
                 status={selectedKeywords.includes(prompt) ? 'checked' : 'unchecked'}
-                color="#007AFF"
+                color="#00CDBC"
+                
               />
               <Text style={styles.keywordText}>{prompt}</Text>
             </TouchableOpacity>
@@ -281,7 +275,11 @@ export const FoodMenuScreen = ({ navigation, route }) => {
         activeOpacity={0.7}
         style={styles.addKeywordsButton}
       >
-        <Button mode="contained" onPress={addSelectedKeywords}>
+        <Button 
+        theme={{
+          colors:{primary:'white'}
+        }} 
+        onPress={addSelectedKeywords}>
           Add Keywords
         </Button>
       </TouchableOpacity>
@@ -300,7 +298,7 @@ return (
           color="#333"
         />
       </View>
-      {(!apiResponse || searchText.length > 0) && ( // Show the search bar when apiResponse is not shown or when searchText is not empty
+      {(!apiResponse || searchText.length > 0) && ( 
         <View style={styles.searchInputContainer}>
         <TextInput
           style={styles.searchInput}
@@ -340,6 +338,7 @@ return (
       )}
       <Snackbar
         visible={snackbarVisible}
+        style={styles.snackbar}
         onDismiss={() => setSnackbarVisible(false)}
       >
         Please enter a food-related query.
@@ -347,7 +346,7 @@ return (
       {searchText.length > 0 && !apiResponse ? (
         renderKeywords()
       ) : null}
-      {!apiResponse && searchText.length <= 0 && ( // Conditionally render the restaurant card when apiResponse is not shown and searchText is empty
+      {!apiResponse && searchText.length <= 0 && ( 
         <View style={styles.restaurantCard}>
           {hasSearchResults ? null : (
             <>
@@ -358,58 +357,34 @@ return (
               />
               <Text style={styles.restaurantName}>{foodItem.name}</Text>
               <Text style={styles.restaurantLocation}>{foodItem.location}</Text>
+
+              <TouchableOpacity onPress={() => navigation.navigate('Maps', { foodItem })}>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent:'space-between', marginBottom:10, marginTop:10 }}>
+                    <View style={{flexDirection:'row'}}>
+                    <Icon name="info" size={20} color="#00CDBC" style={{marginRight:10}}/> 
+                    <Text>Info</Text>
+                    <Text style={{marginLeft:-30, marginTop:20}}> Maps, allergens and hygiene rating</Text>
+                    </View>
+                    
+                    <Icon name='chevron-right' color="#00CDBC"/>
+                  </View> 
+                </TouchableOpacity>
+                
+                <TouchableOpacity onPress={() => navigation.navigate('Reviews', { foodItem })}>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent:'space-between', marginBottom:10, marginTop:10 }}>
+                    <View style={{flexDirection:'row'}}>
+                    <Icon name="star" size={20} color="#00CDBC" style={{marginRight:10}}/> 
+                    <Text>{foodItem.rating}</Text>
+                    <Text style={{marginLeft:-25}}> {"\n"} See all {foodItem.reviews.length} reviews</Text>
+                    </View>
+                    <Icon name='chevron-right' color="#00CDBC"/>
+                  </View>  
+                </TouchableOpacity>
+              
+                
               <Text style={styles.restaurantDescription}>
                 {foodItem.description}
               </Text>
-              {foodItem.reviews.length > 0 && (
-                <>
-                  <Text style={styles.reviewTitle}>
-                    Reviews ({foodItem.reviews.length})
-                  </Text>
-                  <ScrollView
-                    style={styles.reviewScrollView}
-                    contentContainerStyle={styles.reviewScrollViewContent}
-                  >
-                    {isExpanded
-                      ? foodItem.reviews.map((review, index) => {
-                          if (review.name && review.review) {
-                            return (
-                              <View key={index} style={styles.review}>
-                                <Text style={styles.reviewName}>
-                                  {review.name}
-                                </Text>
-                                <Text style={styles.reviewText}>
-                                  {capitalizeFirstWord(review.review)}
-                                </Text>
-                              </View>
-                            );
-                          }
-                          return null;
-                        })
-                      : foodItem.reviews.slice(0, 3).map((review, index) => {
-                          if (review.name && review.review) {
-                            return (
-                              <View key={index} style={styles.review}>
-                                <Text style={styles.reviewName}>
-                                  {review.name}
-                                </Text>
-                                <Text style={styles.reviewText}>
-                                  {capitalizeFirstWord(review.review)}
-                                </Text>
-                              </View>
-                            );
-                          }
-                          return null;
-                        })}
-                  </ScrollView>
-                  <IconButton
-                    style={styles.toggleButton}
-                    icon={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={30}
-                    onPress={toggleReviewExpansion}
-                  />
-                </>
-              )}
             </>
           )}
         </View>
@@ -420,6 +395,7 @@ return (
 
 }
 width = Dimensions.get('window').width;
+height = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
   container: {
@@ -480,22 +456,13 @@ const styles = StyleSheet.create({
   reviewName: {
     fontSize: 18,
     fontWeight: 'bold',
-    fontFamily: 'Futura',
     color: '#333',
   },
   reviewText: {
     fontSize: 16,
     fontWeight: '500',
     color: '#111',
-    fontFamily: 'Futura',
     marginTop: 5,
-  },
-  reviewScrollView: {
-    maxHeight: 400,
-  },
-  toggleButton: {
-    alignSelf: 'center',
-    marginTop: 10,
   },
   searchButton: {
     marginLeft: 10,
@@ -506,14 +473,13 @@ const styles = StyleSheet.create({
   apiResponseScrollView: {
     marginTop: 10,
     padding: 10,
-    backgroundColor: '#FCF7F6',
     borderRadius: 8,
   },
   apiResponseText: {
-    fontSize: 15,
+    fontSize: 20,
     fontWeight: '200',
-    fontFamily: 'Futura',
     color: '#111',
+    fontWeight:'900'
   },
   loadingIndicator: {
     marginTop: 20,
@@ -521,6 +487,11 @@ const styles = StyleSheet.create({
   snackbar: {
     backgroundColor: '#111',
     marginTop: 20,
+    position: 'absolute',
+    bottom:-80,
+    width:width * .9,
+    alignSelf: 'center',
+
   },
   keywordContainer: {
     flexDirection: 'row',
@@ -537,19 +508,19 @@ const styles = StyleSheet.create({
   keywordText: {
     fontSize: 14,
     marginLeft: 0,
-    backgroundColor: '#F48037',
-    padding:10,
+    backgroundColor: '#00CDBC',
+    padding:8,
     margin:5,
-    borderRadius:10,
     color:'white',
+    fontWeight:'900'
 
-    
   },
   addKeywordsButton: {
-    marginTop: 10,
-    borderRadius: 0,
+    marginTop: 20,
+    borderRadius: 20,
     width: width * 0.8,
     alignSelf: 'center',
+    backgroundColor:'black',
   },
   sectionTitle: {
     fontSize: 16,
@@ -557,7 +528,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 0,
     marginLeft: 10,
-    fontFamily: 'Avenir',
   },
 });
 

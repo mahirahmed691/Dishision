@@ -8,9 +8,9 @@ export default {
     orientation: 'portrait',
     icon: './assets/iconApp.png',
     splash: {
-      image: './assets/bigburger.png',
-      resizeMode: 'cover',
-      backgroundColor: '#F57C00'
+      image: './assets/logo4.png',
+      resizeMode: 'contain',
+      backgroundColor: '#00CDBC'
     },
     updates: {
       fallbackToCacheTimeout: 0

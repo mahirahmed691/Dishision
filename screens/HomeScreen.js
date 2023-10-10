@@ -317,7 +317,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
                   { color: activeTab === 'Profile' ? '#00CDBC' : '#333' },
                 ]}
               >
-                Profile
+                {""} Profile
               </Text>
             </TouchableOpacity>
             <TouchableOpacity

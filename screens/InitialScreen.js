@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ImageBackground, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
 export const InitialScreen = ({ navigation }) => {
   return (
@@ -9,8 +9,10 @@ export const InitialScreen = ({ navigation }) => {
     imageStyle={{resizeMode:'contain'}}
   >
     <View style={styles.container}>
-      <Text style={styles.title}>Dish{"\n"}Decide</Text>
-      <Text style={styles.tagline}>Decision Easier</Text>
+
+      <Image source={require('../assets/logo4.png')} style={styles.logo} />
+      {/* <Text style={styles.title}>Dish{"\n"}Decide</Text>
+      <Text style={styles.tagline}>Decision Easier</Text> */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
@@ -85,6 +87,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  logo:{
+    flex:1,
+    alignContent:'center',
+    textAlign:'center',
+    width:500,
+    height:500,
+    resizeMode:'contain'
+  }
 });
 
 export default styles;

@@ -6,6 +6,7 @@ import { InitialScreen } from './InitialScreen';
 import { ProfileScreen } from './ProfileScreen';
 import { SettingsScreen} from './SettingsScreen';
 import { FavouritesScreen } from './FavouritesScreen';
+import { ReviewsScreen } from './ReviewsScreen';
 
 export { 
     LoginScreen, 
@@ -15,5 +16,6 @@ export {
     InitialScreen, 
     ProfileScreen, 
     SettingsScreen,
-    FavouritesScreen
+    FavouritesScreen,
+    ReviewsScreen
 };

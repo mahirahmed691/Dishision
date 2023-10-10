@@ -5,31 +5,41 @@ export const restaurantData = [
       cuisine: 'Grill',
       image:"https://media-cdn.tripadvisor.com/media/photo-p/22/b4/85/13/nando-s-logo.jpg",
       rating: 4.5,
-      location: '145 Oxford Road, Manchester',
+      location: 'The Quad, Oxford Rd, Manchester M1 5QS',
       isHalal: true,
       favourite:false,
       price:[15],
+      lat: 53.47252133966724,
+      long: -2.2404270027794375,
+      link:"https://ratings.food.gov.uk/business/1215154",
+      hygieneRating:3,
       description:"Nando's (/ˈnændoʊz/; Afrikaans: [ˈnandœs]) is a South African multinational fast casual chain that specialises in Portuguese flame-grilled peri-peri style chicken. Founded in Johannesburg in 1987, Nando's operates over 1,200 outlets in 30 countries.",
       reviews:
       [
         {
           name:'Moe',
-          review:"chicken was great"
-        },
-        
+          review:"chicken was great",
+          starRating:4.5,
+        },       
         {
-          name:'Moe',
-          review:"chicken was great"
+          name:'Shakia',
+          review:"it was meh",
+          starRating:3,
         },
-
         {
-          name:'Moe',
-          review:"chicken was great"
+          name:'Faz',
+          review:"chicken was great and lovely meal",
+          starRating:5,
         },
-
         {
-          name:'Moe',
-          review:"chicken was great"
+          name:'Patrick',
+          review:"chicken was great",
+          starRating:3,
+        },
+        {
+          name:'Riri',
+          review:"chicken was great",
+          starRating:1,
         },
       ]
     },
@@ -43,6 +53,7 @@ export const restaurantData = [
       isHalal: true,
       price:[30],
       favourite:false,
+      hygieneRating:2,
       reviews:
       [
         {

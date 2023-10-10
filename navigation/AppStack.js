@@ -7,6 +7,8 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { PaymentsScreen } from '../screens/PaymentsScreen';
 import { FoodMenuScreen } from '../screens/FoodMenuScreen';
 import { FavouritesScreen } from '../screens/FavouritesScreen';
+import { ReviewsScreen } from '../screens/ReviewsScreen';
+import { MapScreen } from '../screens/MapsScreen';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +22,8 @@ export const AppStack = () => {
       <Stack.Screen name='Payments' component={PaymentsScreen} />
       <Stack.Screen name='Menu' component={FoodMenuScreen} />
       <Stack.Screen name='Favourites' component={FavouritesScreen} />
+      <Stack.Screen name='Reviews' component={ReviewsScreen} />
+      <Stack.Screen name='Maps' component={MapScreen} />
     </Stack.Navigator>
   );
 };
