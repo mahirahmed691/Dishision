@@ -9,6 +9,8 @@ import { FoodMenuScreen } from '../screens/FoodMenuScreen';
 import { FavouritesScreen } from '../screens/FavouritesScreen';
 import { ReviewsScreen } from '../screens/ReviewsScreen';
 import { MapScreen } from '../screens/MapsScreen';
+import {Restaurants} from '../components/Restaurants';
+
 
 const Stack = createStackNavigator();
 
@@ -24,6 +26,7 @@ export const AppStack = () => {
       <Stack.Screen name='Favourites' component={FavouritesScreen} />
       <Stack.Screen name='Reviews' component={ReviewsScreen} />
       <Stack.Screen name='Maps' component={MapScreen} />
+      <Stack.Screen name="Restaurants" component={Restaurants} />
     </Stack.Navigator>
   );
 };

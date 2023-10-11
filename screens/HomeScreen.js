@@ -2,12 +2,9 @@ import React, { useEffect, useState,  } from 'react';
 import Drawer from 'react-native-drawer';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { signOut } from 'firebase/auth';
-import { auth } from '../config';
-import { restaurantData } from '../data/restuarantData';
-import StarRating from 'react-native-star-rating';
 import * as Location from 'expo-location'; 
 import axios from 'axios';
-
+import { firestore, auth } from '../config/firebase'; 
 import {
   View,
   StyleSheet,
@@ -20,6 +17,7 @@ import {
 } from 'react-native';
 import { TextInput, Avatar, Card, Button, IconButton } from 'react-native-paper';
 import FilterModal from '../components/FilterModal';
+import Restaurants from '../components/Restaurants';
 
 const EmptyResultsMessage = ({ clearFilters }) => {
   return (
@@ -44,7 +42,7 @@ export const HomeScreen = ({ navigation }) => {
   const [userPhotoURL, setUserPhotoURL] = useState('');
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Home');
-  const [filteredRestaurants, setFilteredRestaurants] = useState(restaurantData);
+  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
   const [filterResultsEmpty, setFilterResultsEmpty] = useState(false);
   const [selectedRating, setSelectedRating] = useState(null);
@@ -57,15 +55,23 @@ export const HomeScreen = ({ navigation }) => {
   const [locationName, setLocationName] = useState(null);
   const apiKey = '9a05000aa2177a72a4a01ddafd1bc03c';
 
-
   useEffect(() => {
-    if (auth.currentUser) {
-      const user = auth.currentUser;
-      setUserName(user.displayName || '');
-      setUserPhotoURL(user.photoURL || '');
-    }
-  }, []);
+    const fetchRestaurantData = async () => {
+      try {
+        const restaurantsCollection = firestore.collection('restaurant'); // Use your Firestore collection name.
+        const snapshot = await restaurantsCollection.get();
+        const restaurants = snapshot.docs.map((doc) => doc.data());
 
+        setFilteredRestaurants(restaurants);
+        // ... (other state updates)
+
+      } catch (error) {
+        console.error('Error fetching restaurant data:', error);
+      }
+    };
+
+    fetchRestaurantData();
+  }, []);
 
   useEffect(() => {
     filterRestaurantsByFavorites();
@@ -81,7 +87,7 @@ export const HomeScreen = ({ navigation }) => {
   };
 
   const filterRestaurants = (text) => {
-    let filtered = restaurantData.filter((restaurant) =>
+    let filtered = filteredRestaurants.filter((restaurant) =>
       restaurant.name.toLowerCase().includes(text.toLowerCase())
     );
 
@@ -117,7 +123,7 @@ export const HomeScreen = ({ navigation }) => {
   };
 
   const applyFilters = (rating, foodType, isHalal) => {
-  let filtered = [...restaurantData];
+  let filtered = [...filteredRestaurants];
 
   if (rating !== null) {
     filtered = filtered.filter((restaurant) => restaurant.rating >= rating);
@@ -185,8 +191,8 @@ export const HomeScreen = ({ navigation }) => {
 
   const filterRestaurantsByFavorites = () => {
     let filtered = showFavoritesOnly
-      ? restaurantData.filter((restaurant) => favorites.includes(restaurant.name))
-      : [...restaurantData];
+      ? filteredRestaurants.filter((restaurant) => favorites.includes(restaurant.name))
+      : [...filteredRestaurants];
 
     if (inputText) {
       filtered = filtered.filter((restaurant) =>
@@ -198,7 +204,7 @@ export const HomeScreen = ({ navigation }) => {
     setFilterResultsEmpty(filtered.length === 0);
   };
 
-  const favoriteRestaurants = restaurantData.filter((restaurant) =>
+  const favoriteRestaurants = filteredRestaurants.filter((restaurant) =>
   favorites.includes(restaurant.name)
 );
 
@@ -431,81 +437,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
               onApplyFilters={applyFilters}
             />
             </View>
-          <ScrollView style={styles.scrollableContent}>
-            {filteredRestaurants.map((restaurant, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.foodCard}
-                onPress={() =>
-                  navigation.navigate(
-                    'Menu',
-                    { foodItem: restaurant },
-                    () => setSelectedRestaurant(restaurant.name) 
-                  )
-                }
-              >
-                <View style={styles.cardContent}>
-                  <View style={styles.rightContent}>
-                    <View>
-                      <HalalBanner isHalal={restaurant.isHalal} />
-                      <Image
-                        source={{ uri: restaurant.image }}
-                        style={styles.restaurantImage}
-                        onError={(error) =>
-                          console.error('Image loading error:', error)
-                        }
-                      />
-                    </View>
-                  </View>
-                  <View style={styles.leftContent}>
-                    <View style={styles.favoriteAndReviews}>
-                      <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                    </View>
-                    <Text style={styles.cuisine}>{restaurant.cuisine}</Text>
-                    <View style={styles.ratingContainer}>
-                      <StarRating
-                        disabled={true}
-                        maxStars={5}
-                        rating={restaurant.rating}
-                        fullStarColor="#111"
-                        starSize={18}
-                      />
-                    </View>
-                    <Text style={styles.location}>
-                      Location: {restaurant.location}
-                    </Text>
-                    <Text>
-                      Price: £{restaurant.price}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.favoriteButton}
-                    onPress={() => toggleFavorite(restaurant.name)}
-                  >
-                    <Icon
-                      name={favorites.includes(restaurant.name) ? 'heart' : 'heart-o'}
-                      size={20}
-                      color={favorites.includes(restaurant.name) ? 'red' : 'gray'}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            ))}
-            {filteredRestaurants.length < restaurantData.length && (
-              <>
-                {filteredRestaurants.length === 0 ? (
-                  <EmptyResultsMessage clearFilters={clearFilters} />
-                ) : (
-                  <Button mode='contained' onPress={clearFilters}>
-                    Show all restaurants
-                  </Button>
-                )}
-              </>
-            )}
-            {favoriteRestaurants.map((restaurant, index) => (
-              <TouchableOpacity key={index} />
-            ))}            
-          </ScrollView>
+            <Restaurants navigation={navigation}/>
         </View>
         
       </Drawer>

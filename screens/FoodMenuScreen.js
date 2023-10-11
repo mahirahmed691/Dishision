@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Dimensions,
+  Image,
 } from 'react-native';
 import {
   TextInput,
@@ -16,7 +17,7 @@ import {
   Card,
   Checkbox,
 } from 'react-native-paper';
-import {Icon} from "react-native-elements"
+import { Icon } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Animated, {
   withSpring,
@@ -24,6 +25,13 @@ import Animated, {
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import { axiosGPT } from '../utils/request';
+import { db } from '../config/firebase'; // Import your Firebase configuration
+import {
+  collection,
+  where,
+  query,
+  getDocs,
+} from 'firebase/firestore';
 
 export const FoodMenuScreen = ({ navigation, route }) => {
   const [searchText, setSearchText] = useState('');
@@ -33,9 +41,12 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   const [apiResponse, setApiResponse] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const hasSearchResults = searchText.length > 0 && !apiResponse;
-  const { foodItem } = route.params;
+  const { restaurant } = route.params;
 
-  // An extended list of food-related keywords
+  const [selectedKeywords, setSelectedKeywords] = useState([]);
+  const [commentsLength, setCommentsLength] = useState(0);
+  const searchButtonScale = useSharedValue(1);
+
   const foodKeywords = [
     'food',
     'restaurant',
@@ -54,22 +65,35 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     'rice',
   ];
 
-  // Animated values
-  const searchButtonScale = useSharedValue(1);
-
-  // Animation styles
-  const searchButtonStyle = useAnimatedStyle(() => {
-    const scale = withSpring(searchButtonScale.value, {
-      damping: 2,
-      stiffness: 80,
-      mass: 0.1,
+  const addSelectedKeywords = () => {
+    const keywordsText = selectedKeywords.join(' ');
+    setSearchText((prevSearchText) => {
+      if (prevSearchText) {
+        // If there is existing search text, append the keywords
+        return `${prevSearchText} ${keywordsText}`;
+      } else {
+        return keywordsText;
+      }
     });
-    return {
-      transform: [{ scale }],
-    };
-  });
+    setSelectedKeywords([]); // Clear selected keywords
+  };
 
-  // Define keyword prompts
+  const fetchCommentsLengthForRestaurant = async (restaurantName) => {
+    try {
+      const commentsCollection = collection(db, 'comments');
+      const q = query(commentsCollection, where('restaurantName', '==', restaurantName));
+      const querySnapshot = await getDocs(q);
+  
+      const length = querySnapshot.size;
+      setCommentsLength(length); // Set the length in the state
+  
+      return length;
+    } catch (error) {
+      console.error('Error fetching comments length:', error);
+      return 0;
+    }
+  };
+
   const startersKeywords = ['appetizers', 'starters', 'entrées'];
 
   const mainsKeywords = ['chicken', 'lamb', 'pasta', 'curry', 'rice'];
@@ -81,7 +105,6 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   const spiceLevelKeywords = ['hot', 'medium', 'mild'];
 
   // State to track selected keywords
-  const [selectedKeywords, setSelectedKeywords] = useState([]);
 
   // Function to handle the selection of a keyword
   const handleSelectPrompt = (prompt) => {
@@ -98,17 +121,10 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     }
   };
 
-  // Function to add selected keywords to the search text
-  const addSelectedKeywords = () => {
-    const keywordsText = selectedKeywords.join(' ');
-    setSearchText((prevSearchText) => {
-      if (prevSearchText) {
-        // If there is existing search text, append the keywords
-        return `${prevSearchText} ${keywordsText}`;
-      } else {
-        return keywordsText;
-      }
-    });
+  const handleClearSearch = () => {
+    setSearchText('');
+    setApiResponse('');
+    setError(null);
     setSelectedKeywords([]); // Clear selected keywords
   };
 
@@ -134,7 +150,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           },
           {
             role: 'user',
-            content: `Search for the menu of ${foodItem.name}: ${searchText}
+            content: `Search for the menu of ${restaurant.restaurantName}: ${searchText}
             output the content as a list of max 5 items, don't print out a big paragraph,
             don't use bullet points, only numbers. do not display any other text besides the list of 5`,
           },
@@ -155,18 +171,41 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     }
   };
 
-  const handleClearSearch = () => {
-    setSearchText('');
-    setApiResponse('');
-    setError(null);
-    setSelectedKeywords([]); // Clear selected keywords
+  const searchButtonStyle = useAnimatedStyle(() => {
+    const scale = withSpring(searchButtonScale.value, {
+      damping: 2,
+      stiffness: 80,
+      mass: 0.1,
+      stiffness: 120,
+      damping: 8,
+      restSpeedThreshold: 0.001,
+      restDisplacementThreshold: 0.001,
+      overshootClamping: false,
+      toValue: 1,
+    });
+    return {
+      transform: [{ scale }],
+    };
+  });
+
+  const fetchRestaurantCommentsLength = async () => {
+    try {
+      const restaurantNameToQuery = restaurant.restaurantName;
+      const length = await fetchCommentsLengthForRestaurant(restaurantNameToQuery);
+      setCommentsLength(length);
+    } catch (error) {
+      console.error('Error fetching restaurant comments length:', error);
+    }
   };
 
+  useEffect(() => {
+    fetchRestaurantCommentsLength();
+  }, []);
 
-  // Render API response as list items
+
   const renderApiResponse = () => {
     if (apiResponse) {
-      const responseLines = apiResponse.split('\t');
+      const responseLines = apiResponse.split('\n');
       return (
         <ScrollView style={styles.apiResponseScrollView}>
           {responseLines.map((line, index) => (
@@ -180,7 +219,6 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     return null;
   };
 
-  // Render keyword categories
   const renderKeywords = () => {
     return (
       <>
@@ -287,115 +325,106 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     );
   };
 
-return (
-  <SafeAreaView style={styles.container}>
-    <ScrollView>
-      <View style={styles.header}>
-        <IconButton
-          icon="arrow-left"
-          size={30}
-          onPress={() => navigation.goBack()}
-          color="#333"
-        />
-      </View>
-      {(!apiResponse || searchText.length > 0) && ( 
-        <View style={styles.searchInputContainer}>
-        <TextInput
-          style={styles.searchInput}
-          mode="contained"
-          placeholder="Search the menu"
-          value={searchText}
-          onChangeText={(text) => setSearchText(text)}
-        />
-        {searchText.length > 0 ? (
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        <View style={styles.header}>
           <IconButton
-            icon="close"
-            color="#555"
-            size={20}
-            onPress={handleClearSearch}
-            style={styles.clearButton}
+            icon="arrow-left"
+            size={30}
+            onPress={() => navigation.goBack()}
+            color="#333"
           />
-        ) : null}
-        {searchText.length > 0 ? (
-          <TouchableOpacity
-            onPress={handleSearch}
-            activeOpacity={0.7}
-            style={styles.searchButtonTouchable}
-          >
-            <Animated.View style={[styles.searchButton, searchButtonStyle]}>
-              <IconButton icon="magnify" name="search" />
-            </Animated.View>
-          </TouchableOpacity>
-        ) : null}
-      </View>
-      )}
-      {loading ? (
-        <ActivityIndicator size="large" color="#333" style={styles.loadingIndicator} />
-      ) : error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : (
-        renderApiResponse()
-      )}
-      <Snackbar
-        visible={snackbarVisible}
-        style={styles.snackbar}
-        onDismiss={() => setSnackbarVisible(false)}
-      >
-        Please enter a food-related query.
-      </Snackbar>
-      {searchText.length > 0 && !apiResponse ? (
-        renderKeywords()
-      ) : null}
-      {!apiResponse && searchText.length <= 0 && ( 
-        <View style={styles.restaurantCard}>
-          {hasSearchResults ? null : (
-            <>
-              <Animated.Image
-                source={{ uri: foodItem.image }}
-                style={[styles.restaurantImage, searchButtonStyle]}
-                onError={(error) => console.error('Image loading error:', error)}
-              />
-              <Text style={styles.restaurantName}>{foodItem.name}</Text>
-              <Text style={styles.restaurantLocation}>{foodItem.location}</Text>
-
-              <TouchableOpacity onPress={() => navigation.navigate('Maps', { foodItem })}>
-                  <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent:'space-between', marginBottom:10, marginTop:10 }}>
-                    <View style={{flexDirection:'row'}}>
-                    <Icon name="info" size={20} color="#00CDBC" style={{marginRight:10}}/> 
-                    <Text>Info</Text>
-                    <Text style={{marginLeft:-30, marginTop:20}}> Maps, allergens and hygiene rating</Text>
-                    </View>
-                    
-                    <Icon name='chevron-right' color="#00CDBC"/>
-                  </View> 
-                </TouchableOpacity>
-                
-                <TouchableOpacity onPress={() => navigation.navigate('Reviews', { foodItem })}>
-                  <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent:'space-between', marginBottom:10, marginTop:10 }}>
-                    <View style={{flexDirection:'row'}}>
-                    <Icon name="star" size={20} color="#00CDBC" style={{marginRight:10}}/> 
-                    <Text>{foodItem.rating}</Text>
-                    <Text style={{marginLeft:-25}}> {"\n"} See all {foodItem.reviews.length} reviews</Text>
-                    </View>
-                    <Icon name='chevron-right' color="#00CDBC"/>
-                  </View>  
-                </TouchableOpacity>
-              
-                
-              <Text style={styles.restaurantDescription}>
-                {foodItem.description}
-              </Text>
-            </>
-          )}
         </View>
-      )}
-    </ScrollView>
-  </SafeAreaView>
-);
-
-}
-width = Dimensions.get('window').width;
-height = Dimensions.get('window').height;
+        {(!apiResponse || searchText.length > 0) && (
+          <View style={styles.searchInputContainer}>
+            <TextInput
+              style={styles.searchInput}
+              mode="contained"
+              placeholder="Search the menu"
+              value={searchText}
+              onChangeText={(text) => setSearchText(text)}
+            />
+            {searchText.length > 0 ? (
+              <IconButton
+                icon="close"
+                color="#555"
+                size={20}
+                onPress={handleClearSearch}
+                style={styles.clearButton}
+              />
+            ) : null}
+            {searchText.length > 0 ? (
+              <TouchableOpacity
+                onPress={handleSearch}
+                activeOpacity={0.7}
+                style={styles.searchButtonTouchable}
+              >
+                <Animated.View style={[styles.searchButton, searchButtonStyle]}>
+                  <IconButton icon="magnify" name="search" />
+                </Animated.View>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        )}
+        {loading ? (
+          <ActivityIndicator size="large" color="#333" style={styles.loadingIndicator} />
+        ) : error ? (
+          <Text style={styles.errorText}>{error}</Text>
+        ) : (
+          renderApiResponse()
+        )}
+        <Snackbar
+          visible={snackbarVisible}
+          style={styles.snackbar}
+          onDismiss={() => setSnackbarVisible(false)}
+        >
+          Please enter a food-related query.
+        </Snackbar>
+        {searchText.length > 0 && !apiResponse ? (
+          renderKeywords()
+        ) : null}
+        {!apiResponse && searchText.length <= 0 && (
+          <View style={styles.restaurantCard}>
+            {hasSearchResults ? null : (
+              <>
+                <Animated.Image
+                  source={{ uri: restaurant.logo }}
+                  style={[styles.restaurantImage, searchButtonStyle]}
+                  onError={(error) => console.error('Image loading error:', error)}
+                />
+                <Text style={styles.restaurantName}>{restaurant.name}</Text>
+                <Text style={styles.restaurantLocation}>{restaurant.location}</Text>
+                <Text style={styles.commentsLength}>Comments Length: {commentsLength}</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Maps', { restaurant })}>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10, marginTop: 10 }}>
+                    <View style={{ flexDirection: 'row' }}>
+                      <Icon name="info" size={20} color="#00CDBC" style={{ marginRight: 10 }} />
+                      <Text>Info</Text>
+                      <Text style={{ marginLeft: -30, marginTop: 20 }}> Maps, allergens and hygiene rating</Text>
+                    </View>
+                    <Icon name='chevron-right' color="#00CDBC" />
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Reviews', { restaurant })}>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10, marginTop: 10 }}>
+                    <View style={{ flexDirection: 'row' }}>
+                      <Icon name="star" size={20} color="#00CDBC" style={{ marginRight: 10 }} />
+                      <Text>{restaurant.rating}</Text>
+                      <Text style={{ marginLeft: -20, }}> {"\n"} See all {commentsLength} reviews</Text>
+                    </View>
+                    <Icon name='chevron-right' color="#00CDBC" />
+                  </View>
+                </TouchableOpacity>
+                <Text style={styles.restaurantDescription}>{restaurant.description}</Text>
+              </>
+            )}
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -473,13 +502,12 @@ const styles = StyleSheet.create({
   apiResponseScrollView: {
     marginTop: 10,
     padding: 10,
-    borderRadius: 8,
   },
   apiResponseText: {
     fontSize: 20,
     fontWeight: '200',
     color: '#111',
-    fontWeight:'900'
+    fontWeight: '900',
   },
   loadingIndicator: {
     marginTop: 20,
@@ -488,10 +516,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#111',
     marginTop: 20,
     position: 'absolute',
-    bottom:-80,
-    width:width * .9,
+    bottom: -80,
+    width: width * 0.9,
     alignSelf: 'center',
-
   },
   keywordContainer: {
     flexDirection: 'row',
@@ -509,18 +536,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 0,
     backgroundColor: '#00CDBC',
-    padding:8,
-    margin:5,
-    color:'white',
-    fontWeight:'900'
-
+    padding: 8,
+    margin: 5,
+    color: 'white',
+    fontWeight: '900',
   },
   addKeywordsButton: {
     marginTop: 20,
     borderRadius: 20,
     width: width * 0.8,
     alignSelf: 'center',
-    backgroundColor:'black',
+    backgroundColor: 'black',
   },
   sectionTitle: {
     fontSize: 16,
@@ -528,6 +554,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 0,
     marginLeft: 10,
+  },
+  commentsLength: {
+    fontSize: 16,
+    color: '#777',
+    marginBottom: 10,
   },
 });
 

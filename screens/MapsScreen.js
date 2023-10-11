@@ -8,13 +8,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import HygieneRating from '../components/HygieneRating';
 
 export const MapScreen = ({route}) => {
-  const {foodItem} = route.params;
+  const {restaurant} = route.params;
   const {width, height} = Dimensions.get('window');
   
-  const map = { latitude: foodItem.lat, longitude: foodItem.long };
+  const map = { latitude: restaurant.lat, longitude: restaurant.long };
+  console.log(restaurant.hygieneRating)
   const openMapZoomedOut = createOpenLink({ ...map, zoom: 18, provider:'apple' });
-
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,7 +23,7 @@ export const MapScreen = ({route}) => {
          Visit the FSA's website to see the recent for this partner. {"\n"}
         </Text>
 
-        <HygieneRating hygieneRating={foodItem.hygieneRating} />
+        <HygieneRating hygieneRating={restaurant.hygiene} />
         <View style={{flexDirection:'row', alignItems:'baseline'}}>
           <Icon name="language"/>
           <Text style={{
@@ -32,7 +31,7 @@ export const MapScreen = ({route}) => {
             paddingVertical:6, marginLeft:10,
              textDecorationLine: "underline", 
              textDecorationStyle: "solid", }}
-          onPress={() => Linking.openURL(foodItem.link)}
+          onPress={() => Linking.openURL(restaurant.link)}
           >
             View hygiene rating
           </Text>
@@ -47,22 +46,21 @@ export const MapScreen = ({route}) => {
           scrollEnabled={false}
           rotateEnabled={false}
           initialRegion={{
-            latitude: foodItem.lat, 
-            longitude: foodItem.long, 
+            latitude: restaurant.lat, 
+            longitude: restaurant.long, 
             latitudeDelta: 0.00358723958820065,
             longitudeDelta: 0.00250270688370961
             
           }}
         >
-          {/* Add markers to the map */}
           <Marker
-            title={foodItem.name}
-            description={foodItem.description}
+            title={restaurant.name}
+            description={restaurant.description}
           />
         </MapView>
       </View>
       <View style={{margin:10,}}>
-        <Text>{foodItem.location}</Text>
+        <Text>{restaurant.location}</Text>
       <TouchableOpacity>
         <Button 
         onPress={openMapZoomedOut}

@@ -6,7 +6,7 @@ export default {
     platforms: ['ios', 'android'],
     version: '0.15.0',
     orientation: 'portrait',
-    icon: './assets/iconApp.png',
+    icon: './assets/logo4.png',
     splash: {
       image: './assets/logo4.png',
       resizeMode: 'contain',

@@ -60,7 +60,7 @@ export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName 
         <StarRating
           maxStars={5}
           rating={restaurantRating}
-          fullStarColor={Colors.green}
+          fullStarColor={Colors.white}
           starSize={25}
           selectedStar={(rating) => setRestaurantRating(rating)}
         />
@@ -94,11 +94,11 @@ height = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
   container: {
-    margin: 20,
     flex: 1,
     padding: 16,
     borderRadius: 8,
-    justifyContent: 'center', // Center content vertically
+    justifyContent: 'center', 
+    backgroundColor:Colors.green
   },
   title: {
     fontSize: 24,
