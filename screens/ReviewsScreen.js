@@ -89,7 +89,7 @@ export const ReviewsScreen = ({ route }) => {
                     </View>
                   );
                 })
-              : comments.slice(0, 2).map((comment, index) => {
+              : comments.slice(0, 4).map((comment, index) => {
                   return (
                     <View key={index} style={styles.review}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

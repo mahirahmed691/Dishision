@@ -5,6 +5,7 @@ import { signOut } from 'firebase/auth';
 import * as Location from 'expo-location'; 
 import axios from 'axios';
 import { firestore, auth } from '../config/firebase'; 
+import RestaurantForm from '../components/RestaurantForm';
 import {
   View,
   StyleSheet,
@@ -54,6 +55,10 @@ export const HomeScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
   const [locationName, setLocationName] = useState(null);
   const apiKey = '9a05000aa2177a72a4a01ddafd1bc03c';
+ const [searchInput, setSearchInput] = useState('');
+ const [isRestaurantFormVisible, setIsRestaurantFormVisible] = useState(false);
+ const [restaurantFormMode, setRestaurantFormMode] = useState('add');
+
 
   useEffect(() => {
     const fetchRestaurantData = async () => {
@@ -63,7 +68,6 @@ export const HomeScreen = ({ navigation }) => {
         const restaurants = snapshot.docs.map((doc) => doc.data());
 
         setFilteredRestaurants(restaurants);
-        // ... (other state updates)
 
       } catch (error) {
         console.error('Error fetching restaurant data:', error);
@@ -82,8 +86,22 @@ export const HomeScreen = ({ navigation }) => {
   };
 
   const handleInputChange = (text) => {
-    setInputText(text);
-    filterRestaurants(text);
+    setSearchInput(text);
+  };
+
+  const openRestaurantFormModal = () => {
+    setRestaurantToEdit(null); // Clear any previously edited restaurant
+    setIsRestaurantFormVisible(true);
+  };
+
+  const closeRestaurantForm = () => {
+    setIsRestaurantFormVisible(false);
+  };
+
+  const toggleRestaurantForm = (mode) => {
+    // Set the mode when toggling the form
+    setRestaurantFormMode(mode);
+    setIsRestaurantFormVisible(true);
   };
 
   const filterRestaurants = (text) => {
@@ -235,6 +253,10 @@ useEffect(() => {
   requestLocationPermission();
 }, []);
 
+useEffect(() => {
+  filterRestaurants(searchInput);
+}, [searchInput]);
+
 const reverseGeocode = async (latitude, longitude, apiKey) => {
   try {
     const response = await axios.get(
@@ -370,30 +392,56 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
       >
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
-            <IconButton
-              icon="menu"
-              iconColor="#111"
-              size={40}
-              onPress={toggleDrawer}
-            />
-          <View style={{flexDirection:'row'}}>
-              <TouchableOpacity onPress={toggleFavorite}>
+          
+                <IconButton
+                  icon="menu"
+                  iconColor="#111"
+                  size={40}
+                  onPress={toggleDrawer}
+                />
+                <View style={{flexDirection:'row'}}>
+                <TouchableOpacity>
+                <Icon
+                  name="plus"
+                  size={24}
+                  style={{ marginLeft: 20 }}
+                  onPress={() => {
+                    toggleRestaurantForm('add'); // Call your toggleRestaurantForm function
+                    setRestaurantFormMode(''); // Set the mode to 'edit'
+                  }}
+                  color="#00CDBC"
+                />
+                </TouchableOpacity>
+                {/* <TouchableOpacity>
+                <Icon
+                  name="pencil"   
+                  size={24}
+                  style={{marginLeft:20}}
+                  onPress={() => {
+                    toggleRestaurantForm('edit'); // Call your toggleRestaurantForm function
+                    setRestaurantFormMode('edit'); // Set the mode to 'edit'
+                  }}
+                  color="#00CDBC"
+                />
+  
+                </TouchableOpacity> */}
+                <TouchableOpacity onPress={toggleFavorite}>
                   <Icon
-                    style={{marginLeft:10}}
+                    style={{marginLeft:20}}
                     name={favorites.includes(selectedRestaurant) ? 'heart' : 'heart-o'}
                     size={24}
                     color={favorites.includes(selectedRestaurant) ? 'red' : 'gray'}
                   />
-              </TouchableOpacity>
+               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
               <Icon
-                    style={{marginLeft:10}}
+                    style={{marginLeft:20}}
                     name="user"
                     size={24}
                     color="#00CDBC"
                   />
               </TouchableOpacity>
-          </View>
+              </View>
           </View>
           <View>
         {locationName ? (
@@ -401,8 +449,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
         ) : (
           <Text>Loading location...</Text>
         )}
-      </View>
-            
+      </View>   
           <View style={styles.filterContainer}>
             <TextInput
               theme={{
@@ -436,8 +483,14 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
               setIsHalal={setIsHalal}
               onApplyFilters={applyFilters}
             />
+            <RestaurantForm
+            isVisible={isRestaurantFormVisible}
+            onClose={() => setIsRestaurantFormVisible(false)}
+            mode={restaurantFormMode} // Pass the mode
+          />
             </View>
             <Restaurants navigation={navigation}/>
+            
         </View>
         
       </Drawer>

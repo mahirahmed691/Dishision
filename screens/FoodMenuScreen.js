@@ -395,7 +395,6 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                 />
                 <Text style={styles.restaurantName}>{restaurant.name}</Text>
                 <Text style={styles.restaurantLocation}>{restaurant.location}</Text>
-                <Text style={styles.commentsLength}>Comments Length: {commentsLength}</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Maps', { restaurant })}>
                   <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10, marginTop: 10 }}>
                     <View style={{ flexDirection: 'row' }}>
@@ -471,7 +470,7 @@ const styles = StyleSheet.create({
   },
   restaurantImage: {
     width: '100%',
-    height: 150,
+    height: 250,
     marginBottom: 20,
     resizeMode: 'contain',
     borderRadius: 8,

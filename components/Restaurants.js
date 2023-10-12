@@ -52,8 +52,10 @@ export const Restaurants = ({ navigation }) => {
             <View style={styles.restaurantInfo}>
               <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                 <Text style={styles.restaurantName}>{restaurant.restaurantName}</Text>
-            <StarRating style={styles.starRating} starSize={18} disabled fullStarColor={Colors.green} maxStars={5} rating={restaurant.rating} />
               </View>
+              <View style={styles.starRating}>
+            <StarRating width={100} starSize={18} disabled fullStarColor={Colors.green} maxStars={5} rating={restaurant.rating} />
+            </View>
               <Text style={styles.address}>{restaurant.address}</Text>
               <Text style={styles.cuisine}>
                 {restaurant.cuisine ? restaurant.cuisine.charAt(0).toUpperCase() + restaurant.cuisine.slice(1) : ''}
@@ -102,6 +104,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#888',
   },
+  starRating:{
+    width:60,
+    flexDirection:'row',
+  }
 });
 
 export default Restaurants;
