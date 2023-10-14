@@ -29,6 +29,11 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   const [desserts, setDesserts] = useState([{ name: '', price: 0 }]);
   const [drinks, setDrinks] = useState([{ name: '', price: 0 }]);
 
+  const [starterDescriptions, setStarterDescriptions] = useState(['']);
+  const [mainDescriptions, setMainDescriptions] = useState(['']);
+  const [dessertDescriptions, setDessertDescriptions] = useState(['']);
+  const [drinkDescriptions, setDrinkDescriptions] = useState(['']);
+
   useEffect(() => {
     if (restaurantToEdit) {
       setIsEditing(true);
@@ -54,13 +59,12 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
     }
   }, [restaurantToEdit]);
 
-  
   const handleAddRestaurant = async () => {
     if (!restaurantName || !address || !cuisine || !logo) {
       alert('Please fill in all required fields');
       return;
     }
-
+  
     const newRestaurant = {
       restaurantName,
       address,
@@ -77,20 +81,20 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
       desserts,
       drinks,
     };
-
+  
     try {
       const restaurantRef = collection(db, 'restaurant');
-
+  
       if (isEditing) {
         const restaurantDocRef = doc(restaurantRef, restaurantToEdit.id);
         await updateDoc(restaurantDocRef, newRestaurant);
         alert('Restaurant updated successfully');
       } else {
-        const restaurantDocRef = doc(restaurantRef);
+        const restaurantDocRef = doc(restaurantRef, restaurantName); 
         await setDoc(restaurantDocRef, newRestaurant);
         alert('Restaurant added successfully');
       }
-
+  
       clearForm();
       onClose();
     } catch (error) {
@@ -107,7 +111,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addStarter = () => {
-    setStarters([...starters, { name: '', price: 0 }]);
+    setStarters([...starters, { name: '', price: 0, descriptions: '' }]);
   };
 
   const removeStarter = (index) => {
@@ -117,7 +121,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addMain = () => {
-    setMains([...mains, { name: '', price: 0 }]);
+    setMains([...mains, { name: '', price: 0, descriptions: '' }]);
   };
 
   const removeMain = (index) => {
@@ -127,7 +131,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addDessert = () => {
-    setDesserts([...desserts, { name: '', price: 0 }]);
+    setDesserts([...desserts, { name: '', price: 0, descriptions: '' }]);
   };
 
   const removeDessert = (index) => {
@@ -137,7 +141,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addDrink = () => {
-    setDrinks([...drinks, { name: '', price: 0 }]);
+    setDrinks([...drinks, { name: '', price: 0, descriptions: '' }]);
   };
 
   const removeDrink = (index) => {
@@ -292,6 +296,14 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                 value={starter.name}
                 onChangeText={(text) => updateItem(starters, index, 'name', text)}
               />
+               <Input
+                  label={`Starter Description ${index + 1}`}
+                  placeholder="Enter starter description"
+                  value={starterDescriptions[index]}
+                  onChangeText={(text) =>
+                    updateDescription(starterDescriptions, index, text)
+                  }
+                />
               <Input
                 label={`Starter Price ${index + 1}`}
                 placeholder="Enter starter price"
@@ -320,6 +332,15 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                 value={main.name}
                 onChangeText={(text) => updateItem(mains, index, 'name', text)}
               />
+
+            <Input
+                  label={`Main Description ${index + 1}`}
+                  placeholder="Enter Main description"
+                  value={mainDescriptions[index]}
+                  onChangeText={(text) =>
+                    updateDescription(mainDescriptions, index, text)
+                  }
+                />
               <Input
                 label={`Main Course Price ${index + 1}`}
                 placeholder="Enter main course price"
@@ -349,6 +370,14 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                 onChangeText={(text) => updateItem(desserts, index, 'name', text)}
               />
               <Input
+                  label={`Dessert Description ${index + 1}`}
+                  placeholder="Enter Dessert description"
+                  value={dessertDescriptions[index]}
+                  onChangeText={(text) =>
+                    updateDescription(dessertDescriptions, index, text)
+                  }
+                />
+              <Input
                 label={`Dessert Price ${index + 1}`}
                 placeholder="Enter dessert price"
                 value={dessert.price.toString()}
@@ -376,6 +405,14 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                 value={drink.name}
                 onChangeText={(text) => updateItem(drinks, index, 'name', text)}
               />
+              <Input
+                  label={`Drink Description ${index + 1}`}
+                  placeholder="Enter Drink description"
+                  value={drinkDescriptions[index]}
+                  onChangeText={(text) =>
+                    updateDescription(drinkDescriptions, index, text)
+                  }
+                />
               <Input
                 label={`Drink Price ${index + 1}`}
                 placeholder="Enter drink price"
@@ -449,7 +486,7 @@ const styles = StyleSheet.create({
   logoPreview: {
     width: 150,
     height: 150,
-    resizeMode: 'cover',
+    resizeMode: 'contain',
     marginBottom: 20,
     alignSelf: 'center',
   },

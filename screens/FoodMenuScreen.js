@@ -16,6 +16,8 @@ import {
   Snackbar,
   Card,
   Checkbox,
+  Accordian,
+  List
 } from 'react-native-paper';
 import { Icon } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -23,9 +25,13 @@ import Animated, {
   withSpring,
   useSharedValue,
   useAnimatedStyle,
+  withTiming,
+  Easing,
+  withSequence,
 } from 'react-native-reanimated';
 import { axiosGPT } from '../utils/request';
 import { db } from '../config/firebase'; // Import your Firebase configuration
+import RestaurantMenu from '../components/RestaurantMenu';
 import {
   collection,
   where,
@@ -162,7 +168,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
         const response = await axiosGPT.post('', requestData);
         const choices = response.data.choices[0].message.content;
         setApiResponse(choices);
-
+        animateSearchButton(); 
         setLoading(false);
       } catch (error) {
         console.log(error);
@@ -188,6 +194,13 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     };
   });
 
+  const animateSearchButton = () => {
+    searchButtonScale.value = withSequence(
+      withTiming(1.1, { duration: 200, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) })
+    );
+  };
+
   const fetchRestaurantCommentsLength = async () => {
     try {
       const restaurantNameToQuery = restaurant.restaurantName;
@@ -209,7 +222,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
       return (
         <ScrollView style={styles.apiResponseScrollView}>
           {responseLines.map((line, index) => (
-            <Card key={index} style={{ padding: 20, elevation: 10 }}>
+            <Card key={index} style={{ padding: 20, borderRadius:0, backgroundColor:'#00CDBC', backgroundColor:'#00CDBC', margin:10, marginBottom:0, marginTop:5 }}>
               <Text style={styles.apiResponseText}>{line.trim()}</Text>
             </Card>
           ))}
@@ -327,8 +340,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <View style={styles.header}>
+       <View style={styles.header}>
           <IconButton
             icon="arrow-left"
             size={30}
@@ -336,7 +348,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             color="#333"
           />
         </View>
-        {(!apiResponse || searchText.length > 0) && (
+      {(!apiResponse || searchText.length > 0) && (
           <View style={styles.searchInputContainer}>
             <TextInput
               style={styles.searchInput}
@@ -365,8 +377,16 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                 </Animated.View>
               </TouchableOpacity>
             ) : null}
+            <Snackbar
+          visible={snackbarVisible}
+          style={styles.snackbar}
+          onDismiss={() => setSnackbarVisible(false)}
+        >
+          Please enter a food-related query.
+        </Snackbar>
           </View>
         )}
+        
         {loading ? (
           <ActivityIndicator size="large" color="#333" style={styles.loadingIndicator} />
         ) : error ? (
@@ -374,53 +394,60 @@ export const FoodMenuScreen = ({ navigation, route }) => {
         ) : (
           renderApiResponse()
         )}
-        <Snackbar
-          visible={snackbarVisible}
-          style={styles.snackbar}
-          onDismiss={() => setSnackbarVisible(false)}
-        >
-          Please enter a food-related query.
-        </Snackbar>
+        
+      <ScrollView> 
+        
         {searchText.length > 0 && !apiResponse ? (
           renderKeywords()
         ) : null}
         {!apiResponse && searchText.length <= 0 && (
           <View style={styles.restaurantCard}>
             {hasSearchResults ? null : (
-              <>
-                <Animated.Image
-                  source={{ uri: restaurant.logo }}
-                  style={[styles.restaurantImage, searchButtonStyle]}
-                  onError={(error) => console.error('Image loading error:', error)}
-                />
-                <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                <Text style={styles.restaurantLocation}>{restaurant.location}</Text>
+          <View>    
+                <View style={{marginBottom:10, flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+                <View style={{width:'50%'}}>
+                  <Animated.Image
+                    source={{ uri: restaurant.logo }}
+                    style={styles.restaurantImage}
+                    onError={(error) => console.error('Image loading error:', error)}
+                  />
+                  </View>
+                  <View style={{width:'50%', alignItems:'center'}}>
+                  <Text style={styles.restaurantName}>{restaurant.restaurantName}</Text>
+                  <Text style={styles.restaurantLocation}>{restaurant.address}</Text>
+                  </View>
+                </View>
+                <View>
+                <Text style={styles.restaurantDescription}>{restaurant.description}</Text>
+              <View style={{margin:10}}>
                 <TouchableOpacity onPress={() => navigation.navigate('Maps', { restaurant })}>
-                  <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10, marginTop: 10 }}>
-                    <View style={{ flexDirection: 'row' }}>
-                      <Icon name="info" size={20} color="#00CDBC" style={{ marginRight: 10 }} />
-                      <Text>Info</Text>
-                      <Text style={{ marginLeft: -30, marginTop: 20 }}> Maps, allergens and hygiene rating</Text>
-                    </View>
-                    <Icon name='chevron-right' color="#00CDBC" />
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View style={{flexDirection:'row'}}> 
+                      <Icon name="info" size={30} color="#00CDBC" style={{ marginRight: 10 }} />
+                      <Text style={{marginTop:8}}>Info, Maps & Hygiene Rating</Text>               
+                     </View>
+                      <Icon name='chevron-right' color="#00CDBC" />
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Reviews', { restaurant })}>
-                  <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10, marginTop: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 10 }}>
                     <View style={{ flexDirection: 'row' }}>
-                      <Icon name="star" size={20} color="#00CDBC" style={{ marginRight: 10 }} />
+                      <Icon name="star" size={30} color="#00CDBC" style={{ marginRight: 10 }} />
                       <Text>{restaurant.rating}</Text>
-                      <Text style={{ marginLeft: -20, }}> {"\n"} See all {commentsLength} reviews</Text>
+                      <Text style={{ marginLeft: -23, }}> {"\n"} See all {commentsLength} reviews</Text>
                     </View>
                     <Icon name='chevron-right' color="#00CDBC" />
                   </View>
                 </TouchableOpacity>
-                <Text style={styles.restaurantDescription}>{restaurant.description}</Text>
-              </>
+                </View>
+                </View>
+              </View>
             )}
           </View>
         )}
       </ScrollView>
+      <RestaurantMenu restaurantName={restaurant.restaurantName} />
+
     </SafeAreaView>
   );
 };
@@ -429,57 +456,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF',
-    padding: 20,
+    padding: 10,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
   },
   restaurantCard: {
-    padding: 20,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
     elevation: 2,
+    backgroundColor: '#FFF',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   restaurantName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    marginTop: 10,
+    color: '#111',
+    marginBottom: 5,
+    marginRight:45,
   },
   restaurantLocation: {
-    fontSize: 18,
-    color: '#777',
+    color: '#555',
     marginBottom: 10,
-  },
-  restaurantDescription: {
-    fontSize: 16,
-    color: '#777',
-    marginBottom: 20,
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  searchInput: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    elevation: 1,
   },
   restaurantImage: {
     width: '100%',
-    height: 250,
-    marginBottom: 20,
-    resizeMode: 'contain',
-    borderRadius: 8,
+    height: 150,
+    resizeMode: 'cover',
+    borderRadius: 10,
+  },
+  restaurantDescription: {
+    fontSize: 16,
+    color: '#444',
   },
   review: {
-    marginBottom: 20,
     backgroundColor: '#F2F2F2',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   reviewName: {
     fontSize: 18,
@@ -492,7 +507,17 @@ const styles = StyleSheet.create({
     color: '#111',
     marginTop: 5,
   },
-  searchButton: {
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 10,
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor:'#FFF'
+  },
+  searchButtonTouchable: {
+    borderRadius: 20,
     marginLeft: 10,
   },
   clearButton: {
@@ -500,64 +525,62 @@ const styles = StyleSheet.create({
   },
   apiResponseScrollView: {
     marginTop: 10,
-    padding: 10,
+    backgroundColor:'#FFF'
   },
   apiResponseText: {
-    fontSize: 20,
-    fontWeight: '200',
-    color: '#111',
-    fontWeight: '900',
+    fontSize: 16,
+    color: '#FFF',
+    fontWeight:'bold',
+    fontFamily:'Futura',
   },
   loadingIndicator: {
     marginTop: 20,
   },
   snackbar: {
-    backgroundColor: '#111',
-    marginTop: 20,
-    position: 'absolute',
-    bottom: -80,
-    width: width * 0.9,
-    alignSelf: 'center',
+    backgroundColor: '#FF5252',
+    marginTop: 10,
   },
   keywordContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: 10,
+    
   },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 0,
-    marginBottom: 0,
-    alignSelf: 'center',
+    marginRight: 10,
+    marginBottom: 10,
   },
   keywordText: {
     fontSize: 14,
-    marginLeft: 0,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     backgroundColor: '#00CDBC',
-    padding: 8,
-    margin: 5,
     color: 'white',
-    fontWeight: '900',
+    borderRadius: 20,
   },
   addKeywordsButton: {
-    marginTop: 20,
-    borderRadius: 20,
-    width: width * 0.8,
+    marginTop: 10,
     alignSelf: 'center',
-    backgroundColor: 'black',
+    backgroundColor: '#111',
+    padding: 10,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 10,
-    marginBottom: 0,
-    marginLeft: 10,
+    marginBottom: 10,
+    marginLeft:20
   },
   commentsLength: {
     fontSize: 16,
     color: '#777',
     marginBottom: 10,
+  },
+  animatedSearchButton: {
+    borderRadius: 20,
+    marginLeft: 10,
   },
 });
 

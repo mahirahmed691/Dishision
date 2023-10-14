@@ -1,6 +1,7 @@
 import React, { useEffect, useState,  } from 'react';
 import Drawer from 'react-native-drawer';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import EntypoIcon from 'react-native-vector-icons/Entypo';
 import { signOut } from 'firebase/auth';
 import * as Location from 'expo-location'; 
 import axios from 'axios';
@@ -304,7 +305,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
               <Card style={styles.walletCard}>
                 <View style={styles.walletHeader}>
                   <Text style={styles.walletHeaderText}>My Wallet</Text>
-                  <Icon name="chevron-right" style={styles.walletHeaderIcon} />
+                  <FontAwesomeIcon name="chevron-right" style={styles.walletHeaderIcon} />
                 </View>
                 <Text style={styles.walletAmountText}>$250.00</Text>
               </Card>
@@ -316,7 +317,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
                 toggleDrawer();
               }}
             >
-              <Icon
+              <FontAwesomeIcon
                 name="home"
                 size={20}
                 color={activeTab === 'Home' ? '#00CDBC' : '#333'}
@@ -334,7 +335,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
               style={styles.menuItem}
               onPress={() => navigation.navigate('Profile')}
             >
-              <Icon
+              <FontAwesomeIcon
                 name="user"
                 size={20}
                 color={activeTab === 'Profile' ? '#00CDBC' : '#333'}
@@ -352,7 +353,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
               style={styles.menuItem}
               onPress={() => navigation.navigate('Settings')}
             >
-              <Icon
+              <FontAwesomeIcon
                 name="cog"
                 size={20}
                 color={activeTab === 'Settings' ? '#60BA62' : '#333'}
@@ -367,7 +368,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-              <Icon
+              <FontAwesomeIcon
                 name="power-off"
                 size={20}
                 color={activeTab === 'Logout' ? '#60BA62' : '#333'}
@@ -401,32 +402,19 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
                 />
                 <View style={{flexDirection:'row'}}>
                 <TouchableOpacity>
-                <Icon
-                  name="plus"
+                <EntypoIcon
+                  name="shop"
                   size={24}
                   style={{ marginLeft: 20 }}
                   onPress={() => {
-                    toggleRestaurantForm('add'); // Call your toggleRestaurantForm function
-                    setRestaurantFormMode(''); // Set the mode to 'edit'
+                    toggleRestaurantForm('add'); 
+                    setRestaurantFormMode(''); 
                   }}
                   color="#00CDBC"
                 />
                 </TouchableOpacity>
-                {/* <TouchableOpacity>
-                <Icon
-                  name="pencil"   
-                  size={24}
-                  style={{marginLeft:20}}
-                  onPress={() => {
-                    toggleRestaurantForm('edit'); // Call your toggleRestaurantForm function
-                    setRestaurantFormMode('edit'); // Set the mode to 'edit'
-                  }}
-                  color="#00CDBC"
-                />
-  
-                </TouchableOpacity> */}
                 <TouchableOpacity onPress={toggleFavorite}>
-                  <Icon
+                  <FontAwesomeIcon
                     style={{marginLeft:20}}
                     name={favorites.includes(selectedRestaurant) ? 'heart' : 'heart-o'}
                     size={24}
@@ -434,7 +422,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
                   />
                </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-              <Icon
+              <FontAwesomeIcon
                     style={{marginLeft:20}}
                     name="user"
                     size={24}
@@ -499,7 +487,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
           style={[styles.tabItem, activeTab === 'Home' && styles.activeTab]}
           onPress={() => navigation.navigate('Home')}
         >
-          <Icon
+          <FontAwesomeIcon
             name="home"
             size={24}
             color={activeTab === 'Home' ? '#00CDBC' : '#333'}
@@ -509,7 +497,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
           style={[styles.tabItem, activeTab === 'Profile' && styles.activeTab]}
           onPress={() => navigation.navigate('Profile')}
         >
-          <Icon
+          <FontAwesomeIcon
             name="user"
             size={24}
             color={activeTab === 'Profile' ? '#60BA62' : '#333'}
@@ -522,7 +510,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
             setShowFavoritesOnly(!showFavoritesOnly);
           }}
         >
-          <Icon
+          <FontAwesomeIcon
             name="heart"
             size={24}
             color={activeTab === 'Favourites' ? '#00CDBC' : '#333'}
@@ -532,7 +520,7 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
           style={[styles.tabItem, activeTab === 'Settings' && styles.activeTab]}
           onPress={() => navigation.navigate('Settings')}
         >
-          <Icon
+          <FontAwesomeIcon
             name="cog"
             size={24}
             color={activeTab === 'Settings' ? '#00CDBC' : '#333'}

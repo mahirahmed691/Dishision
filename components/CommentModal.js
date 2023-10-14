@@ -18,15 +18,11 @@ export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName 
       restaurantRating,
       comment,
       date: new Date().toISOString(),
-      restaurantName, // Pass restaurantName from props
+      restaurantName, 
     };
   
-    // Use Firestore to add the comment to the "comments" collection
     addDoc(collection(db, 'comments'), commentData)
       .then((docRef) => {
-        // Comment added successfully
-        console.log('Comment added to Firestore with ID: ', docRef.id);
-        // Clear input fields after adding a comment
         setUserName('');
         setRestaurantRating(0);
         setComment('');
@@ -43,47 +39,49 @@ export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName 
   return (
     <Modal visible={isVisible} animationType="slide">
       <View style={styles.container}>
-          <IconButton Button icon="close" style={{position:'absolute', top:50, left:20}} mode='contained' onPress={onClose}>
-            Close
-          </IconButton>
+        <IconButton
+          icon="close"
+          style={styles.closeButton}
+          mode='contained'
+          onPress={onClose}>
+          Close
+        </IconButton>
         <Text style={styles.title}>Add a Comment</Text>
         <TextInput
           style={styles.input}
           mode='outlined'
           placeholder="Your Name"
-          placeholderTextColor="black"
+          placeholderTextColor={Colors.textSecondary}
           value={userName}
           onChangeText={(text) => setUserName(text)}
-          theme={{colors: {primary: Colors.green, underlineColor: 'transparent'}}}
         />
         <Text style={styles.label}>Restaurant Rating (1-5):</Text>
         <StarRating
           maxStars={5}
           rating={restaurantRating}
-          fullStarColor={Colors.white}
-          starSize={25}
+          fullStarColor={Colors.primary}
+          emptyStarColor={Colors.textSecondary}
+          starSize={32}
           selectedStar={(rating) => setRestaurantRating(rating)}
         />
         <TextInput
           style={styles.commentInput}
           mode='outlined'
           placeholder="Your Comment"
-          placeholderTextColor="black"
+          placeholderTextColor={Colors.textSecondary}
           value={comment}
           onChangeText={(text) => setComment(text)}
           multiline
-          theme={{colors: {primary: Colors.green, underlineColor: 'transparent'}}}
         />
-        <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-          <Button
-            mode="contained"
-            style={{ backgroundColor: Colors.black }}
-            title="Add Comment"
-            onPress={addComment}
-          >
-            Add Comment
-          </Button>
-        </View>
+        <Button
+          mode="contained"
+          style={styles.addButton}
+          title="Add Comment"
+          onPress={addComment}
+          color={Colors.primary}
+        >
+          Add Comment
+        </Button>
       </View>
     </Modal>
   );
@@ -96,29 +94,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    borderRadius: 8,
-    justifyContent: 'center', 
-    backgroundColor:Colors.green
+    borderRadius: 16,
+    justifyContent: 'center',
+    backgroundColor: Colors.background,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    backgroundColor: 'transparent',
+    color: Colors.primary,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: Colors.primary,
   },
   input: {
-    width: '100%',
     marginBottom: 16,
-    paddingHorizontal: 8,
-    marginBottom: 30,
   },
   label: {
     fontSize: 16,
     marginBottom: 8,
-    fontWeight:'700'
+    fontWeight: '700',
+    color: Colors.primary,
   },
   commentInput: {
-    marginTop:20,
-    height:300,
+    marginTop: 20,
+    height: 200,
     marginBottom: 30,
+  },
+  addButton: {
+    paddingVertical: 10,
+    borderRadius: 8,
   },
 });

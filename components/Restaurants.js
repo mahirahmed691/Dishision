@@ -71,12 +71,10 @@ export const Restaurants = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
   },
   restaurantCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 10,
     marginBottom: 10,
   },
   logo: {
