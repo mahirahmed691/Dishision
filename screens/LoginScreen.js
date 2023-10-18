@@ -13,13 +13,6 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { TextInput, Button as PaperButton, IconButton, Card } from 'react-native-paper';
 import { SocialIcon } from 'react-native-elements'
 
-
-// useEffect(() => {
-//   GoogleSignin.configure({
-//     iosClientId: '151956588290-ja8v0v2lorl4d0b90kqmuqeoh1q86nfr.apps.googleusercontent.com'
-//   });
-// }, []);
-
 const handleGoogleSignIn = async () => {
   try {
     await GoogleSignin.hasPlayServices();

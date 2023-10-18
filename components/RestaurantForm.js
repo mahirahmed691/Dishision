@@ -29,10 +29,17 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   const [desserts, setDesserts] = useState([{ name: '', price: 0 }]);
   const [drinks, setDrinks] = useState([{ name: '', price: 0 }]);
 
+  const [starterKcals, setStarterKcals] = useState(['']);
+  const [mainKcals, setMainKcals] = useState(['']);
+  const [dessertKcals, setDessertKcals] = useState(['']);
+  const [drinkKcals, setDrinkKcals] = useState(['']);
+
   const [starterDescriptions, setStarterDescriptions] = useState(['']);
   const [mainDescriptions, setMainDescriptions] = useState(['']);
   const [dessertDescriptions, setDessertDescriptions] = useState(['']);
   const [drinkDescriptions, setDrinkDescriptions] = useState(['']);
+
+  
 
   useEffect(() => {
     if (restaurantToEdit) {
@@ -56,6 +63,11 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
       setMains(restaurantToEdit.mains);
       setDesserts(restaurantToEdit.desserts);
       setDrinks(restaurantToEdit.drinks);
+
+      setStarterKcals(restaurantToEdit.starters.map(starter => starter.kcal));
+      setMainKcals(restaurantToEdit.mains.map(main => main.kcal));
+      setDessertKcals(restaurantToEdit.desserts.map(dessert => dessert.kcal));
+      setDrinkKcals(restaurantToEdit.drinks.map(drink => drink.kcal));
     }
   }, [restaurantToEdit]);
 
@@ -111,7 +123,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addStarter = () => {
-    setStarters([...starters, { name: '', price: 0, descriptions: '' }]);
+    setStarters([...starters, { name: '', price: 0, descriptions: '', kcal:'' }]);
   };
 
   const removeStarter = (index) => {
@@ -121,7 +133,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addMain = () => {
-    setMains([...mains, { name: '', price: 0, descriptions: '' }]);
+    setMains([...mains, { name: '', price: 0, descriptions: '', kcal:'' }]);
   };
 
   const removeMain = (index) => {
@@ -131,7 +143,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addDessert = () => {
-    setDesserts([...desserts, { name: '', price: 0, descriptions: '' }]);
+    setDesserts([...desserts, { name: '', price: 0, descriptions: '', kcal:'' }]);
   };
 
   const removeDessert = (index) => {
@@ -141,7 +153,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addDrink = () => {
-    setDrinks([...drinks, { name: '', price: 0, descriptions: '' }]);
+    setDrinks([...drinks, { name: '', price: 0, descriptions: '', kcal:'' }]);
   };
 
   const removeDrink = (index) => {
@@ -304,6 +316,12 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                     updateDescription(starterDescriptions, index, text)
                   }
                 />
+                 <Input
+                label={`Starter Kcal ${index + 1}`}
+                placeholder="Enter kcal"
+                value={starterKcals[index]}
+                onChangeText={(text) => updateKcal(starterKcals, index, text)}
+              />
               <Input
                 label={`Starter Price ${index + 1}`}
                 placeholder="Enter starter price"
@@ -347,6 +365,12 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                 value={main.price.toString()}
                 onChangeText={(text) => updateItem(mains, index, 'price', text)}
               />
+               <Input
+                label={`Main Kcal ${index + 1}`}
+                placeholder="Enter kcal"
+                value={starterKcals[index]}
+                onChangeText={(text) => updateKcal(mainKcals, index, text)}
+              />
               <Icon
                 name="delete"
                 type="material"
@@ -377,6 +401,12 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                     updateDescription(dessertDescriptions, index, text)
                   }
                 />
+                 <Input
+                label={`Desert Kcal ${index + 1}`}
+                placeholder="Enter kcal"
+                value={starterKcals[index]}
+                onChangeText={(text) => updateKcal(desertKcals, index, text)}
+              />
               <Input
                 label={`Dessert Price ${index + 1}`}
                 placeholder="Enter dessert price"
@@ -413,6 +443,12 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                     updateDescription(drinkDescriptions, index, text)
                   }
                 />
+                 <Input
+                label={`Starter Kcal ${index + 1}`}
+                placeholder="Enter kcal"
+                value={starterKcals[index]}
+                onChangeText={(text) => updateKcal(drinkKcals, index, text)}
+              />
               <Input
                 label={`Drink Price ${index + 1}`}
                 placeholder="Enter drink price"

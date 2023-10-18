@@ -235,7 +235,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   filterContainer: {
-    marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },

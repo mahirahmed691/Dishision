@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import StarRating from 'react-native-star-rating';
 import { getFirestore, collection, getDocs, where, query } from 'firebase/firestore';
 import { Colors } from '../config';
+import styles from './styles';
 import { CommentModal } from '../components/CommentModal';
 
 export const ReviewsScreen = ({ route }) => {
@@ -55,7 +56,7 @@ export const ReviewsScreen = ({ route }) => {
       <Text style={styles.title}>{restaurant.restaurantName}</Text>
       <View style={styles.ratingContainer}>
         <View style={styles.ratingInfo}>
-          <Text style={styles.ratingValue}>{restaurant.rating}</Text>
+          <Text style={styles.ratingValue}></Text>
           <StarRating
             disabled={true}
             maxStars={5}
@@ -144,62 +145,4 @@ export const ReviewsScreen = ({ route }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
 
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: '900',
-    marginBottom: 20,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  ratingInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingValue: {
-    fontSize: 30,
-    fontWeight: '800',
-    marginRight: 10,
-  },
-  reviewCount: {
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  reviewTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: 'black',
-  },
-  toggleButton: {
-    alignSelf: 'center',
-   
-  },
-  reviewText: {
-    fontSize: 16,
-    fontWeight: '300',
-    marginTop: 20,
-    color: '#111',
-  },
-  reviewName: {
-    fontSize: 18,
-    fontWeight:'bold',
-    color: '#111',
-  },
-  review: {
-    marginBottom: 20,
-    backgroundColor: '#f3f3f3',
-    padding: 8,
-    borderRadius: 8,
-  },
-});
