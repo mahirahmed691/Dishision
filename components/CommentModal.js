@@ -27,14 +27,16 @@ export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName 
         setRestaurantRating(0);
         setComment('');
         onClose();
-        // Call the callback function to update the parent component's state
         onAddComment(commentData);
       })
       .catch((error) => {
-        // Handle error
         console.error('Error adding comment to Firestore:', error);
       });
   };
+
+  const burgerIcon = (
+    <Text style={{ fontSize: 20 }}>🍔</Text> // Replace with your burger icon
+  );
 
   return (
     <Modal visible={isVisible} animationType="slide">
@@ -42,29 +44,49 @@ export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName 
         <IconButton
           icon="close"
           style={styles.closeButton}
-          mode='contained'
+          mode='outlined'
+          backgroundColor="#00CDBC"
+          iconColor='white'
           onPress={onClose}>
           Close
         </IconButton>
         <Text style={styles.title}>Add a Comment</Text>
         <TextInput
+          theme={{
+            colors: {
+              primary: '#444', 
+              placeholder: 'white', 
+              text: 'black',         
+              background: 'white',
+            }
+          }}
           style={styles.input}
-          mode='outlined'
+          mode='contained'
+          backgroundColor='white'
           placeholder="Your Name"
-          placeholderTextColor={Colors.textSecondary}
           value={userName}
           onChangeText={(text) => setUserName(text)}
         />
         <Text style={styles.label}>Restaurant Rating (1-5):</Text>
-        <StarRating
-          maxStars={5}
-          rating={restaurantRating}
-          fullStarColor={Colors.primary}
-          emptyStarColor={Colors.textSecondary}
-          starSize={32}
-          selectedStar={(rating) => setRestaurantRating(rating)}
-        />
+        <View style={{width:170}}>
+          <StarRating
+            maxStars={5}
+            rating={restaurantRating}
+            fullStarColor="black"
+            emptyStarColor={Colors.textSecondary}
+            starSize={20}
+            selectedStar={(rating) => setRestaurantRating(rating)}
+          />
+        </View>
         <TextInput
+          theme={{
+            colors: {
+              primary: '#00CDBC',       
+              placeholder: 'white',
+              text: 'black',
+              background: 'white',
+            }
+          }}
           style={styles.commentInput}
           mode='outlined'
           placeholder="Your Comment"
@@ -78,7 +100,6 @@ export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName 
           style={styles.addButton}
           title="Add Comment"
           onPress={addComment}
-          color={Colors.primary}
         >
           Add Comment
         </Button>
@@ -96,11 +117,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     justifyContent: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: '#FFF',
   },
   closeButton: {
     position: 'absolute',
-    top: 20,
+    top: 40,
     left: 20,
     backgroundColor: 'transparent',
     color: Colors.primary,
@@ -109,7 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: Colors.primary,
+    color: 'black'
   },
   input: {
     marginBottom: 16,
@@ -118,15 +139,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
     fontWeight: '700',
-    color: Colors.primary,
+    color: "black",
   },
   commentInput: {
     marginTop: 20,
-    height: 200,
+    height: 400,
     marginBottom: 30,
   },
   addButton: {
-    paddingVertical: 10,
+    paddingVertical: 5,
     borderRadius: 8,
+    backgroundColor:'#00CDBC'
   },
 });

@@ -59,6 +59,7 @@ export const HomeScreen = ({ navigation }) => {
  const [searchInput, setSearchInput] = useState('');
  const [isRestaurantFormVisible, setIsRestaurantFormVisible] = useState(false);
  const [restaurantFormMode, setRestaurantFormMode] = useState('add');
+ const [searchText, setSearchText] = useState('');
 
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export const HomeScreen = ({ navigation }) => {
   };
 
   const handleInputChange = (text) => {
-    setSearchInput(text);
+    setSearchText(text);
   };
 
   const openRestaurantFormModal = () => {
@@ -105,24 +106,34 @@ export const HomeScreen = ({ navigation }) => {
     setIsRestaurantFormVisible(true);
   };
 
-  const filterRestaurants = (text) => {
+  const filterRestaurants = () => {
+    // Filter restaurants based on searchText
     let filtered = filteredRestaurants.filter((restaurant) =>
-      restaurant.name.toLowerCase().includes(text.toLowerCase())
+      restaurant.name.toLowerCase().includes(searchText.toLowerCase())
     );
-
+  
+    // Apply other filters (rating, food type, halal)
     if (selectedRating) {
       filtered = filtered.filter((restaurant) => restaurant.rating >= selectedRating);
     }
-
+  
     if (selectedFoodType) {
       filtered = filtered.filter((restaurant) =>
         restaurant.cuisine.toLowerCase() === selectedFoodType.toLowerCase()
       );
     }
-
+  
+    if (isHalal) {
+      filtered = filtered.filter((restaurant) => restaurant.isHalal);
+    }
+  
     setFilteredRestaurants(filtered);
     setFilterResultsEmpty(filtered.length === 0);
   };
+
+  useEffect(() => {
+    filterRestaurants();
+  }, [searchText]);
 
   const toggleDrawer = () => {
     if (isDrawerOpen) {
@@ -133,7 +144,6 @@ export const HomeScreen = ({ navigation }) => {
   };
 
   const openFilterModal = () => {
-    console.log('Opening filter modal');
     setFilterModalVisible(true);
   };
 
@@ -233,7 +243,6 @@ useEffect(() => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        console.log('Location permission denied');
         return;
       }
 
@@ -242,7 +251,6 @@ useEffect(() => {
 
       // Call reverseGeocode to get the location name
       const name = await reverseGeocode(latitude, longitude, apiKey);
-      console.log('Location Name:', name);
 
       // Set the location name in the state
       setLocationName(name);
@@ -268,10 +276,8 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
       const results = response.data.results;
       if (results.length > 0) {
         const locationName = results[0].formatted_address;
-        console.log('Reverse geocoding response:', locationName);
         return locationName;
       } else {
-        console.log('No results found for reverse geocoding');
         return 'Location Not Available';
       }
     } else {
@@ -279,7 +285,6 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
       return 'Location Not Available';
     }
   } catch (error) {
-    console.error('Error during reverse geocoding:', error);
     return 'Location Not Available';
   }
 };
@@ -432,53 +437,15 @@ const reverseGeocode = async (latitude, longitude, apiKey) => {
               </View>
           </View>
           <View>
-        {locationName ? (
-          <Text>Location: {locationName}</Text>
-        ) : (
-          <Text>Loading location...</Text>
-        )}
       </View>   
-          <View style={styles.filterContainer}>
-            <TextInput
-              theme={{
-                roundness:30,
-                colors: {
-                  primary: '#00CDBC', underlineColor: 'transparent'
-                }         
-              }}
-              mode="outlined"
-              label="Search for food place"
-              value={inputText}
-              onChangeText={handleInputChange}
-              style={styles.searchInput}
-              clearButtonMode="always"
-              clearButtonModeStyle={{backgroundColor:'red'}}
-            />
-              <IconButton
-                icon="tune"
-                onPress={openFilterModal}
-                style={{ marginBottom: 10, marginLeft: 10 }}
-                iconColor='#00CDBC'
-                size={30}
-                collapsable={true}
-              >
-                Filter
-              </IconButton>
-              <FilterModal
-              visible={isFilterModalVisible}
-              onClose={closeFilterModal}
-              isHalal={isHalal}
-              setIsHalal={setIsHalal}
-              onApplyFilters={applyFilters}
-            />
+            
             <RestaurantForm
             isVisible={isRestaurantFormVisible}
             onClose={() => setIsRestaurantFormVisible(false)}
             mode={restaurantFormMode} // Pass the mode
           />
-            </View>
-            <Restaurants navigation={navigation}/>
-            
+          <Restaurants navigation={navigation}/>
+
         </View>
         
       </Drawer>

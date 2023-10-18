@@ -70,7 +70,7 @@ export const ReviewsScreen = ({ route }) => {
       {comments.length > 0 && (
         <View>
           <Text style={styles.reviewTitle}>All Reviews</Text>
-          <ScrollView style={{ height: 'auto' }}>
+        <ScrollView style={{ height:540}}>
             {isExpanded
               ? comments.map((comment, index) => {
                   return (
@@ -86,6 +86,10 @@ export const ReviewsScreen = ({ route }) => {
                         />
                       </View>
                       <Text style={styles.reviewText}>{capitalizeFirstWord(comment.comment)}</Text>
+                      <View style={{ flexDirection: 'row', alignSelf:'flex-end' }}>
+                        <IconButton icon="thumb-up" size={20} color="#00CDBC" />
+                        <IconButton icon="thumb-down" size={20} color="#00CDBC" />
+                      </View>
                     </View>
                   );
                 })
@@ -103,29 +107,33 @@ export const ReviewsScreen = ({ route }) => {
                         />
                       </View>
                       <Text style={styles.reviewText}>{capitalizeFirstWord(comment.comment)}</Text>
+                      <View style={{ flexDirection: 'row', alignSelf:'flex-end' }}>
+                        <IconButton icon="thumb-up" size={20} color="#00CDBC" />
+                        <IconButton icon="thumb-down" size={20} color="#00CDBC" />
+                      </View>
                     </View>
                   );
                 })}
+                   {comments.length > 4 && (
+                    <IconButton
+                      style={styles.toggleButton}
+                      icon={isExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={30}
+                      onPress={toggleReviewExpansion}
+                    />
+                  )}
           </ScrollView>
         </View>
       )}
       <View>
         <Button
           mode="contained"
-          style={{ backgroundColor: Colors.black }}
+      style={{ backgroundColor: Colors.black, marginTop: 20,}}
           title="Add Comment"
           onPress={toggleModal}
         >
           Add Comment
         </Button>
-        {comments.length > 0 && (
-          <IconButton
-            style={styles.toggleButton}
-            icon={isExpanded ? 'chevron-up' : 'chevron-down'}
-            size={30}
-            onPress={toggleReviewExpansion}
-          />
-        )}
       </View>
       <CommentModal
         isVisible={isModalVisible}
@@ -141,6 +149,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
+
   },
   title: {
     fontSize: 30,
@@ -174,21 +183,23 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     alignSelf: 'center',
-    marginTop: 10,
+   
   },
   reviewText: {
-    fontSize: 22,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '300',
+    marginTop: 20,
     color: '#111',
   },
   reviewName: {
     fontSize: 18,
+    fontWeight:'bold',
     color: '#111',
   },
   review: {
     marginBottom: 20,
     backgroundColor: '#f3f3f3',
-    padding: 10,
+    padding: 8,
     borderRadius: 8,
   },
 });

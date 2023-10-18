@@ -95,6 +95,26 @@ const RestaurantMenu = ({ restaurantName }) => {
           ))}
         </List.Accordion>
       ))}
+      {restaurantData.map((item, index) => (
+        <List.Accordion key={index} title="Drinks" style={{backgroundColor: "#111", marginBottom:3}} titleStyle={{color:'#fff'}}>
+          {item.drinks.map((drink, starterIndex) => (
+            <List.Item
+              key={starterIndex}
+              title={
+                <View>
+                  <Text style={{ fontSize: 18, color: 'white', fontWeight:'900' }}>{drink.name}</Text> 
+                  <Text style={{ fontSize: 18, color: 'white', fontWeight:'800' }}>{drink.price}</Text>
+                </View>}
+              description={`${drink.description}`}
+              descriptionNumberOfLines={4}
+              style={{ backgroundColor: "#00CDBC", margin:2 }}
+              titleStyle={{color:'white', fontSize:20, marginBottom:10}}
+              descriptionStyle={{color:'teal'}}
+              
+            />
+          ))}
+        </List.Accordion>
+      ))}
     </ScrollView>
   );
 };

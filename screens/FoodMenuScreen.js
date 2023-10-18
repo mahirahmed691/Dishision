@@ -16,8 +16,6 @@ import {
   Snackbar,
   Card,
   Checkbox,
-  Accordian,
-  List
 } from 'react-native-paper';
 import { Icon } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -30,7 +28,7 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { axiosGPT } from '../utils/request';
-import { db } from '../config/firebase'; // Import your Firebase configuration
+import { db } from '../config/firebase';
 import RestaurantMenu from '../components/RestaurantMenu';
 import {
   collection,
@@ -52,6 +50,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [commentsLength, setCommentsLength] = useState(0);
   const searchButtonScale = useSharedValue(1);
+  
 
   const foodKeywords = [
     'food',
@@ -134,48 +133,93 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     setSelectedKeywords([]); // Clear selected keywords
   };
 
-  const handleSearch = async () => {
-    if (searchText) {
-      // Check if the query contains food-related keywords
-      const containsFoodKeyword = foodKeywords.some((keyword) =>
-        searchText.toLowerCase().includes(keyword)
-      );
+  const [allRestaurantData, setAllRestaurantData] = useState([]);
 
-      if (!containsFoodKeyword) {
-        setSnackbarVisible(true);
-        return;
-      }
-
-      setLoading(true);
-      const requestData = {
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a helpful assistant.',
-          },
-          {
-            role: 'user',
-            content: `Search for the menu of ${restaurant.restaurantName}: ${searchText}
-            output the content as a list of max 5 items, don't print out a big paragraph,
-            don't use bullet points, only numbers. do not display any other text besides the list of 5`,
-          },
-        ],
-      };
-
-      try {
-        setLoading(true);
-        const response = await axiosGPT.post('', requestData);
-        const choices = response.data.choices[0].message.content;
-        setApiResponse(choices);
-        animateSearchButton(); 
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
-        setLoading(false);
-      }
+  
+  const fetchAllRestaurantData = async () => {
+    try {
+      const restaurantsCollection = collection(db, 'restaurant');
+      const querySnapshot = await getDocs(restaurantsCollection);
+  
+      const restaurantDataArray = [];
+      querySnapshot.forEach((doc) => {
+        const restaurantData = doc.data();
+        restaurantDataArray.push(restaurantData);
+      });
+  
+      // Log the retrieved restaurant data to check if it's populated
+      console.log('Retrieved restaurant data:', restaurantDataArray);
+  
+      // Set the restaurant data in the state
+      setAllRestaurantData(restaurantDataArray);
+  
+      // Call handleSearch with the retrieved data
+      console.log('Calling handleSearch with restaurantDataArray:', restaurantDataArray);
+      handleSearch(restaurantDataArray); // Pass the restaurant data to handleSearch
+    } catch (error) {
+      console.error('Error fetching all restaurant data:', error);
     }
   };
+
+    useEffect(() => {
+      fetchAllRestaurantData();
+    }, []);
+  
+    const handleSearch = async (restaurantData) => {
+      if (searchText) {
+        // Check if the query contains food-related keywords
+        const containsFoodKeyword = foodKeywords.some((keyword) =>
+          searchText.toLowerCase().includes(keyword)
+        );
+    
+        if (!containsFoodKeyword) {
+          setSnackbarVisible(true);
+          return;
+        }
+    
+        setLoading(true);
+    
+        const requestData = {
+          model: 'gpt-4',
+          restaurantData: restaurantData,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful assistant.',
+            },
+            {
+              role: 'user',
+              content: `Search for the menu of ${restaurant.restaurantName}: ${searchText}  
+              output the content as a list of max 5 items, don't print out a big paragraph,
+              don't use bullet points, only numbers. do not display any other text besides 
+              the list of 5`,
+            },
+          ],
+        };
+    
+        // Print the requestData JSON
+        console.log('Request Data:', requestData);
+    
+        // Convert the requestData to a JSON string
+        const requestDataJSON = JSON.stringify(requestData);
+    
+        try {
+          const response = await axiosGPT.post('', requestDataJSON, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+    
+          const choices = response.data.choices[0].message.content;
+          setApiResponse(choices);
+          animateSearchButton();
+          setLoading(false);
+        } catch (error) {
+          console.error(error);
+          setLoading(false);
+        }
+      }
+    };
 
   const searchButtonStyle = useAnimatedStyle(() => {
     const scale = withSpring(searchButtonScale.value, {
@@ -340,7 +384,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-       <View style={styles.header}>
+      <View style={styles.header}>
           <IconButton
             icon="arrow-left"
             size={30}
@@ -425,7 +469,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                     <View style={{flexDirection:'row'}}> 
                       <Icon name="info" size={30} color="#00CDBC" style={{ marginRight: 10 }} />
                       <Text style={{marginTop:8}}>Info, Maps & Hygiene Rating</Text>               
-                     </View>
+                    </View>
                       <Icon name='chevron-right' color="#00CDBC" />
                   </View>
                 </TouchableOpacity>
@@ -447,7 +491,6 @@ export const FoodMenuScreen = ({ navigation, route }) => {
         )}
       </ScrollView>
       <RestaurantMenu restaurantName={restaurant.restaurantName} />
-
     </SafeAreaView>
   );
 };
@@ -487,8 +530,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   restaurantDescription: {
-    fontSize: 16,
-    color: '#444',
+    fontSize: 12,
+    color: '#111',
+    fontWeight:'bold'
   },
   review: {
     backgroundColor: '#F2F2F2',
