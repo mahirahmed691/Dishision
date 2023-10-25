@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
   Dimensions,
-  Image,
+  Share,
 } from "react-native";
 import {
   TextInput,
@@ -28,10 +27,12 @@ import Animated, {
   withSequence,
 } from "react-native-reanimated";
 import { axiosGPT } from "../utils/request";
-import { db } from "../config/firebase";
+import { app, db, auth } from "../config/firebase";
+import { getDoc, doc, setDoc } from "firebase/firestore";
 import RestaurantMenu from "../components/RestaurantMenu";
 import { collection, where, query, getDocs } from "firebase/firestore";
 import { BottomNavBar } from "./BottomNavBar";
+import ViewShot from "react-native-view-shot";
 import { styles } from "./styles";
 
 export const FoodMenuScreen = ({ navigation, route }) => {
@@ -45,10 +46,23 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   const { restaurant } = route.params;
   const [activeTab, setActiveTab] = useState("Home");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-
+  const [isRestaurantMenuVisible, setIsRestaurantMenuVisible] = useState(true);
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [commentsLength, setCommentsLength] = useState(0);
   const searchButtonScale = useSharedValue(1);
+  const [closingTimes, setClosingTimes] = useState([]);
+  const currentDay = new Date().getDay();
+  const [userFavorites, setUserFavorites] = useState([]);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
 
   const foodKeywords = [
     "food",
@@ -67,6 +81,49 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     "curry",
     "rice",
   ];
+
+  const menuHeight = useSharedValue(0);
+  const menuVisible = useSharedValue(false);
+
+  const closeMenu = () => {
+    // Close the menu if it's currently visible
+    if (menuVisible.value) {
+      menuHeight.value = withTiming(0, {
+        duration: 300,
+        easing: Easing.inOut(Easing.ease),
+      });
+      menuVisible.value = false;
+    }
+  };
+  const menuStyle = useAnimatedStyle(() => {
+    return {
+      height: withSpring(menuHeight.value, {
+        damping: 10, // Adjust damping for smoother animation
+        stiffness: 60, // Adjust stiffness for smoother animation
+      }),
+      opacity: withTiming(menuVisible.value ? 1 : 0, {
+        duration: 200,
+        easing: Easing.inOut(Easing.ease), // Use easing for smoother transition
+      }),
+    };
+  });
+  const toggleRestaurantMenu = () => {
+    if (menuVisible.value) {
+      // Close the menu
+      menuHeight.value = withTiming(0, {
+        duration: 300,
+        easing: Easing.inOut(Easing.ease),
+      });
+      menuVisible.value = false;
+    } else {
+      // Show the menu and expand it to the whole page
+      menuHeight.value = withSpring(Dimensions.get("window").height, {
+        damping: 10,
+        stiffness: 70,
+      });
+      menuVisible.value = true;
+    }
+  };
 
   const addSelectedKeywords = () => {
     const keywordsText = selectedKeywords.join(" ");
@@ -147,17 +204,9 @@ export const FoodMenuScreen = ({ navigation, route }) => {
         restaurantDataArray.push(restaurantData);
       });
 
-      // Log the retrieved restaurant data to check if it's populated
-      console.log("Retrieved restaurant data:", restaurantDataArray);
-
       // Set the restaurant data in the state
       setAllRestaurantData(restaurantDataArray);
 
-      // Call handleSearch with the retrieved data
-      console.log(
-        "Calling handleSearch with restaurantDataArray:",
-        restaurantDataArray
-      );
       handleSearch(restaurantDataArray); // Pass the restaurant data to handleSearch
     } catch (error) {
       console.error("Error fetching all restaurant data:", error);
@@ -264,27 +313,223 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     fetchRestaurantCommentsLength();
   }, []);
 
+  const handleShare = async () => {
+    try {
+      const uri = await this.viewShotRef.capture();
+      Share.share({
+        message: apiResponse, // The text content you want to share
+        title: "Share Menu", // Title for the share dialog
+        url: uri, // The captured screenshot as a local file URI
+      })
+        .then((result) => {
+          if (result.action === Share.sharedAction) {
+            // Sharing was successful
+            console.log("Shared successfully");
+          } else if (result.action === Share.dismissedAction) {
+            // Sharing was dismissed
+            console.log("Sharing dismissed");
+          }
+        })
+        .catch((error) => {
+          console.error("Error sharing:", error);
+        });
+    } catch (error) {
+      console.error("Error capturing screenshot:", error);
+    }
+  };
+  const addToFavorites = async (restaurant) => {
+    try {
+      const user = auth.currentUser; // Get the current user
+      if (user) {
+        const userEmail = user.email; // Get the user's email
+        if (restaurant && restaurant.restaurantName) {
+          const favoritesRef = collection(db, "favorites");
+          const userFavoriteDoc = doc(favoritesRef, userEmail);
+  
+          // Check if the user already has a document in the "Favorites" collection
+          // If not, create a new document; otherwise, update the existing one
+          const favoriteRestaurant = {
+            [restaurant.restaurantName]: [
+              {
+                name: restaurant.restaurantName,
+                isFavorited: true,
+                image: restaurant.logo, // Add the restaurant's image to the data
+              },
+            ],
+          };
+  
+          // Set the user's favorite restaurant with a boolean value of true
+          // To remove a restaurant, set its value to false
+          await setDoc(userFavoriteDoc, favoriteRestaurant, { merge: true });
+  
+          console.log(
+            `Added ${restaurant.restaurantName} to favorites for ${userEmail}.`
+          );
+        } else {
+          console.error("The restaurant or restaurantName is not defined.");
+        }
+      } else {
+        // Handle the case where the user is not authenticated
+        console.error("User is not authenticated.");
+      }
+    } catch (error) {
+      console.error("Error adding to favorites:", error);
+    }
+  };
+
+  const shareMenu = async () => {
+    try {
+      // Capture a screenshot of the current page
+      const uri = await this.viewShotRef.capture();
+
+      // Set the content you want to share (you can customize this)
+      const shareContent = {
+        message: "Check out this restaurant's menu:",
+        title: "Share Restaurant Menu",
+        url: uri, // The captured screenshot as a local file URI
+      };
+
+      // Use the Share API to share the content
+      Share.share(shareContent)
+        .then((result) => {
+          if (result.action === Share.sharedAction) {
+            // Sharing was successful
+            console.log("Shared successfully");
+          } else if (result.action === Share.dismissedAction) {
+            // Sharing was dismissed
+            console.log("Sharing dismissed");
+          }
+        })
+        .catch((error) => {
+          console.error("Error sharing:", error);
+        });
+    } catch (error) {
+      console.error("Error capturing screenshot:", error);
+    }
+  };
+
+  const removeFromFavorites = async (restaurant) => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const userEmail = user.email;
+        if (restaurant && restaurant.restaurantName) {
+          const restaurantName = restaurant.restaurantName;
+          console.log("restaurantName:", restaurantName);
+          console.log(
+            `Removing ${restaurantName} from favorites for ${userEmail}`
+          );
+
+          const favoritesRef = collection(db, "favorites");
+          const userFavoriteDoc = doc(favoritesRef, userEmail);
+
+          const userFavoriteSnapshot = await getDoc(userFavoriteDoc);
+
+          if (userFavoriteSnapshot.exists()) {
+            const userFavoriteData = userFavoriteSnapshot.data();
+            if (userFavoriteData[restaurantName]) {
+              delete userFavoriteData[restaurantName]; // Remove the restaurant entry
+              await setDoc(userFavoriteDoc, userFavoriteData); // Update the document
+
+              console.log(
+                `Removed ${restaurantName} from favorites for ${userEmail}.`
+              );
+            } else {
+              console.error(
+                `Restaurant ${restaurantName} is not in user favorites.`
+              );
+            }
+          } else {
+            console.error(`User with email ${userEmail} has no favorites.`);
+          }
+        } else {
+          console.error("The restaurant or restaurantName is not defined.");
+        }
+      } else {
+        console.error("User is not authenticated.");
+      }
+    } catch (error) {
+      console.error("Error removing from favorites:", error);
+    }
+  };
+
+  const handleFavoriteToggle = async () => {
+    if (isFavorite) {
+      // Remove the restaurant from favorites
+      await removeFromFavorites(restaurant);
+    } else {
+      // Add the restaurant to favorites
+      await addToFavorites(restaurant);
+    }
+    setIsFavorite(!isFavorite); // Toggle the favorite status
+  };
+
+  const checkIfFavorited = async (restaurantName) => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const userEmail = user.email;
+        const favoritesRef = collection(db, "favorites");
+        const userFavoriteDoc = doc(favoritesRef, userEmail);
+
+        const userFavoriteSnapshot = await getDoc(userFavoriteDoc);
+
+        if (userFavoriteSnapshot.exists()) {
+          const userFavoriteData = userFavoriteSnapshot.data();
+          if (userFavoriteData[restaurantName]) {
+            setIsFavorite(userFavoriteData[restaurantName][0].isFavorited);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error checking if restaurant is favorited:", error);
+    }
+  };
+
+  useEffect(() => {
+    checkIfFavorited(restaurant.restaurantName);
+  }, [restaurant.restaurantName]);
+
   const renderApiResponse = () => {
     if (apiResponse) {
       const responseLines = apiResponse.split("\n");
       return (
         <ScrollView style={styles.apiResponseScrollView}>
-          {responseLines.map((line, index) => (
-            <Card
-              key={index}
-              style={{
-                padding: 20,
-                borderRadius: 0,
-                backgroundColor: "#00CDBC",
-                backgroundColor: "#00CDBC",
-                margin: 10,
-                marginBottom: 0,
-                marginTop: 5,
-              }}
-            >
-              <Text style={styles.apiResponseText}>{line.trim()}</Text>
-            </Card>
-          ))}
+          <ViewShot
+            ref={(ref) => (this.viewShotRef = ref)}
+            options={{ format: "jpg", quality: 1 }}
+          >
+            {responseLines.map((line, index) => (
+              <Card
+                key={index}
+                style={{
+                  padding: 20,
+                  borderRadius: 0,
+                  backgroundColor: "#00CDBC",
+                  backgroundColor: "#00CDBC",
+                  margin: 10,
+                  marginBottom: 0,
+                  marginTop: 5,
+                }}
+              >
+                <Text style={styles.apiResponseText}>{line.trim()}</Text>
+              </Card>
+            ))}
+          </ViewShot>
+          <Button
+            mode="contained"
+            onPress={handleShare}
+            style={{
+              backgroundColor: "black",
+              width: "70%",
+              borderRadius: 0,
+              alignSelf: "center",
+              marginTop: 30,
+            }}
+            labelStyle={styles.shareButtonLabel}
+          >
+            Share
+          </Button>
         </ScrollView>
       );
     }
@@ -406,18 +651,46 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     );
   };
 
+  const fetchClosingTimes = async (restaurantName) => {
+    try {
+      const closingTimeCollection = collection(db, "restaurant");
+      const q = query(
+        closingTimeCollection,
+        where("restaurantName", "==", restaurantName)
+      );
+      const querySnapshot = await getDocs(q);
+
+      const closingTimeData = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.closingTime) {
+          closingTimeData.push({ id: doc.id, closingTime: data.closingTime });
+        }
+      });
+
+      setClosingTimes(closingTimeData);
+    } catch (error) {
+      console.error("Error fetching closing times from Firestore:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchClosingTimes(restaurant.restaurantName);
+  }, [restaurant.restaurantName]);
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <IconButton
-          icon="arrow-left"
-          size={30}
-          onPress={() => navigation.goBack()}
-          color="#00CDBC"
-        />
-      </View>
       {(!apiResponse || searchText.length > 0) && (
         <View style={styles.searchInputContainer}>
+          <View style={styles.header}>
+            <IconButton
+              icon="arrow-left"
+              size={20}
+              onPress={() => navigation.pop()}
+              color="#00CDBC"
+            />
+          </View>
+
           <TextInput
             theme={{
               roundness: 30,
@@ -459,6 +732,23 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           >
             Please enter a food-related query.
           </Snackbar>
+
+          {searchText == "" ? (
+            <>
+              <IconButton
+                icon={isFavorite ? "heart" : "heart-outline"}
+                size={22}
+                iconColor={isFavorite ? "red" : "black"}
+                onPress={handleFavoriteToggle}
+              />
+              <IconButton
+                icon="share"
+                size={22}
+                iconColor="#00CDBC"
+                onPress={shareMenu} // Add this line to trigger sharing
+              />
+            </>
+          ) : null}
         </View>
       )}
 
@@ -497,7 +787,13 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                       }
                     />
                   </View>
-                  <View style={{ width: "50%", alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: "50%",
+                      alignItems: "flex-start",
+                      marginLeft: "5%",
+                    }}
+                  >
                     <Text style={styles.restaurantName}>
                       {restaurant.restaurantName}
                     </Text>
@@ -506,10 +802,34 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                     </Text>
                   </View>
                 </View>
+                <Text style={styles.restaurantDescription}>
+                  {restaurant.description}
+                </Text>
+                <View style={styles.closingTimes}>
+                  {closingTimes.map((restaurant, index) => (
+                    <View key={index}>
+                      <Text style={styles.closingTimesText}>
+                        Closing Times:
+                      </Text>
+                      <View>
+                        {daysOfWeek.map((day, dayIndex) => (
+                          <Text
+                            key={day}
+                            style={[
+                              styles.dayText,
+                              currentDay === dayIndex
+                                ? styles.currentDayText
+                                : null,
+                            ]}
+                          >
+                            {day}: {restaurant.closingTime[day] || "Closed"}
+                          </Text>
+                        ))}
+                      </View>
+                    </View>
+                  ))}
+                </View>
                 <View>
-                  <Text style={styles.restaurantDescription}>
-                    {restaurant.description}
-                  </Text>
                   <View style={{ margin: 10 }}>
                     <TouchableOpacity
                       onPress={() =>
@@ -522,18 +842,20 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                           justifyContent: "space-between",
                         }}
                       >
-                        <View style={{ flexDirection: "row" }}>
+                        <View style={styles.menuList}>
                           <Icon
                             name="info"
-                            size={30}
+                            size={20}
                             color="#00CDBC"
                             style={{ marginRight: 10 }}
                           />
-                          <Text style={{ marginTop: 8 }}>
-                            Info, Maps & Hygiene Rating
-                          </Text>
+                          <Text>Info, Maps & Hygiene Rating</Text>
                         </View>
-                        <Icon name="chevron-right" color="#00CDBC" />
+                        <Icon
+                          name="chevron-right"
+                          color="#00CDBC"
+                          style={{ marginTop: 10 }}
+                        />
                       </View>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -549,19 +871,46 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                           marginTop: 10,
                         }}
                       >
-                        <View style={{ flexDirection: "row" }}>
+                        <View style={styles.menuList}>
                           <Icon
                             name="star"
-                            size={30}
+                            size={20}
                             color="#00CDBC"
                             style={{ marginRight: 10 }}
                           />
-                          <Text>{restaurant.rating}</Text>
-                          <Text style={{ marginLeft: -23 }}>
-                            {"\n"} See all {commentsLength} reviews
-                          </Text>
+                          <Text>See all {commentsLength} reviews</Text>
                         </View>
-                        <Icon name="chevron-right" color="#00CDBC" />
+                        <Icon
+                          name="chevron-right"
+                          color="#00CDBC"
+                          style={{ marginTop: 10 }}
+                        />
+                      </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={toggleRestaurantMenu}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "baseline",
+                          justifyContent: "space-between",
+                          marginTop: 10,
+                        }}
+                      >
+                        <View style={styles.menuList}>
+                          <Icon
+                            name="book"
+                            size={20}
+                            color="#00CDBC"
+                            style={{ marginRight: 10 }}
+                          />
+                          <Text>Show Menu</Text>
+                        </View>
+                        <Icon
+                          name="chevron-right"
+                          color="#00CDBC"
+                          style={{ marginTop: 10 }}
+                        />
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -571,7 +920,24 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           </View>
         )}
       </ScrollView>
-      <RestaurantMenu restaurantName={restaurant.restaurantName} />
+
+      {menuVisible && (
+        <Animated.View style={[styles.restaurantMenu, menuStyle]}>
+          <View style={styles.closeMenuButton}>
+            <IconButton
+              icon="close"
+              size={30}
+              color="#00CDBC"
+              onPress={closeMenu}
+            />
+          </View>
+          <RestaurantMenu
+            restaurantName={restaurant.restaurantName}
+            style={{ flex: 1 }}
+          />
+        </Animated.View>
+      )}
+
       <BottomNavBar
         activeTab={activeTab}
         showFavoritesOnly={showFavoritesOnly}

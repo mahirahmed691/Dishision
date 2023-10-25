@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { Avatar } from "react-native-paper";
+import { Avatar, IconButton } from "react-native-paper";
 import { BottomNavBar } from "./BottomNavBar";
 import styles from "./styles";
 
@@ -25,19 +25,18 @@ export const ProfileScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Icon
-        name="chevron-left"
+      <IconButton
+        icon="chevron-left"
         size={24}
-        style={styles.backButton}
         onPress={() => navigation.goBack()}
       />
 
       <Avatar.Image
-        size={80}
+        size={100}
         source={
           userPhotoURL ? { uri: userPhotoURL } : require("../assets/avatar.png")
         }
-        style={{ marginBottom: 30, alignSelf: "center", borderRadius: 40 }}
+        style={{ marginBottom: 30, alignSelf: "center", borderRadius: 75 }}
       />
       <Text style={{ fontSize: 20, color: "black", textAlign: "center" }}>
         {userName}
@@ -56,7 +55,10 @@ export const ProfileScreen = ({ navigation }) => {
               <Icon name="chevron-right" size={24} />
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.listItem}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("EditProfile")}
+            style={styles.listItem}
+          >
             <View style={styles.listItemContent}>
               <View style={styles.iconContainer}>
                 <Icon name="edit" style={styles.icon} />
@@ -65,7 +67,7 @@ export const ProfileScreen = ({ navigation }) => {
               <Icon name="chevron-right" size={24} />
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.listItem}>
+          <TouchableOpacity onPress={() => navigation.navigate('Notifications')} style={styles.listItem}>
             <View style={styles.listItemContent}>
               <View style={styles.iconContainer}>
                 <Icon name="bell" style={styles.icon} />

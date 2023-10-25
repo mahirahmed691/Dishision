@@ -1,312 +1,221 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Linking,
-  FlatList,
-} from "react-native";
-import {
-  Button,
-  TextInput,
-  Card,
-  Paragraph,
-  IconButton,
-} from "react-native-paper";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { Button, TextInput, IconButton } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useStripe } from "@stripe/stripe-react-native";
-import * as Animatable from "react-native-animatable";
-import Modal from "react-native-modal";
-import styles from "./styles";
 
 export const PaymentsScreen = () => {
-  const [userBalance, setUserBalance] = useState(100);
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cvc, setCVC] = useState("");
+  const [expiry, setExpiry] = useState("");
+
   const [isPaymentSuccess, setPaymentSuccess] = useState(false);
   const [purchaseAmount, setPurchaseAmount] = useState("");
-  const { handleURLCallback } = useStripe();
-  const [defaultCard, setDefaultCard] = useState("**** **** **** 1234"); // Last 4 digits of the card
 
-  // Modal state for card management
-  const [isAddCardModalVisible, setAddCardModalVisible] = useState(false);
-  const [newCardNumber, setNewCardNumber] = useState("");
+  const handlePurchase = async () => {
+    // Implement the payment processing logic here
+    try {
+      // Use a payment gateway (e.g., Stripe, PayPal) to process the payment
+      // This is where you would send the card details, amount, and make the payment request
 
-  const handlePurchase = () => {
-    const purchaseValue = parseFloat(purchaseAmount);
-
-    if (isNaN(purchaseValue) || purchaseValue < 5) {
-      alert("Invalid purchase amount. Minimum purchase amount is £5.");
-      return;
-    }
-
-    if (userBalance >= purchaseValue) {
-      setUserBalance(userBalance - purchaseValue);
+      // If the payment is successful, setPaymentSuccess(true)
       setPaymentSuccess(true);
-    } else {
-      alert("Insufficient balance");
+    } catch (error) {
+      // Handle errors and show an error message
+      console.error("Error processing payment:", error);
+      alert("Payment failed. Please try again.");
     }
   };
 
-  const isPaymentButtonDisabled =
-    !purchaseAmount || parseFloat(purchaseAmount) <= 0;
-
-  const [bundles] = useState([
-    { amount: 5, label: "£5 Bundle", description: "500 Searches" },
-    { amount: 10, label: "£10 Bundle", description: "1000 Searches" },
-    { amount: 20, label: "£20 Bundle", description: "2000 Searches" },
-  ]);
-
-  const handleBundleSelection = (amount) => {
-    setPurchaseAmount(amount.toString());
-  };
-
-  const [transactions, setTransactions] = useState([
-    { date: "2023-09-01", description: "#498484", amount: "£50.00" },
-    { date: "2023-09-02", description: "#984984", amount: "£30.00" },
-  ]);
-
-  // Modal state for transaction history
-  const [isTransactionHistoryVisible, setTransactionHistoryVisible] =
-    useState(false);
-
-  const handleAddCard = () => {
-    if (newCardNumber && newCardNumber.length === 16) {
-      setDefaultCard(newCardNumber.slice(-4)); // Set last 4 digits as default card
-      setAddCardModalVisible(false); // Close the modal
-      alert("Card added successfully"); // Display a success message
+  const handleApplePay = () => {
+    // Implement Apple Pay handling
+    if (Platform.OS === "ios") {
+      // Show Apple Pay options and process payment
     } else {
-      alert("Invalid card number. Please enter a 16-digit card number.");
+      alert("Apple Pay is not available on this platform.");
     }
   };
 
-  const modalRef = useRef();
-  const transactionCardRef = useRef(null); // Create a ref for the transaction card
-
-  const fadeIn = {
-    from: { opacity: 0 },
-    to: { opacity: 1 },
+  const handleGooglePay = () => {
+    // Implement Google Pay handling
+    if (Platform.OS === "android") {
+      // Show Google Pay options and process payment
+    } else {
+      alert("Google Pay is not available on this platform.");
+    }
   };
 
-  const slideIn = {
-    from: { translateY: 300 },
-    to: { translateY: 0 },
-  };
-
-  const slideOut = {
-    from: { translateY: 0 },
-    to: { translateY: 300 },
-  };
-
-  const handleDeepLink = useCallback(
-    async (url: string | null) => {
-      if (url) {
-        const stripeHandled = await handleURLCallback(url);
-        if (stripeHandled) {
-          // This was a Stripe URL - you can return or add extra handling here as you see fit
-        } else {
-          // This was NOT a Stripe URL – handle as you normally would
-        }
-      }
-    },
-    [handleURLCallback]
-  );
-
-  useEffect(() => {
-    const getUrlAsync = async () => {
-      const initialUrl = await Linking.getInitialURL();
-      handleDeepLink(initialUrl);
-    };
-
-    getUrlAsync();
-
-    const deepLinkListener = Linking.addEventListener(
-      "url",
-      (event: { url: string }) => {
-        handleDeepLink(event.url);
-        console.log("Stripe URL callback handled:", url);
-      }
-    );
-
-    return () => deepLinkListener.remove();
-  }, []);
-
-  // Function to render each payment bundle card with animation
-  const renderPaymentBundle = ({ item }) => {
-    return (
-      <TouchableOpacity onPress={() => handleBundleSelection(item.amount)}>
-        <Card style={styles.bundleCard}>
-          <Card.Content>
-            <Paragraph style={styles.bundleAmount}>
-              £{item.amount.toFixed(2)}
-            </Paragraph>
-            <Paragraph style={styles.bundleDescription}>
-              {item.description}
-            </Paragraph>
-          </Card.Content>
-        </Card>
-      </TouchableOpacity>
+  const isPaymentButtonDisabled = () => {
+    return !(
+      isCardNameValid(cardName) &&
+      isCardNumberValid(cardNumber) &&
+      isCVCValid(cvc) &&
+      isExpiryValid(expiry) &&
+      purchaseAmount.trim()
     );
   };
+
+  const isCardNameValid = (name) => /^[A-Za-z\s]+$/.test(name);
+  const isCardNumberValid = (number) => /^[0-9]{16}$/.test(number);
+  const isCVCValid = (cvc) => /^[0-9]{3}$/.test(cvc);
+  const isExpiryValid = (expiry) => /^[0-9]{2}\/[0-9]{2}$/.test(expiry);
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.content}>
           {isPaymentSuccess ? (
-            <Animatable.View animation="fadeIn" style={styles.paymentSuccess}>
-              <Text style={styles.success}>Payment Successful!</Text>
-              <Text style={styles.balanceAfterPayment}>
-                New Balance: £{userBalance.toFixed(2)}
-              </Text>
-            </Animatable.View>
+            <View style={styles.successContainer}>
+              <Text style={styles.successText}>Payment Successful</Text>
+            </View>
           ) : (
-            <>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => setTransactionHistoryVisible(true)}
-                  style={styles.transactionHistoryButton}
-                >
-                  <IconButton icon="history" size={30} />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => {
-                    setNewCardNumber("");
-                    setAddCardModalVisible(true);
-                  }}
-                  style={styles.addCardButtonTopRight}
-                >
-                  <IconButton icon="card-plus" size={30} />
-                </TouchableOpacity>
-              </View>
-
+            <View>
               <TextInput
-                label="Amount (£)"
+                label="Card Name"
+                mode="outlined"
+                placeholder="Enter Card Name"
+                value={cardName}
+                onChangeText={(text) => setCardName(text)}
+                style={styles.input}
+                error={!isCardNameValid(cardName)}
+              />
+              <TextInput
+                label="Card Number"
+                placeholder="Enter Card Number"
+                mode="outlined"
+                value={cardNumber}
+                onChangeText={(text) => setCardNumber(text)}
+                style={styles.input}
+                error={!isCardNumberValid(cardNumber)}
+              />
+              <View style={styles.cardDetailsRow}>
+                <TextInput
+                  label="CVC"
+                  placeholder="CVC"
+                  mode="outlined"
+                  value={cvc}
+                  onChangeText={(text) => setCVC(text)}
+                  style={styles.cvcInput}
+                  error={!isCVCValid(cvc)}
+                />
+                <TextInput
+                  label="Expiry (MM/YY)"
+                  placeholder="MM/YY"
+                  mode="outlined"
+                  value={expiry}
+                  onChangeText={(text) => setExpiry(text)}
+                  style={styles.expiryInput}
+                  error={!isExpiryValid(expiry)}
+                />
+              </View>
+              <TextInput
+                label="Purchase Amount (£)"
                 placeholder="Enter Purchase Amount"
                 value={purchaseAmount}
                 onChangeText={(text) => setPurchaseAmount(text)}
                 style={styles.input}
                 keyboardType="numeric"
-                mode="contained"
+                mode="outlined"
               />
-
-              <Text style={styles.bundlesTitle}>Payment Bundles</Text>
-              <View style={styles.bundlesContainer}>
-                <FlatList
-                  data={bundles}
-                  horizontal
-                  renderItem={renderPaymentBundle}
-                  keyExtractor={(item) => item.amount.toString()}
-                />
-              </View>
-
-              <Animatable.Text
-                animation="fadeIn"
-                style={styles.defaultCardText}
-              >
-                Default Card:
-                <Text style={{ color: "#00CDBC" }}>{defaultCard}</Text>
-              </Animatable.Text>
-
               <View style={styles.buttonContainer}>
                 <Button
                   mode="contained"
-                  onPress={handleDeepLink}
+                  onPress={handlePurchase}
                   style={styles.purchaseButton}
-                  disabled={isPaymentButtonDisabled}
+                  disabled={isPaymentButtonDisabled()}
                 >
-                  Confirm Payment
+                 <Text style={{color:'white'}}>Confirm Payment</Text> 
                 </Button>
               </View>
-            </>
-          )}
-
-          <Modal
-            isVisible={isTransactionHistoryVisible}
-            onSwipeComplete={() => setTransactionHistoryVisible(false)}
-            swipeDirection="down"
-            style={styles.transactionHistoryModal}
-          >
-            <View style={styles.transactionHistoryContainer}>
-              <ScrollView
-                contentContainerStyle={styles.transactionHistoryContent}
-              >
-                <Text style={styles.transactionsTitle}>
-                  Transaction History
-                </Text>
-                {transactions.map((transaction, index) => (
-                  <Animatable.View
-                    key={index}
-                    animation="fadeInUp"
-                    delay={300 + index * 100}
-                  >
-                    <Card style={styles.transactionCard}>
-                      <Card.Content>
-                        <Paragraph style={styles.transactionDate}>
-                          {transaction.date}
-                        </Paragraph>
-                        <Paragraph style={styles.transactionDescription}>
-                          {transaction.description}
-                        </Paragraph>
-                        <Paragraph style={styles.transactionAmount}>
-                          {transaction.amount}
-                        </Paragraph>
-                      </Card.Content>
-                    </Card>
-                  </Animatable.View>
-                ))}
-              </ScrollView>
-            </View>
-          </Modal>
-        </View>
-      </ScrollView>
-      <Modal
-        visible={isAddCardModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setAddCardModalVisible(false)}
-      >
-        <Animatable.View
-          ref={modalRef}
-          animation={fadeIn}
-          style={styles.modalContainer}
-        >
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add/Replace Card</Text>
-            <TextInput
-              label="New Card Number"
-              placeholder="Enter 16-digit Card Number"
-              value={newCardNumber}
-              onChangeText={(text) => setNewCardNumber(text)}
-              style={styles.input}
-              keyboardType="numeric"
-            />
-            <Button
+              <View style={styles.paymentOptions}>
+          {Platform.OS === "ios" && (
+            <IconButton
+              icon="apple"
+              iconColor="black"
               mode="contained"
-              onPress={handleAddCard}
-              style={styles.modalButton}
+              onPress={handleApplePay}
+              style={styles.paymentButton}
             >
-              Save Card
-            </Button>
-            <Button
+              Apple Pay
+            </IconButton>
+          )}
+          {Platform.OS === "android" && (
+            <IconButton
+              icon="google"
               mode="outlined"
-              onPress={() => setAddCardModalVisible(false)}
-              style={styles.modalButton}
+              onPress={handleGooglePay}
+              style={styles.paymentButton}
             >
-              Cancel
-            </Button>
-          </View>
-        </Animatable.View>
-      </Modal>
+              Google Pay
+            </IconButton>
+          )}
+        </View>
+            </View>
+          )}
+        </View>
+        
+      </ScrollView>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    justifyContent: "center",
+  },
+  input: {
+    marginBottom: 16,
+    backgroundColor: "#F0F0F0",
+  },
+  cardDetailsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  cvcInput: {
+    flex: 1,
+    marginRight: 8,
+  },
+  expiryInput: {
+    flex: 2,
+  },
+  buttonContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  purchaseButton: {
+    width: "100%",
+    backgroundColor: "#111",
+  },
+  successContainer: {
+    backgroundColor: "#4CAF50",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  successText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  paymentOptions: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 16,
+  },
+  paymentButton: {
+    marginHorizontal: 8,
+    borderColor: "#111",
+  },
+});
 
 export default PaymentsScreen;

@@ -14,8 +14,6 @@ import {
 import Restaurants from "../components/Restaurants";
 import { styles } from "./styles";
 
-
-
 export function DrawerSlider(props) {
   return (
     <Drawer
@@ -140,7 +138,7 @@ export function DrawerSlider(props) {
           <IconButton
             icon="menu"
             iconColor="#111"
-            size={40}
+            size={30}
             onPress={props.toggleDrawer} />
           <View
             style={{
@@ -160,20 +158,7 @@ export function DrawerSlider(props) {
                 }}
                 color="#00CDBC" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={props.toggleFavorite}>
-              <FontAwesomeIcon
-                style={{
-                  marginLeft: 20,
-                }}
-                name={props.favorites.includes(props.selectedRestaurant)
-                  ? "heart"
-                  : "heart-o"}
-                size={24}
-                color={props.favorites.includes(props.selectedRestaurant)
-                  ? "red"
-                  : "gray"} />
-            </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => props.navigation.navigate("Profile")}
             >
               <FontAwesomeIcon
@@ -183,7 +168,7 @@ export function DrawerSlider(props) {
                 name="user"
                 size={24}
                 color="#00CDBC" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
         <View></View>

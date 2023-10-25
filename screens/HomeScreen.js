@@ -39,16 +39,19 @@ export const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchRestaurantData = async () => {
       try {
-        const restaurantsCollection = firestore.collection("restaurant"); // Use your Firestore collection name.
-        const snapshot = await restaurantsCollection.get();
-        const restaurants = snapshot.docs.map((doc) => doc.data());
-
-        setFilteredRestaurants(restaurants);
+        const restaurantsCollection = collection(db, 'restaurant'); // Updated syntax
+        const snapshot = await getDocs(restaurantsCollection); // Updated syntax
+    
+        if (snapshot && snapshot.docs) {
+          const restaurants = snapshot.docs.map((doc) => doc.data());
+          setFilteredRestaurants(restaurants);
+        } else {
+          console.error('No data retrieved from Firestore.');
+        }
       } catch (error) {
-        console.error("Error fetching restaurant data:", error);
+        console.error('Error fetching restaurant data:', error);
       }
     };
-
     fetchRestaurantData();
   }, []);
 

@@ -6,8 +6,8 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
-    paddingLeft:20,
-    paddingRight:20,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   header: {
     flexDirection: "row",
@@ -56,6 +56,10 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
   },
+  menuList: {
+    flexDirection: "row",
+    marginTop: 10,
+  },
   walletCard: {
     width: 200,
     height: 100,
@@ -101,8 +105,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
   },
   restaurantImage: {
-    width: "100%",
-    height: 150,
+    height: 50,
     resizeMode: "contain",
     borderRadius: 8,
   },
@@ -111,6 +114,7 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#333",
     marginBottom: 5,
+    alignSelf: "flex-start",
   },
   cuisine: {
     fontSize: 18,
@@ -122,6 +126,10 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: "#444",
     marginTop: 10,
+  },
+  restaurantLocation: {
+    fontSize: 14,
+    width: "50%",
   },
   location: {
     fontSize: 16,
@@ -159,14 +167,18 @@ export const styles = StyleSheet.create({
   },
   ratingContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  ratingInfo: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 10,
     alignItems: "center",
   },
-  ratingInfo:{
-    fontSize:30
-  },
-  ratingValue:{
-    fontSize:30,
-    fontWeight:'800'
+  ratingValue: {
+    fontSize: 20,
+    fontWeight: "900",
+    marginRight: 10,
   },
   rightContent: {
     width: "50%",
@@ -237,6 +249,23 @@ export const styles = StyleSheet.create({
     width: width - 40,
     alignItems: "center",
   },
+  favCard:{
+    height:"auto",
+    padding:5,
+    margin:10,
+    width:"90%",
+    alignSelf:'center',
+    backgroundColor:"white",
+    borderColor:'#00CDBC',
+    borderWidth:1,
+
+  },
+  favCardText:{
+    fontSize:16,
+    fontWeight:'600',
+    color:'black',
+    marginLeft:5
+  },
   textContainer: {
     flex: 1,
     marginLeft: 20,
@@ -246,18 +275,27 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
+  toggleButton: {
+    alignSelf: "center",
+  },
   review: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#f0f0f0",
     borderRadius: 10,
     marginBottom: 20,
+    padding: 10,
+  },
+  reviewCount: {
+    fontSize: 15,
+    fontWeight: "bold",
+    marginTop: 15,
   },
   reviewName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: "teal",
   },
   reviewText: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "500",
     color: "#111",
     marginTop: 5,
@@ -341,6 +379,8 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: "900",
+    marginLeft:20,
+    marginBottom:20
   },
   content: {
     flex: 1,
@@ -352,14 +392,28 @@ export const styles = StyleSheet.create({
   },
   listItemContent: {
     flexDirection: "row",
-    justifyContent: "space-between", // Space evenly
+    justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 15,
     paddingHorizontal: 20,
   },
+  dayText: {
+    // Style for normal days
+    fontSize: 14,
+    color:'black',
+    paddingVertical:5,
+    backgroundColor:'#f0f0f0',
+    paddingLeft:20,
+    fontWeight:'500'
+  },
+  currentDayText: {
+    fontWeight: "bold",
+    color: "#00CDBC", 
+    backgroundColor:'white'
+  },
   iconContainer: {
     backgroundColor: "#00CDBC",
-    borderRadius: 50, // Make the container circular
+    borderRadius: 50,
     marginRight: 20,
     padding: 10,
   },
@@ -370,25 +424,59 @@ export const styles = StyleSheet.create({
   listItemText: {
     fontSize: 18,
     color: "#333",
-    flex: 1, // Allow text to take remaining space
-    marginRight: 10, // Add some space between text and chevron
+    flex: 1,
+    marginRight: 10,
   },
   backButton: {
-    marginLeft: 20,
+    marginLeft: 20
   },
-  backgroundImage:{
-    backgroundColor:'#00CDBC',
-    flex:1,
+  backgroundImage: {
+    backgroundColor: "#00CDBC",
+    flex: 1,
   },
   addKeywordsButton: {
-    backgroundColor:'black',
-    width:'80%',
-    alignSelf:'center',
-    marginTop:20,
+    backgroundColor: "black",
+    width: "80%",
+    alignSelf: "center",
+    marginTop: 20,
   },
-  searchButton:{
-    backgroundColor:'white',
-  }
+  searchButton: {
+    backgroundColor: "white",
+  },
+  restaurantDescription: {
+    margin: 20,
+    marginBottom: 20,
+    fontSize: 11,
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  restaurantMenu: {
+    backgroundColor: "white",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 30,
+    zIndex: 100,
+    height: "60%",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    zIndex: 1,
+  },
+  closingTimes: {
+    backgroundColor: "white",
+  },
+  closingTimesText: {
+    paddingLeft:20,
+    paddingBottom:5,
+    paddingTop:5,
+    fontSize: 18,
+    fontWeight: "900",
+    color:"white",
+    backgroundColor:'#00CDBC'
+  },
 });
 
 export default styles;

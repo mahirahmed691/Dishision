@@ -169,7 +169,7 @@ export const Restaurants = ({ navigation }) => {
                     disabled
                     fullStarColor={Colors.green}
                     maxStars={5}
-                    rating={restaurant.rating}
+                    rating={parseFloat(restaurant.rating)}
                   />
                 </View>
                 <Text style={styles.address}>{restaurant.address}</Text>
@@ -185,8 +185,7 @@ export const Restaurants = ({ navigation }) => {
       ) : null}
       {isFilterActive && filteredRestaurants.length === 0 ? ( 
         <View>
-        <Image source={require('../assets/no-food2.gif')} style={styles.gif} />
-        <Text style={styles.nofoodtext}>No food places found</Text>
+        <Image source={require('../assets/no-food.gif')} style={styles.gif} />
         <Button mode="outlined" onPress={handleShowAll}>
           Show All
         </Button>
@@ -237,6 +236,8 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop:-10,
+    marginBottom:5
   },
   searchInput: {
     marginBottom: 10,
@@ -247,9 +248,9 @@ const styles = StyleSheet.create({
   },
   gif:{
     width:'100%',
-    height:200,
+    height:500,
     resizeMode:'contain',
-    marginTop:200,
+
   },
   nofoodtext:{
     alignSelf:'center',

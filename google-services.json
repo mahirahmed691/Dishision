@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "151956588290",
+    "firebase_url": "https://dishdecid-default-rtdb.firebaseio.com",
+    "project_id": "dishdecid",
+    "storage_bucket": "dishdecid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:151956588290:android:d9acbd0fb9ed47e506e41b",
+        "android_client_info": {
+          "package_name": "com.mahir93.expofirebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAM7mYlJBVmD2Uka5PdsNDwHqAXOwPDyZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "151956588290-p6v13tnrpi5t9e7ikrt43n9vnj1rpchp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mahir93.expofirebase",
+                "app_store_id": "mahir-93@live.co.uk"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

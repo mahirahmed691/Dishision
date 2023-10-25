@@ -50,21 +50,7 @@ export const SignupScreen = ({ navigation }) => {
       setProfileImage({ uri: pickerResult.uri });
     }
   };
-  
-  const handleGoogleSignIn = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const { user } = await signInWithCredential(auth, provider);
-  
-      // If Google Sign-In is successful, you can handle the user data here
-      // For example, you can access user.displayName, user.email, and user.photoURL
-  
-      // Redirect or navigate to the desired screen
-      navigation.navigate('Profile'); // Replace with your desired destination screen
-    } catch (error) {
-      setErrorState(error.message);
-    }
-  };
+
   
   
 
@@ -75,35 +61,40 @@ export const SignupScreen = ({ navigation }) => {
     const isDefaultAvatar = profileImage === defaultAvatar;
   
     try {
+      // Create a user with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
   
-      // Set the displayName here
+      // Set the displayName and profile image
       await updateProfile(user, {
-        displayName: `${username}`,
-        photoURL: isDefaultAvatar ? null : profileImage.uri, // Set photoURL to null if it's the default avatar
+        displayName: username,
+        photoURL: isDefaultAvatar ? null : profileImage.uri,
       });
   
       if (!isDefaultAvatar) {
         // Upload the profile image if it's not the default avatar
         const storageRef = storage.ref(`profile_images/${user.uid}`);
-        const snapshot = await storageRef.putFile(profileImage.uri);
-        const downloadURL = await snapshot.ref.getDownloadURL();
-        
-        // Update the photoURL with the download URL
+        const blob = await (await fetch(profileImage.uri)).blob();
+        await storageRef.put(blob);
+        const downloadURL = await storageRef.getDownloadURL();
+  
+        // Update the user's photoURL with the download URL
         await updateProfile(user, {
           photoURL: downloadURL,
         });
       }
   
+      // Add user data to the Firestore database
       await addDoc(collection(db, 'users'), {
         uid: user.uid,
-        displayName: `${username}`,
+        displayName: username,
         // Add other user data as needed
       });
   
-      navigation.navigate('Profile'); // Replace with your desired destination screen
+      // Navigate to the desired screen upon successful signup
+      navigation.navigate('Profile');
     } catch (error) {
+      // Handle signup errors
       setErrorState(error.message);
     }
   };
