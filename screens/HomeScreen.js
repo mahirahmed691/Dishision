@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import { firestore, auth } from "../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { View, Dimensions } from "react-native";
+import { View, Dimensions, RefreshControl } from "react-native";
 
 import { DrawerSlider } from "./DrawerSlider";
 import { BottomNavBar } from "./BottomNavBar";
@@ -58,6 +58,7 @@ export const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     filterRestaurantsByFavorites();
   }, [favorites, showFavoritesOnly]);
+  
 
   const handleLogout = () => {
     signOut(auth).catch((error) => console.log("Error logging out: ", error));

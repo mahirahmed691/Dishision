@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>151956588290-p6v13tnrpi5t9e7ikrt43n9vnj1rpchp.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.151956588290-p6v13tnrpi5t9e7ikrt43n9vnj1rpchp</string>
+	<key>API_KEY</key>
+	<string>AIzaSyD_V2vr2mGlgFHTFhnw2Aqyb2xuQFJguhE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>151956588290</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.mahir93.expofirebase</string>
+	<key>PROJECT_ID</key>
+	<string>dishdecid</string>
+	<key>STORAGE_BUCKET</key>
+	<string>dishdecid.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:151956588290:ios:605ebf1a9185444506e41b</string>
+	<key>DATABASE_URL</key>
+	<string>https://dishdecid-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

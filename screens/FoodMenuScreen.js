@@ -16,7 +16,7 @@ import {
   Card,
   Checkbox,
 } from "react-native-paper";
-import { Icon } from "react-native-elements";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
   withSpring,
@@ -33,7 +33,10 @@ import RestaurantMenu from "../components/RestaurantMenu";
 import { collection, where, query, getDocs } from "firebase/firestore";
 import { BottomNavBar } from "./BottomNavBar";
 import ViewShot from "react-native-view-shot";
+// import Reviews from "../components/Reviews";
 import { styles } from "./styles";
+import ImageRestaurants from "../components/ImageRestaurants";
+import Map from "../components/Map";
 
 export const FoodMenuScreen = ({ navigation, route }) => {
   const [searchText, setSearchText] = useState("");
@@ -345,7 +348,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
         if (restaurant && restaurant.restaurantName) {
           const favoritesRef = collection(db, "favorites");
           const userFavoriteDoc = doc(favoritesRef, userEmail);
-  
+
           // Check if the user already has a document in the "Favorites" collection
           // If not, create a new document; otherwise, update the existing one
           const favoriteRestaurant = {
@@ -357,11 +360,11 @@ export const FoodMenuScreen = ({ navigation, route }) => {
               },
             ],
           };
-  
+
           // Set the user's favorite restaurant with a boolean value of true
           // To remove a restaurant, set its value to false
           await setDoc(userFavoriteDoc, favoriteRestaurant, { merge: true });
-  
+
           console.log(
             `Added ${restaurant.restaurantName} to favorites for ${userEmail}.`
           );
@@ -486,6 +489,10 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     }
   };
 
+  const capitalizeFirstLetter = (str) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   useEffect(() => {
     checkIfFavorited(restaurant.restaurantName);
   }, [restaurant.restaurantName]);
@@ -500,20 +507,20 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             options={{ format: "jpg", quality: 1 }}
           >
             {responseLines.map((line, index) => (
-              <Card
+              <View
                 key={index}
                 style={{
                   padding: 20,
                   borderRadius: 0,
-                  backgroundColor: "#00CDBC",
-                  backgroundColor: "#00CDBC",
+                  backgroundColor: "#fff",
                   margin: 10,
                   marginBottom: 0,
                   marginTop: 5,
+                  borderWidth: 1,
                 }}
               >
                 <Text style={styles.apiResponseText}>{line.trim()}</Text>
-              </Card>
+              </View>
             ))}
           </ViewShot>
           <Button
@@ -770,6 +777,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           <View style={styles.restaurantCard}>
             {hasSearchResults ? null : (
               <View>
+                <ImageRestaurants />
                 <View
                   style={{
                     marginBottom: 10,
@@ -778,15 +786,6 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                     alignItems: "center",
                   }}
                 >
-                  <View style={{ width: "50%" }}>
-                    <Animated.Image
-                      source={{ uri: restaurant.logo }}
-                      style={styles.restaurantImage}
-                      onError={(error) =>
-                        console.error("Image loading error:", error)
-                      }
-                    />
-                  </View>
                   <View
                     style={{
                       width: "50%",
@@ -797,9 +796,60 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                     <Text style={styles.restaurantName}>
                       {restaurant.restaurantName}
                     </Text>
-                    <Text style={styles.restaurantLocation}>
-                      {restaurant.address}
-                    </Text>
+                    <View
+                      style={{
+                        marginBottom: 10,
+                      }}
+                    >
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Icon
+                          name="pin-outline"
+                          size={20}
+                          style={{ marginRight: 5, padding: 3 }}
+                          backgroundColor="#f0f0f0"
+                        />
+                        <Text style={{ fontWeight: "700" }}>
+                          {restaurant.address}
+                        </Text>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginTop: 10,
+                        }}
+                      >
+                        <Icon
+                          name="silverware-fork-knife"
+                          size={20}
+                          style={{ marginRight: 5, padding: 3 }}
+                          backgroundColor="#f0f0f0"
+                        />
+                        <Text style={{ fontWeight: "700" }}>
+                          {capitalizeFirstLetter(restaurant.cuisine)}
+                        </Text>
+                      </View>
+
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginTop: 10,
+                        }}
+                      >
+                        <Icon
+                          name="cash"
+                          size={20}
+                          style={{ marginRight: 5, padding: 3 }}
+                          backgroundColor="#f0f0f0"
+                        />
+                        <Text style={{ fontWeight: "700" }}>
+                          Avergae Price {restaurant.price}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
                 <Text style={styles.restaurantDescription}>
@@ -829,6 +879,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                     </View>
                   ))}
                 </View>
+
                 <View>
                   <View style={{ margin: 10 }}>
                     <TouchableOpacity
@@ -844,7 +895,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                       >
                         <View style={styles.menuList}>
                           <Icon
-                            name="info"
+                            name="information"
                             size={20}
                             color="#00CDBC"
                             style={{ marginRight: 10 }}
@@ -858,6 +909,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                         />
                       </View>
                     </TouchableOpacity>
+
                     <TouchableOpacity
                       onPress={() =>
                         navigation.navigate("Reviews", { restaurant })
@@ -915,7 +967,14 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                   </View>
                 </View>
+                {/* <Reviews/> */}
+                <Map
+                  latitude={restaurant.lat}
+                  longitude={restaurant.long}
+                  title={restaurant.restaurantName}
+                />
               </View>
+              
             )}
           </View>
         )}

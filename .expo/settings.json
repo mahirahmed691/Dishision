@@ -5,6 +5,6 @@
   "minify": false,
   "urlRandomness": null,
   "https": false,
-  "scheme": "com.mahir93.expofirebase",
+  "scheme": null,
   "devClient": false
 }

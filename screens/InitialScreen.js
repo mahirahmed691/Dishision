@@ -11,8 +11,6 @@ export const InitialScreen = ({ navigation }) => {
     <View style={styles.container}>
 
       <Image source={require('../assets/logo4.png')} style={styles.logo} />
-      {/* <Text style={styles.title}>Dish{"\n"}Decide</Text>
-      <Text style={styles.tagline}>Decision Easier</Text> */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
@@ -90,7 +88,6 @@ const styles = StyleSheet.create({
   logo:{
     flex:1,
     alignContent:'center',
-    textAlign:'center',
     width:500,
     height:500,
     resizeMode:'contain'

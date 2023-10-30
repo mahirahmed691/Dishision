@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 5.4.0"
+    "version": "<= 5.6.0"
   },
   "build": {
     "development": {
@@ -10,14 +10,25 @@
       },
       "ios": {
         "buildConfiguration": "Debug"
-      }
+      },
+      "channel": "development"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "preview"
     },
-    "production": {}
+    "production": {
+      "node": "18.17.0",
+      "channel": "production"
+    }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "mahir93@live.co.uk",
+        "ascAppId": "1234567890",
+        "appleTeamId": "AB12XYZ34S"
+      }
+    }
   }
 }

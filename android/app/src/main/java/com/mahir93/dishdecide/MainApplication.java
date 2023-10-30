@@ -1,4 +1,4 @@
-package com.mahir93.expofirebase;
+package com.mahir93.dishdecide;
 
 import android.app.Application;
 import android.content.res.Configuration;

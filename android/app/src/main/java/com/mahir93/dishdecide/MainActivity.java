@@ -1,4 +1,4 @@
-package com.mahir93.expofirebase;
+package com.mahir93.dishdecide;
 
 import android.os.Build;
 import android.os.Bundle;

@@ -68,3 +68,5 @@ yarn-error.*
 .expo
 dist/
 web-build/
+
+.env

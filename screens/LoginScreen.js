@@ -10,12 +10,12 @@ import {
 import { Formik } from "formik";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { TextInput, Button as PaperButton, Card } from "react-native-paper";
+import { TextInput, Button, Card, Icon } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { Button, FormErrorMessage } from "../components";
+import { FormErrorMessage } from "../components";
 import { Colors, auth } from "../config";
 import { useTogglePasswordVisibility } from "../hooks";
 import { loginValidationSchema } from "../utils";
@@ -119,7 +119,7 @@ export const LoginScreen = ({ navigation }) => {
                   keyboardType="email-address"
                   textContentType="emailAddress"
                   autoFocus={true}
-                  left={<TextInput.Icon icon="email-outline" />}
+                  left={<Icon name="email" />} 
                   value={values.email}
                   onChangeText={handleChange("email")}
                   onBlur={handleBlur("email")}
@@ -143,7 +143,7 @@ export const LoginScreen = ({ navigation }) => {
                   }}
                   autoCapitalize="none"
                   secureTextEntry
-                  left={<TextInput.Icon icon="lock-outline" />}
+                  left={<Icon name="lock" />} 
                   value={values.password}
                   onChangeText={handleChange("password")}
                   onBlur={handleBlur("password")}
@@ -165,9 +165,13 @@ export const LoginScreen = ({ navigation }) => {
                 {errorState !== "" ? (
                   <FormErrorMessage error={errorState} visible={true} />
                 ) : null}
-                <PaperButton style={styles.loginButton} onPress={handleSubmit}>
+                <Button
+                  mode="contained"
+                  style={styles.loginButton}
+                  onPress={handleSubmit}
+                >
                   <Text style={styles.buttonText}>Sign in</Text>
-                </PaperButton>
+                </Button>
               </View>
             )}
           </Formik>
@@ -177,7 +181,7 @@ export const LoginScreen = ({ navigation }) => {
               onPress={() => navigation.navigate("Signup")}
             >
               <Text style={styles.createAccountText}>
-                Don't have account?
+                Don't have an account?
                 <Text style={{ color: "#00CDBC", fontWeight: "800" }}>
                   {" "}
                   Signup
@@ -185,9 +189,9 @@ export const LoginScreen = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            <View style={{width:"80%", alignSelf:'center'}}>
-              <Text style={{alignSelf:'center', marginTop:20,}}>Or</Text>
-              <PaperButton
+            <View style={{ width: "80%", alignSelf: 'center' }}>
+              <Text style={{ alignSelf: 'center', marginTop: 20 }}>Or</Text>
+              <Button
                 mode="contained"
                 style={styles.googleButton}
                 disabled={!request}
@@ -195,8 +199,8 @@ export const LoginScreen = ({ navigation }) => {
                   promptAsync();
                 }}
               >
-                <Text style={{color:'red', fontWeight:'800'}}>Sign in with Google"</Text>
-              </PaperButton>
+                <Text style={{ color: 'red', fontWeight: '800' }}>Sign in with Google</Text>
+              </Button>
             </View>
           </View>
         </Card>
@@ -216,7 +220,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
     width: width,
     height: height * 0.8,
     backgroundColor: "white",
@@ -254,18 +257,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     padding: 10,
   },
-  socialBtnContainer: {
-    width: width * 0.7,
-    alignSelf: "center",
-  },
-  socialBtn: {
-    margin: 20,
-    border: "1px solid #999",
-    borderColor: "#E8ECF4",
-    width: 80,
-    borderWidth: 1,
-    borderRadius: 5,
-  },
   textInput: {
     width: width * 0.9,
     alignSelf: "center",
@@ -274,8 +265,10 @@ const styles = StyleSheet.create({
   title: {
     marginBottom: 20,
     fontSize: 20,
-    letterSpacing:2,
+    letterSpacing: 2,
     fontWeight: "700",
     marginLeft: 20,
   },
 });
+
+export default LoginScreen;

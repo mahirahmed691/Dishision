@@ -110,7 +110,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
   },
   restaurantName: {
-    fontSize: 22,
+    fontSize: 30,
     fontWeight: "900",
     color: "#333",
     marginBottom: 5,
@@ -129,7 +129,7 @@ export const styles = StyleSheet.create({
   },
   restaurantLocation: {
     fontSize: 14,
-    width: "50%",
+    width: "100%",
   },
   location: {
     fontSize: 16,
@@ -249,16 +249,17 @@ export const styles = StyleSheet.create({
     width: width - 40,
     alignItems: "center",
   },
-  favCard:{
-    height:"auto",
-    padding:5,
-    margin:10,
-    width:"90%",
-    alignSelf:'center',
-    backgroundColor:"white",
-    borderColor:'#00CDBC',
-    borderWidth:1,
-
+  favCard: {
+    margin: 10,
+    width: '95%',
+    alignSelf: 'center',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 10,  // This property adds an elevation shadow for Android
   },
   favCardText:{
     fontSize:16,
@@ -324,7 +325,7 @@ export const styles = StyleSheet.create({
   },
   apiResponseText: {
     fontSize: 16,
-    color: "#FFF",
+    color: "#111",
     fontWeight: "bold",
     fontFamily: "Futura",
   },
@@ -398,7 +399,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   dayText: {
-    // Style for normal days
     fontSize: 14,
     color:'black',
     paddingVertical:5,
@@ -475,7 +475,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "900",
     color:"white",
-    backgroundColor:'#00CDBC'
+    backgroundColor:'#00CDBC',
   },
 });
 

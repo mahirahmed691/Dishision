@@ -9,11 +9,11 @@ import {
 } from "react-native";
 import { IconButton, Card } from "react-native-paper";
 import { auth } from "../config/firebase";
-import { collection, query, where, getDoc, doc } from "firebase/firestore";
+import { collection, getDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { BottomNavBar } from "./BottomNavBar";
+import { Swipeable } from 'react-native-gesture-handler';
 import { styles } from "./styles";
-import { restaurantData } from "../data/restuarantData";
 
 export const FavouritesScreen = ({ navigation }) => {
   const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
@@ -62,6 +62,38 @@ export const FavouritesScreen = ({ navigation }) => {
     }
   };
 
+  const cleanDocumentId = (name) => {
+    // Remove spaces and other disallowed characters
+    return name.replace(/[ /#$[\]@&]/g, ''); // You can add more disallowed characters to the regex if needed
+  };
+  
+  const handleDelete = async (restaurantName) => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const userEmail = user.email;
+        const favoritesRef = collection(db, "favorites");
+        const userFavoriteDoc = doc(favoritesRef, userEmail);
+  
+        // Clean the restaurant name for use as a document ID
+        const cleanedRestaurantName = cleanDocumentId(restaurantName);
+  
+        // Update the favorite status of the restaurant to false
+        const updatedUserFavorites = { ...userFavorites };
+        updatedUserFavorites[cleanedRestaurantName].isFavorited = false;
+  
+        // Update the Firestore document with the updated user favorites
+        await updateDoc(userFavoriteDoc, updatedUserFavorites);
+  
+        // Fetch updated data after unfavoriting
+        checkIfFavorited();
+      }
+    } catch (error) {
+      console.error("Error unfavoriting restaurant:", error);
+    }
+  };
+  
+  
   useEffect(() => {
     const favoriteRestaurantList = [];
     for (const restaurantName in userFavorites) {
@@ -91,7 +123,17 @@ export const FavouritesScreen = ({ navigation }) => {
         ) : (
           <View style={styles.cardContainer}>
             {favoriteRestaurants.map((restaurant, index) => (
-              <TouchableOpacity key={index}>
+              <Swipeable
+                key={index}
+                renderRightActions={() => (
+                  <TouchableOpacity
+                    onPress={() => handleDelete(restaurant.name)}
+                    style={styles.deleteAction}
+                  >
+                    <Text style={styles.deleteText}>Delete</Text>
+                  </TouchableOpacity>
+                )}
+              >
                 <Card style={styles.favCard}>
                   <View style={styles.cardContent}>
                     <Text style={styles.favCardText}>{restaurant.name}</Text>
@@ -99,9 +141,6 @@ export const FavouritesScreen = ({ navigation }) => {
                       source={{ uri: restaurant.image }}
                       style={styles.restaurantImage}
                     />
-                    <Text style={styles.imageURLText}>
-                      {restaurant.imageURL}
-                    </Text>
                     <IconButton
                       icon={restaurant.isFavorited ? "heart-outlined" : "heart"}
                       iconColor={restaurant.isFavorited ? "red" : "#00CDBC"}
@@ -109,7 +148,7 @@ export const FavouritesScreen = ({ navigation }) => {
                     />
                   </View>
                 </Card>
-              </TouchableOpacity>
+              </Swipeable>
             ))}
           </View>
         )}

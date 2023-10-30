@@ -89,7 +89,7 @@ android {
     namespace 'com.mahir93.expofirebase'
     defaultConfig {
         manifestPlaceholders = [appAuthRedirectScheme: 'DishDecide']
-        applicationId 'com.mahir93.expofirebase'
+        applicationId 'com.mahir93.dishdecide'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
