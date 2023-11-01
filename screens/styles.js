@@ -6,13 +6,31 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingRight:10,
+    paddingLeft:10,
+    paddingBottom:20,
+  },
+  foodMenuContainer: {
+    flex: 1,
+    backgroundColor: "#FFF",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    backgroundColor:'#00CDBC',
+    paddingTop:50,
+    margin:-10,
+    paddingRight:10,
+  },
+  header2: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop:50,
+    margin:-10,
+    alignItems:'center'
+  
   },
   userName: {
     fontSize: 25,
@@ -27,6 +45,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
+    margin:-10,
   },
   dropdown: {
     flex: 1,
@@ -304,7 +323,8 @@ export const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    margin: 10,
+    marginRight:30,
+    marginLeft:10,
   },
   searchInput: {
     flex: 1,
@@ -476,6 +496,123 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
     color:"white",
     backgroundColor:'#00CDBC',
+  },
+
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  brandedContainer: {
+    marginVertical: 10,
+  },
+  cuisineHeader: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  restaurantHorizontalList: {
+    marginVertical: 10,
+  },
+  restaurantCardHorizontal: {
+    borderRadius: 12,
+    marginRight: 12,
+    marginBottom: 10,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+  },
+  logoHorizontal: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  restaurantInfoHorizontal: {
+    padding: 10,
+  },
+  restaurantNameHorizontal: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  restaurantRating: {
+    color: "#00CDBC",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginRight: 5,
+  },
+  noFoodContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 50,
+  },
+  gif: {
+    width: "100%",
+    height: 300,
+    marginBottom: 20,
+  },
+  showAllButton: {
+    borderColor: "#00CDBC",
+  },
+  showAllButtonLabel: {
+    color: "#00CDBC",
+  },
+  searchInput: {
+    width: "80%",
+  },
+  locationContainer: {
+    flexDirection: "row",
+  },
+  pickerWrapper: {
+    flexDirection: "row",
+  },
+  pickerContent: {
+    marginTop: 10,
+    backgroundColor: "#f0f0f0",
+  },
+
+  dropdownContainer: {
+    borderWidth: 1,
+    borderColor: "#00CDBC",
+    borderRadius: 8,
+    zIndex: 1000,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dropdownText: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  pickerContainer: {
+    top: 40,
+    right: 0,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    zIndex: 100, // Adjust the z-index value as needed
+  },
+  pickerOverlay: {
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "transparent",
+  },
+  pickerItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: "#333",
   },
 });
 

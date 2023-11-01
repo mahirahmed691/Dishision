@@ -1,33 +1,54 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, Animated } from 'react-native';
+import React, { useEffect, useRef, useState } from "react";
+import { View, Image, StyleSheet, ScrollView, Animated } from "react-native";
 
-// Dummy data for restaurant food images
-const restaurantImages = [
-  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5Qcm5pB_YUlyrtqkNWVhyLX_82ROqQXGyX0I35mZRKnOysdx133oAbUIoYXLnu_cEKDI&usqp=CAU',
-  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5Qcm5pB_YUlyrtqkNWVhyLX_82ROqQXGyX0I35mZRKnOysdx133oAbUIoYXLnu_cEKDI&usqp=CAU',
-  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5Qcm5pB_YUlyrtqkNWVhyLX_82ROqQXGyX0I35mZRKnOysdx133oAbUIoYXLnu_cEKDI&usqp=CAU',
-  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5Qcm5pB_YUlyrtqkNWVhyLX_82ROqQXGyX0I35mZRKnOysdx133oAbUIoYXLnu_cEKDI&usqp=CAU',
-  // Add more image URLs here or replace these with actual image URLs
-];
+const ImageRestaurants = ({ restaurantName }) => {
+  const [imageUrls, setImageUrls] = useState([]);
 
-const ImageRestaurants = () => {
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const apiKey = "AIzaSyAM7mYlJBVmD2Uka5PdsNDwHqAXOwPDyZs";
+        const searchEngineId = "956eb687154d24fde";
+        const searchTerm = restaurantName + " Restaurant";
+
+        const response = await fetch(
+          `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&searchType=image&q=${searchTerm}`
+        );
+
+        const data = await response.json();
+        const fetchedImageUrls = data.items.map((item) => item.link);
+        setImageUrls(fetchedImageUrls.slice(0, 6)); // Limit to the first 5 images
+      } catch (error) {
+        console.error("Error fetching images:", error);
+      }
+    };
+
+    fetchImages();
+  }, []);
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 2000, // Adjust duration as needed
+      duration: 2000,
       useNativeDriver: true,
     }).start();
   }, [fadeAnim]);
 
   return (
     <ScrollView horizontal contentContainerStyle={styles.container}>
-      {restaurantImages.map((image, index) => (
-        <Animated.View key={index} style={{ opacity: fadeAnim }}>
-          <Image source={{ uri: image }} style={styles.image} key={index} />
-        </Animated.View>
-      ))}
+      {imageUrls.map((imageUrl, index) =>
+        imageUrl ? (
+          <Animated.View key={index} style={{ opacity: fadeAnim }}>
+            <Image
+              source={{ uri: imageUrl }}
+              style={styles.image}
+              key={index}
+            />
+          </Animated.View>
+        ) : null
+      )}
     </ScrollView>
   );
 };
@@ -35,24 +56,15 @@ const ImageRestaurants = () => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  imageContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
   },
   image: {
     width: 300,
     height: 200,
-    margin: 2,
+    margin: 5,
+    marginBottom: 0,
   },
 });
 

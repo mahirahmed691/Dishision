@@ -48,7 +48,15 @@ const RestaurantMenu = ({ restaurantName }) => {
   return (
     <SafeAreaView>
       <ScrollView style={{ margin: 10, height: "80%" }}>
-        <Text style={{ fontSize: 30, fontWeight: "700", marginBottom: 10, letterSpacing:1, marginLeft:5 }}>
+        <Text
+          style={{
+            fontSize: 30,
+            fontWeight: "700",
+            marginBottom: 10,
+            letterSpacing: 1,
+            marginLeft: 5,
+          }}
+        >
           {restaurantName} Menu
         </Text>
         {restaurantData.map((item, index) => (
@@ -56,8 +64,18 @@ const RestaurantMenu = ({ restaurantName }) => {
             key={index}
             title="STARTERS"
             expanded={expandedList === "Starters"}
-            style={{ backgroundColor: "#00CBDC", marginBottom: 10, width:"98%", alignSelf:"center" }}
-            titleStyle={{ color: "#fff", fontWeight: "900", fontSize:18, letterSpacing:2 }}
+            style={{
+              backgroundColor: "#00CBDC",
+              marginBottom: 10,
+              width: "98%",
+              alignSelf: "center",
+            }}
+            titleStyle={{
+              color: "#fff",
+              fontWeight: "900",
+              fontSize: 18,
+              letterSpacing: 2,
+            }}
             onPress={() => toggleList("Starters")}
           >
             {item.starters.map((starter, starterIndex) => (
@@ -105,8 +123,18 @@ const RestaurantMenu = ({ restaurantName }) => {
             key={index}
             title="MAINS"
             expanded={expandedList === "Mains"}
-            style={{ backgroundColor: "#00CBDC", marginBottom: 10, width:"98%", alignSelf:"center" }}
-            titleStyle={{ color: "#fff", fontWeight: "900", fontSize:18, letterSpacing:2 }}
+            style={{
+              backgroundColor: "#00CBDC",
+              marginBottom: 10,
+              width: "98%",
+              alignSelf: "center",
+            }}
+            titleStyle={{
+              color: "#fff",
+              fontWeight: "900",
+              fontSize: 18,
+              letterSpacing: 2,
+            }}
             onPress={() => toggleList("Mains")}
           >
             {item.mains.map((mains, starterIndex) => (
@@ -154,8 +182,18 @@ const RestaurantMenu = ({ restaurantName }) => {
             key={index}
             title="DESSERTS"
             expanded={expandedList === "Desserts"}
-            style={{ backgroundColor: "#00CBDC", marginBottom: 10, width:"98%", alignSelf:"center" }}
-            titleStyle={{ color: "#fff", fontWeight: "900", fontSize:18, letterSpacing:2 }}
+            style={{
+              backgroundColor: "#00CBDC",
+              marginBottom: 10,
+              width: "98%",
+              alignSelf: "center",
+            }}
+            titleStyle={{
+              color: "#fff",
+              fontWeight: "900",
+              fontSize: 18,
+              letterSpacing: 2,
+            }}
             onPress={() => toggleList("Desserts")}
           >
             {item.desserts.map((desserts, starterIndex) => (
@@ -203,8 +241,18 @@ const RestaurantMenu = ({ restaurantName }) => {
             key={index}
             title="DRINKS"
             expanded={expandedList === "Drinks"}
-            style={{ backgroundColor: "#00CBDC", marginBottom: 10, width:"98%", alignSelf:"center" }}
-            titleStyle={{ color: "#fff", fontWeight: "900", fontSize:18, letterSpacing:2 }}
+            style={{
+              backgroundColor: "#00CBDC",
+              marginBottom: 10,
+              width: "98%",
+              alignSelf: "center",
+            }}
+            titleStyle={{
+              color: "#fff",
+              fontWeight: "900",
+              fontSize: 18,
+              letterSpacing: 2,
+            }}
             onPress={() => toggleList("Drinks")}
           >
             {item.drinks.map((drink, starterIndex) => (

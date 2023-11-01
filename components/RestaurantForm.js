@@ -1,45 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
-import { Input, CheckBox, Icon, Image, } from 'react-native-elements';
-import { Button } from 'react-native-paper';
-import Modal from 'react-native-modal';
-import { addDoc, collection, setDoc, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, ScrollView, Text } from "react-native";
+import { Picker } from "react-native-picker";
+import { Input, CheckBox, Icon, Image } from "react-native-elements";
+import { Button } from "react-native-paper";
+import Modal from "react-native-modal";
+import { addDoc, collection, setDoc, doc, updateDoc } from "firebase/firestore";
+import { db } from "../config/firebase";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFormMode }) => {
+const RestaurantForm = ({
+  isVisible,
+  onClose,
+  restaurantToEdit,
+  setRestaurantFormMode,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
-  const formTitle = isEditing ? 'Edit Restaurant' : 'Add Restaurant';
+  const formTitle = isEditing ? "Edit Restaurant" : "Add Restaurant";
 
-  const [restaurantName, setRestaurantName] = useState('');
-  const [address, setAddress] = useState('');
-  const [hygiene, setHygiene] = useState('');
+  const [restaurantName, setRestaurantName] = useState("");
+  const [address, setAddress] = useState("");
+  const [hygiene, setHygiene] = useState("");
   const [halal, setHalal] = useState(false);
   const [lat, setLat] = useState(0);
   const [long, setLong] = useState(0);
   const [vegan, setVegan] = useState(false);
-  const [cuisine, setCuisine] = useState('');
-  const [logo, setLogo] = useState('');
+  const [cuisine, setCuisine] = useState("");
+  const [logo, setLogo] = useState("");
   const [rating, setRating] = useState(0);
-  const [logoPreview, setLogoPreview] = useState('');
+  const [logoPreview, setLogoPreview] = useState("");
 
-  const [starters, setStarters] = useState([{ name: '', price: 0 }]);
-  const [mains, setMains] = useState([{ name: '', price: 0 }]);
-  const [desserts, setDesserts] = useState([{ name: '', price: 0 }]);
-  const [drinks, setDrinks] = useState([{ name: '', price: 0 }]);
+  const [starters, setStarters] = useState([{ name: "", price: 0 }]);
+  const [mains, setMains] = useState([{ name: "", price: 0 }]);
+  const [desserts, setDesserts] = useState([{ name: "", price: 0 }]);
+  const [drinks, setDrinks] = useState([{ name: "", price: 0 }]);
 
-  const [starterKcals, setStarterKcals] = useState(['']);
-  const [mainKcals, setMainKcals] = useState(['']);
-  const [dessertKcals, setDessertKcals] = useState(['']);
-  const [drinkKcals, setDrinkKcals] = useState(['']);
+  const [starterKcals, setStarterKcals] = useState([""]);
+  const [mainKcals, setMainKcals] = useState([""]);
+  const [dessertKcals, setDessertKcals] = useState([""]);
+  const [drinkKcals, setDrinkKcals] = useState([""]);
 
-  const [starterDescriptions, setStarterDescriptions] = useState(['']);
-  const [mainDescriptions, setMainDescriptions] = useState(['']);
-  const [dessertDescriptions, setDessertDescriptions] = useState(['']);
-  const [drinkDescriptions, setDrinkDescriptions] = useState(['']);
-
-  
+  const [starterDescriptions, setStarterDescriptions] = useState([""]);
+  const [mainDescriptions, setMainDescriptions] = useState([""]);
+  const [dessertDescriptions, setDessertDescriptions] = useState([""]);
+  const [drinkDescriptions, setDrinkDescriptions] = useState([""]);
+  const [selectedCuisine, setSelectedCuisine] = useState("");
 
   useEffect(() => {
     if (restaurantToEdit) {
@@ -64,19 +69,19 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
       setDesserts(restaurantToEdit.desserts);
       setDrinks(restaurantToEdit.drinks);
 
-      setStarterKcals(restaurantToEdit.starters.map(starter => starter.kcal));
-      setMainKcals(restaurantToEdit.mains.map(main => main.kcal));
-      setDessertKcals(restaurantToEdit.desserts.map(dessert => dessert.kcal));
-      setDrinkKcals(restaurantToEdit.drinks.map(drink => drink.kcal));
+      setStarterKcals(restaurantToEdit.starters.map((starter) => starter.kcal));
+      setMainKcals(restaurantToEdit.mains.map((main) => main.kcal));
+      setDessertKcals(restaurantToEdit.desserts.map((dessert) => dessert.kcal));
+      setDrinkKcals(restaurantToEdit.drinks.map((drink) => drink.kcal));
     }
   }, [restaurantToEdit]);
 
   const handleAddRestaurant = async () => {
     if (!restaurantName || !address || !cuisine || !logo) {
-      alert('Please fill in all required fields');
+      alert("Please fill in all required fields");
       return;
     }
-  
+
     const newRestaurant = {
       restaurantName,
       address,
@@ -93,25 +98,25 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
       desserts,
       drinks,
     };
-  
+
     try {
-      const restaurantRef = collection(db, 'restaurant');
-  
+      const restaurantRef = collection(db, "restaurant");
+
       if (isEditing) {
         const restaurantDocRef = doc(restaurantRef, restaurantToEdit.id);
         await updateDoc(restaurantDocRef, newRestaurant);
-        alert('Restaurant updated successfully');
+        alert("Restaurant updated successfully");
       } else {
-        const restaurantDocRef = doc(restaurantRef, restaurantName); 
+        const restaurantDocRef = doc(restaurantRef, restaurantName);
         await setDoc(restaurantDocRef, newRestaurant);
-        alert('Restaurant added successfully');
+        alert("Restaurant added successfully");
       }
-  
+
       clearForm();
       onClose();
     } catch (error) {
-      console.error('Error adding/updating restaurant: ', error);
-      alert('An error occurred. Please try again.');
+      console.error("Error adding/updating restaurant: ", error);
+      alert("An error occurred. Please try again.");
     }
   };
 
@@ -123,7 +128,10 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addStarter = () => {
-    setStarters([...starters, { name: '', price: 0, descriptions: '', kcal:'' }]);
+    setStarters([
+      ...starters,
+      { name: "", price: 0, descriptions: "", kcal: "" },
+    ]);
   };
 
   const removeStarter = (index) => {
@@ -133,7 +141,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addMain = () => {
-    setMains([...mains, { name: '', price: 0, descriptions: '', kcal:'' }]);
+    setMains([...mains, { name: "", price: 0, descriptions: "", kcal: "" }]);
   };
 
   const removeMain = (index) => {
@@ -143,7 +151,10 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addDessert = () => {
-    setDesserts([...desserts, { name: '', price: 0, descriptions: '', kcal:'' }]);
+    setDesserts([
+      ...desserts,
+      { name: "", price: 0, descriptions: "", kcal: "" },
+    ]);
   };
 
   const removeDessert = (index) => {
@@ -153,7 +164,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const addDrink = () => {
-    setDrinks([...drinks, { name: '', price: 0, descriptions: '', kcal:'' }]);
+    setDrinks([...drinks, { name: "", price: 0, descriptions: "", kcal: "" }]);
   };
 
   const removeDrink = (index) => {
@@ -165,8 +176,8 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   const updateItem = (category, index, field, value) => {
     const updatedCategory = [...category];
     updatedCategory[index][field] = value;
-    if (field === 'price') {
-      updatedCategory[index][field] = value.replace(/[^0-9.-]/g, '');
+    if (field === "price") {
+      updatedCategory[index][field] = value.replace(/[^0-9.-]/g, "");
     }
 
     if (category === starters) {
@@ -196,28 +207,37 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
   };
 
   const clearForm = () => {
-    setRestaurantName('');
-    setAddress('');
-    setHygiene('');
+    setRestaurantName("");
+    setAddress("");
+    setHygiene("");
     setHalal(false);
     setLat(0);
     setLong(0);
     setVegan(false);
-    setCuisine('');
-    setLogo('');
+    setCuisine("");
+    setLogo("");
     setRating(0);
-    setLogoPreview('');
-    setStarters([{ name: '', price: 0 }]);
-    setMains([{ name: '', price: 0 }]);
-    setDesserts([{ name: '', price: 0 }]);
-    setDrinks([{ name: '', price: 0 }]);
+    setLogoPreview("");
+    setStarters([{ name: "", price: 0 }]);
+    setMains([{ name: "", price: 0 }]);
+    setDesserts([{ name: "", price: 0 }]);
+    setDrinks([{ name: "", price: 0 }]);
   };
+
+  const cuisineTypes = [
+    "Italian",
+    "Mexican",
+    "Indian",
+    "Japanese",
+    "French",
+    "Greek",
+  ];
 
   return (
     <Modal isVisible={isVisible} style={styles.modal} onBackdropPress={onClose}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <SafeAreaView style={styles.formContainer}>
-        <Text style={styles.formTitle}>{formTitle}</Text>
+          <Text style={styles.formTitle}>{formTitle}</Text>
           <Text style={styles.sectionTitle}>Restaurant</Text>
           <Input
             label="Restaurant Name"
@@ -236,7 +256,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
             placeholder="Enter hygiene type"
             value={hygiene}
             onChangeText={(text) => {
-              const cleanedText = text.replace(/[^0-5]/g, '');
+              const cleanedText = text.replace(/[^0-5]/g, "");
               setHygiene(cleanedText);
             }}
             keyboardType="numeric"
@@ -251,7 +271,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
             placeholder="Enter latitude"
             value={lat.toString()}
             onChangeText={(text) => {
-              setLat(text.replace(/[^0-9.-]/g, ''));
+              setLat(text.replace(/[^0-9.-]/g, ""));
             }}
             keyboardType="numeric"
           />
@@ -260,7 +280,7 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
             placeholder="Enter longitude"
             value={long.toString()}
             onChangeText={(text) => {
-              setLong(text.replace(/[^0-9.-]/g, ''));
+              setLong(text.replace(/[^0-9.-]/g, ""));
             }}
             keyboardType="numeric"
           />
@@ -284,39 +304,41 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
           {logoPreview ? (
             <Image source={{ uri: logoPreview }} style={styles.logoPreview} />
           ) : null}
-          <Button mode='outlined' onPress={() => setLogoPreview(logo)}>
+          <Button mode="outlined" onPress={() => setLogoPreview(logo)}>
             <Text>Preview Logo</Text>
-            </Button>
+          </Button>
           <Input
             label="Rating"
             placeholder="Enter restaurant rating"
             value={rating.toString()}
             onChangeText={(text) => {
-              setRating(text.replace(/[^0-9.-]/g, ''));
+              setRating(text.replace(/[^0-9.-]/g, ""));
             }}
           />
 
           <Text style={styles.sectionTitle}>Starters</Text>
-          <Button mode='outlined' onPress={addStarter}>
-              <Text>Add Starter</Text>
-            </Button>
+          <Button mode="outlined" onPress={addStarter}>
+            <Text>Add Starter</Text>
+          </Button>
           {starters.map((starter, index) => (
             <View key={index} style={styles.itemContainer}>
               <Input
                 label={`Starter Name ${index + 1}`}
                 placeholder="Enter starter name"
                 value={starter.name}
-                onChangeText={(text) => updateItem(starters, index, 'name', text)}
+                onChangeText={(text) =>
+                  updateItem(starters, index, "name", text)
+                }
               />
-               <Input
-                  label={`Starter Description ${index + 1}`}
-                  placeholder="Enter starter description"
-                  value={starterDescriptions[index]}
-                  onChangeText={(text) =>
-                    updateDescription(starterDescriptions, index, text)
-                  }
-                />
-                 <Input
+              <Input
+                label={`Starter Description ${index + 1}`}
+                placeholder="Enter starter description"
+                value={starterDescriptions[index]}
+                onChangeText={(text) =>
+                  updateDescription(starterDescriptions, index, text)
+                }
+              />
+              <Input
                 label={`Starter Kcal ${index + 1}`}
                 placeholder="Enter kcal"
                 value={starterKcals[index]}
@@ -326,7 +348,9 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                 label={`Starter Price ${index + 1}`}
                 placeholder="Enter starter price"
                 value={starter.price.toString()}
-                onChangeText={(text) => updateItem(starters, index, 'price', text)}
+                onChangeText={(text) =>
+                  updateItem(starters, index, "price", text)
+                }
               />
               <Icon
                 name="delete"
@@ -339,33 +363,33 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
           ))}
 
           <Text style={styles.sectionTitle}>Mains</Text>
-          <Button  mode='outlined' onPress={addMain}>
+          <Button mode="outlined" onPress={addMain}>
             <Text>Add Main Course</Text>
-            </Button>
+          </Button>
           {mains.map((main, index) => (
             <View key={index} style={styles.itemContainer}>
               <Input
                 label={`Main Course Name ${index + 1}`}
                 placeholder="Enter main course name"
                 value={main.name}
-                onChangeText={(text) => updateItem(mains, index, 'name', text)}
+                onChangeText={(text) => updateItem(mains, index, "name", text)}
               />
 
-            <Input
-                  label={`Main Description ${index + 1}`}
-                  placeholder="Enter Main description"
-                  value={mainDescriptions[index]}
-                  onChangeText={(text) =>
-                    updateDescription(mainDescriptions, index, text)
-                  }
-                />
+              <Input
+                label={`Main Description ${index + 1}`}
+                placeholder="Enter Main description"
+                value={mainDescriptions[index]}
+                onChangeText={(text) =>
+                  updateDescription(mainDescriptions, index, text)
+                }
+              />
               <Input
                 label={`Main Course Price ${index + 1}`}
                 placeholder="Enter main course price"
                 value={main.price.toString()}
-                onChangeText={(text) => updateItem(mains, index, 'price', text)}
+                onChangeText={(text) => updateItem(mains, index, "price", text)}
               />
-               <Input
+              <Input
                 label={`Main Kcal ${index + 1}`}
                 placeholder="Enter kcal"
                 value={starterKcals[index]}
@@ -381,27 +405,29 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
           ))}
 
           <Text style={styles.sectionTitle}>Desserts</Text>
-          <Button mode='outlined' onPress={addDessert}>
+          <Button mode="outlined" onPress={addDessert}>
             <Text>Add Dessert</Text>
           </Button>
-          
+
           {desserts.map((dessert, index) => (
             <View key={index} style={styles.itemContainer}>
               <Input
                 label={`Dessert Name ${index + 1}`}
                 placeholder="Enter dessert name"
                 value={dessert.name}
-                onChangeText={(text) => updateItem(desserts, index, 'name', text)}
+                onChangeText={(text) =>
+                  updateItem(desserts, index, "name", text)
+                }
               />
               <Input
-                  label={`Dessert Description ${index + 1}`}
-                  placeholder="Enter Dessert description"
-                  value={dessertDescriptions[index]}
-                  onChangeText={(text) =>
-                    updateDescription(dessertDescriptions, index, text)
-                  }
-                />
-                 <Input
+                label={`Dessert Description ${index + 1}`}
+                placeholder="Enter Dessert description"
+                value={dessertDescriptions[index]}
+                onChangeText={(text) =>
+                  updateDescription(dessertDescriptions, index, text)
+                }
+              />
+              <Input
                 label={`Desert Kcal ${index + 1}`}
                 placeholder="Enter kcal"
                 value={starterKcals[index]}
@@ -411,7 +437,9 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                 label={`Dessert Price ${index + 1}`}
                 placeholder="Enter dessert price"
                 value={dessert.price.toString()}
-                onChangeText={(text) => updateItem(desserts, index, 'price', text)}
+                onChangeText={(text) =>
+                  updateItem(desserts, index, "price", text)
+                }
               />
               <Icon
                 name="delete"
@@ -422,28 +450,27 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
             </View>
           ))}
 
-          {/* Drinks */}
           <Text style={styles.sectionTitle}>Drinks</Text>
-          <Button mode="outlined" icon="" onPress={addDrink} >
+          <Button mode="outlined" icon="" onPress={addDrink}>
             <Text>Add Drink</Text>
-            </Button>
+          </Button>
           {drinks.map((drink, index) => (
             <View key={index} style={styles.itemContainer}>
               <Input
                 label={`Drink Name ${index + 1}`}
                 placeholder="Enter drink name"
                 value={drink.name}
-                onChangeText={(text) => updateItem(drinks, index, 'name', text)}
+                onChangeText={(text) => updateItem(drinks, index, "name", text)}
               />
               <Input
-                  label={`Drink Description ${index + 1}`}
-                  placeholder="Enter Drink description"
-                  value={drinkDescriptions[index]}
-                  onChangeText={(text) =>
-                    updateDescription(drinkDescriptions, index, text)
-                  }
-                />
-                 <Input
+                label={`Drink Description ${index + 1}`}
+                placeholder="Enter Drink description"
+                value={drinkDescriptions[index]}
+                onChangeText={(text) =>
+                  updateDescription(drinkDescriptions, index, text)
+                }
+              />
+              <Input
                 label={`Starter Kcal ${index + 1}`}
                 placeholder="Enter kcal"
                 value={starterKcals[index]}
@@ -453,7 +480,9 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
                 label={`Drink Price ${index + 1}`}
                 placeholder="Enter drink price"
                 value={drink.price.toString()}
-                onChangeText={(text) => updateItem(drinks, index, 'price', text)}
+                onChangeText={(text) =>
+                  updateItem(drinks, index, "price", text)
+                }
               />
               <Icon
                 name="delete"
@@ -465,52 +494,51 @@ const RestaurantForm = ({ isVisible, onClose, restaurantToEdit, setRestaurantFor
           ))}
 
           <Button
-            mode='contained'
+            mode="contained"
             onPress={handleAddRestaurant}
-            style={{marginBottom:20}}
+            style={{ marginBottom: 20 }}
           >
-            <Text>{isEditing ? 'Update Restaurant' : 'Add Restaurant'}</Text>
+            <Text>{isEditing ? "Update Restaurant" : "Add Restaurant"}</Text>
           </Button>
           {isEditing && (
             <Button title="Cancel Edit" onPress={handleCancelEdit} />
           )}
-          <Button
-             mode='contained-tonal' onPress={onClose} >
+          <Button mode="contained-tonal" onPress={onClose}>
             <Text>Close</Text>
-            </Button>
+          </Button>
         </SafeAreaView>
       </ScrollView>
-     </Modal>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
   modal: {
-    marginTop:60,
+    marginTop: 60,
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   formContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 30,
     borderRadius: 10,
   },
   formTitle: {
     fontSize: 30,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 10,
     marginBottom: 10,
     borderBottomWidth: 2,
   },
   itemContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 10,
   },
   itemInput: {
@@ -522,9 +550,9 @@ const styles = StyleSheet.create({
   logoPreview: {
     width: 150,
     height: 150,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     marginBottom: 20,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   button: {
     marginVertical: 10,
@@ -532,7 +560,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   closeButton: {
-    backgroundColor: '#aaa',
+    backgroundColor: "#aaa",
   },
 });
 

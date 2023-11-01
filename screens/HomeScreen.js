@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import { firestore, auth } from "../config/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { View, Dimensions, RefreshControl } from "react-native";
+import { View, Dimensions, RefreshControl, Text } from "react-native";
 
 import { DrawerSlider } from "./DrawerSlider";
 import { BottomNavBar } from "./BottomNavBar";
@@ -18,7 +18,7 @@ export const HomeScreen = ({ navigation }) => {
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
   const [filterResultsEmpty, setFilterResultsEmpty] = useState(false);
-  
+
   const [favorites, setFavorites] = useState([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
@@ -39,17 +39,17 @@ export const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchRestaurantData = async () => {
       try {
-        const restaurantsCollection = collection(db, 'restaurant'); // Updated syntax
+        const restaurantsCollection = collection(db, "restaurant"); // Updated syntax
         const snapshot = await getDocs(restaurantsCollection); // Updated syntax
-    
+
         if (snapshot && snapshot.docs) {
           const restaurants = snapshot.docs.map((doc) => doc.data());
           setFilteredRestaurants(restaurants);
         } else {
-          console.error('No data retrieved from Firestore.');
+          console.error("No data retrieved from Firestore.");
         }
       } catch (error) {
-        console.error('Error fetching restaurant data:', error);
+        console.error("Error fetching restaurant data:", error);
       }
     };
     fetchRestaurantData();
@@ -58,7 +58,6 @@ export const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     filterRestaurantsByFavorites();
   }, [favorites, showFavoritesOnly]);
-  
 
   const handleLogout = () => {
     signOut(auth).catch((error) => console.log("Error logging out: ", error));
@@ -108,7 +107,8 @@ export const HomeScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      
       <DrawerSlider
         userName={userName}
         userPhotoURL={userPhotoURL}
@@ -126,7 +126,8 @@ export const HomeScreen = ({ navigation }) => {
         toggleRestaurantForm={toggleRestaurantForm}
         toggleDrawer={toggleDrawer}
         navigation={navigation}
-      ></DrawerSlider>
+        restaurants={filteredRestaurants}
+      />
 
       <BottomNavBar
         styles={styles.BottomNavBar}
@@ -135,10 +136,8 @@ export const HomeScreen = ({ navigation }) => {
         setShowFavoritesOnly={setShowFavoritesOnly}
         navigation={navigation}
       ></BottomNavBar>
-    </SafeAreaView>
+    </View>
   );
 };
-
-
 
 export default HomeScreen;

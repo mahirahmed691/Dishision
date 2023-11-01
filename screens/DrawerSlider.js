@@ -141,7 +141,7 @@ export function DrawerSlider(props) {
         <View style={styles.header}>
           <IconButton
             icon="menu"
-            iconColor="#111"
+            iconColor="#fff"
             size={30}
             onPress={props.toggleDrawer}
           />
@@ -161,12 +161,11 @@ export function DrawerSlider(props) {
                   props.toggleRestaurantForm("add");
                   props.setRestaurantFormMode("");
                 }}
-                color="#00CDBC"
+                color="#fff"
               />
             </TouchableOpacity>
           </View>
         </View>
-        <View></View>
 
         <RestaurantForm
           isVisible={props.isRestaurantFormVisible}

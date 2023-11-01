@@ -6,16 +6,18 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  Dimensions,
-  RefreshControl
+  RefreshControl,
 } from "react-native";
 import { Button, IconButton, TextInput } from "react-native-paper";
+import { Icon } from "@rneui/themed";
+import DropDownPicker from "react-native-dropdown-picker";
 import { collection, getDocs } from "firebase/firestore";
-import StarRating from "react-native-star-rating";
 import { db } from "../config/firebase";
-import Colors from "../config/colors";
 import FilterModal from "../components/FilterModal";
 import RestaurantForm from "../components/RestaurantForm";
+import Branded from "./Branded";
+import LocationServices from "./Location";
+import * as Location from "expo-location";
 
 export const Restaurants = ({ navigation }) => {
   const [restaurants, setRestaurants] = useState([]);
@@ -30,6 +32,44 @@ export const Restaurants = ({ navigation }) => {
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState("Manchester");
+  const [currentLocation, setCurrentLocation] = useState(null);
+
+  useEffect(() => {
+    if (currentLocation) {
+      const currentLocationItem = {
+        label: "Current Location",
+        value: currentLocation, // Update with the current location name
+      };
+
+      const reverseGeocode = async () => {
+        try {
+          const reverseGeocoding = await Location.reverseGeocodeAsync({
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+          });
+
+          const cityName = reverseGeocoding[0].city; // Access the city name from the reverse geocoding result
+          const updatedItems = [
+            currentLocationItem,
+            { label: "All Locations", value: "All Locations" },
+            { label: "Manchester", value: "Manchester" },
+            { label: "London", value: "London" },
+            { label: "Birmingham", value: "Birmingham" },
+            { label: "Liverpool", value: "Liverpool" },
+          ];
+
+          setItems(updatedItems);
+          setSelectedLocation(cityName); // Set the selected location to the current location's city
+        } catch (error) {
+          console.error("Error fetching city name: ", error);
+          // Fallback or error handling if there's an issue with reverse geocoding
+        }
+      };
+
+      reverseGeocode(); // Perform reverse geocoding to get the city name
+    }
+  }, [currentLocation]);
 
   // Function to fetch restaurants from Firestore
   const fetchRestaurantsFromFirestore = async () => {
@@ -53,7 +93,7 @@ export const Restaurants = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-  
+
     try {
       // Fetch your data again here
       await fetchRestaurantsFromFirestore();
@@ -65,7 +105,7 @@ export const Restaurants = ({ navigation }) => {
   };
 
   // Function to handle filtered search
-  const applyFilters = (rating, foodType, isHalal, searchText) => {
+  const applyFilters = (rating, foodType, isHalal, searchText, location) => {
     let filtered = [...restaurants];
 
     // Apply search filter first
@@ -128,7 +168,63 @@ export const Restaurants = ({ navigation }) => {
     navigation.navigate("Menu", { restaurant });
   };
 
-  const windowWidth = Dimensions.get("window").width; // Get window width
+  const groupRestaurantsByCuisine = (restaurants) => {
+    const groupedRestaurants = {};
+
+    restaurants.forEach((restaurant) => {
+      const cuisineType = restaurant.cuisine.toLowerCase(); // Normalize to lowercase
+      if (!groupedRestaurants[cuisineType]) {
+        groupedRestaurants[cuisineType] = [];
+      }
+      groupedRestaurants[cuisineType].push(restaurant);
+    });
+
+    return groupedRestaurants;
+  };
+
+  const filterByLocation = (restaurants, location) => {
+    return restaurants.filter((restaurant) => restaurant.city === location);
+  };
+
+  const handleLocationChange = (location) => {
+    setSelectedLocation(location);
+
+    if (location === "All Locations") {
+      setFilteredRestaurants(restaurants); // Show all restaurants if "All Locations" is selected
+    } else {
+      const filteredByLocation = filterByLocation(restaurants, location);
+      if (filteredByLocation.length === 0) {
+        setFilteredRestaurants(restaurants); // If no items found, show all restaurants
+      } else {
+        setFilteredRestaurants(filteredByLocation);
+      }
+    }
+  };
+
+  useEffect(() => {
+    setSelectedLocation(currentLocation);
+    const filteredByCurrentLocation = filterByLocation(
+      restaurants,
+      currentLocation
+    );
+    if (filteredByCurrentLocation.length === 0) {
+      setFilteredRestaurants(restaurants);
+    } else {
+      setFilteredRestaurants(filteredByCurrentLocation);
+    }
+  }, [currentLocation, restaurants]);
+
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([
+    { label: "All Locations", value: "All Locations" },
+    { label: "Manchester", value: "Manchester" },
+    { label: "London", value: "London" },
+    { label: "Birmingham", value: "Birmingham" },
+    { label: "Liverpool", value: "Liverpool" },
+  ]);
+
+  const groupedRestaurants = groupRestaurantsByCuisine(filteredRestaurants);
 
   return (
     <View style={styles.container}>
@@ -137,8 +233,8 @@ export const Restaurants = ({ navigation }) => {
           theme={{
             roundness: 30,
             colors: {
-              primary: "#00CDBC",
-              underlineColor: "transparent",
+              primary: "white",
+              primaryContainer: "#fff",
             },
           }}
           mode="outlined"
@@ -147,12 +243,26 @@ export const Restaurants = ({ navigation }) => {
           onChangeText={handleInputChange}
           style={styles.searchInput}
           clearButtonMode="always"
+          right={
+            searchText.length > 0 && (
+              <TextInput.Icon
+                icon="close"
+                color="black"
+                onPress={() => [
+                  setSearchText(""),
+                  setFilteredRestaurants(restaurants), // Display all restaurants
+                  setIsFilterActive(false), // Hide the filter status
+                ]}
+              />
+            )
+          }
+          dense
         />
         <IconButton
           icon="tune"
           onPress={openFilterModal}
-          style={{ marginBottom: 10, marginLeft: 10 }}
-          iconColor="#00CDBC"
+          style={{ marginTop: 10, marginLeft: 10 }}
+          iconColor="#fff"
           size={30}
         >
           Filter
@@ -177,53 +287,113 @@ export const Restaurants = ({ navigation }) => {
       {isDataLoaded && filteredRestaurants.length > 0 ? (
         <ScrollView
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#00CDBC" />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#00CDBC"
+            />
           }
         >
-          {filteredRestaurants.map((restaurant, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.restaurantCard}
-              onPress={() => navigateToFoodScreen(restaurant)}
-            >
-              <Image source={{ uri: restaurant.logo }} style={styles.logo} />
-              <View style={styles.restaurantInfo}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Text style={styles.restaurantName}>
-                    {restaurant.restaurantName}
-                  </Text>
-                </View>
-                <View style={styles.starRating}>
-                  <StarRating
-                    width={100}
-                    starSize={18}
-                    disabled
-                    fullStarColor={Colors.green}
-                    maxStars={5}
-                    rating={parseFloat(restaurant.rating)}
-                  />
-                </View>
-                <Text style={styles.address}>{restaurant.address}</Text>
-                <Text style={styles.cuisine}>
-                  {restaurant.cuisine
-                    ? restaurant.cuisine.charAt(0).toUpperCase() +
-                      restaurant.cuisine.slice(1)
-                    : ""}
+          <View style={{ flexDirection: "row", zIndex: 9999 }}>
+            <LocationServices />
+            <DropDownPicker
+              value={value}
+              items={items}
+              open={open}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setItems}
+              defaultValue={selectedLocation} // Set default value to the selectedLocation state
+              containerStyle={{ height: 40, width: "50%" }}
+              style={{ backgroundColor: "#fafafa" }}
+              itemStyle={{
+                justifyContent: "flex-start",
+              }}
+              dropDownStyle={{ backgroundColor: "#fafafa" }}
+              onChangeItem={(item) => handleLocationChange(value)}
+              zIndex={5000}
+              searchable={true}
+              searchablePlaceholder="Search for location"
+              searchablePlaceholderTextColor="gray"
+              onChangeValue={(value) => {
+                handleLocationChange(value);
+              }}
+            />
+          </View>
+
+          <View style={styles.brandedContainer}>
+            <Branded />
+          </View>
+          {Object.keys(groupedRestaurants).map((cuisineType, index) => (
+            <View key={index}>
+              <View style={{flexDirection:'row', alignItems:'center'}}>
+                <Text style={styles.cuisineHeader}>
+                  {" "}
+                  {cuisineType
+                    .split(" ")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}{" "}
+                </Text>
+                <Text style={{ fontSize: 12, fontWeight:'700' }}>
+                  ({groupedRestaurants[cuisineType].length})
                 </Text>
               </View>
-            </TouchableOpacity>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.restaurantHorizontalList}
+              >
+                {groupedRestaurants[cuisineType].map((restaurant, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    style={styles.restaurantCardHorizontal}
+                    onPress={() => navigateToFoodScreen(restaurant)}
+                  >
+                    <View>
+                      <Image
+                        source={{ uri: restaurant.logo }}
+                        style={styles.logoHorizontal}
+                      />
+                      <View style={styles.restaurantInfoHorizontal}>
+                        <Text style={styles.restaurantNameHorizontal}>
+                          {restaurant.restaurantName}
+                        </Text>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            marginTop: 0,
+                          }}
+                        >
+                          <Text style={styles.restaurantRating}>
+                            {(restaurant.rating * 2).toFixed(1)}
+                          </Text>
+                          {restaurant.rating >= 4.5 ? (
+                            <Icon
+                              name="fire-circle"
+                              size={8}
+                              iconColor="orange"
+                            />
+                          ) : null}
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           ))}
         </ScrollView>
       ) : null}
       {isFilterActive && filteredRestaurants.length === 0 ? (
         <View>
           <Image source={require("../assets/no-food.gif")} style={styles.gif} />
-          <Button mode="outlined" onPress={handleShowAll}>
+          <Button
+            mode="outlined"
+            labelStyle={styles.showAllButtonLabel}
+            onPress={handleShowAll}
+          >
             Show All
           </Button>
         </View>
@@ -235,65 +405,127 @@ export const Restaurants = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  restaurantCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logo: {
-    width: 150,
-    height: 150,
-    resizeMode: "cover",
-    marginRight: 15,
-  },
-  restaurantInfo: {
-    flex: 1,
-    padding: 15,
-  },
-  restaurantName: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333",
-  },
-  address: {
-    fontSize: 16,
-    color: "#555",
-    marginBottom: 5,
-  },
-  cuisine: {
-    fontSize: 16,
-    color: "#888",
-  },
-  starRating: {
-    width: 60,
-    flexDirection: "row",
+    backgroundColor: "#fff",
   },
   filterContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: -10,
+    backgroundColor: "#00CDBC",
+    margin: -10,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  brandedContainer: {
+    marginVertical: 10,
+  },
+  cuisineHeader: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  restaurantHorizontalList: {
+    backgroundColor: "#fff",
+  },
+  restaurantCardHorizontal: {
+    borderRadius: 12,
+    marginRight: 12,
+    marginBottom: 10,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+  },
+  logoHorizontal: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    marginBottom: 10,
+    resizeMode: "cover",
+  },
+  restaurantInfoHorizontal: {
+    padding: 10,
+  },
+  restaurantNameHorizontal: {
+    fontSize: 11,
+    fontWeight: "bold",
     marginBottom: 5,
   },
-  searchInput: {
-    marginBottom: 10,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 20,
-    flex: 1,
-    marginRight: 10,
+  restaurantRating: {
+    color: "#00CDBC",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginRight: 5,
+  },
+  noFoodContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 50,
   },
   gif: {
     width: "100%",
-    height: 500,
-    resizeMode: "contain",
+    height: 300,
+    marginBottom: 20,
   },
-  nofoodtext: {
-    alignSelf: "center",
-    marginTop: 50,
-    marginBottom: 120,
-    fontSize: 30,
-    fontWeight: "800",
+  showAllButton: {
+    borderColor: "#00CDBC",
+  },
+  showAllButtonLabel: {
+    color: "#00CDBC",
+  },
+  searchInput: {
+    width: "80%",
+    margin: 10,
+  },
+  locationContainer: {
+    flexDirection: "row",
+  },
+  pickerWrapper: {
+    flexDirection: "row",
+  },
+  pickerContent: {
+    marginTop: 10,
+    backgroundColor: "#f0f0f0",
+  },
+  dropdownContainer: {
+    borderWidth: 1,
+    borderColor: "#00CDBC",
+    borderRadius: 8,
+    zIndex: 1000,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dropdownText: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  pickerContainer: {
+    top: 40,
+    right: 0,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    zIndex: 100, // Adjust the z-index value as needed
+  },
+  pickerOverlay: {
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "transparent",
+  },
+  pickerItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: "#333",
   },
 });
 

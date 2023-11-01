@@ -686,18 +686,9 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   }, [restaurant.restaurantName]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.foodMenuContainer}>
       {(!apiResponse || searchText.length > 0) && (
         <View style={styles.searchInputContainer}>
-          <View style={styles.header}>
-            <IconButton
-              icon="arrow-left"
-              size={20}
-              onPress={() => navigation.pop()}
-              color="#00CDBC"
-            />
-          </View>
-
           <TextInput
             theme={{
               roundness: 30,
@@ -777,7 +768,10 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           <View style={styles.restaurantCard}>
             {hasSearchResults ? null : (
               <View>
-                <ImageRestaurants />
+                <ImageRestaurants
+                  restaurantName={restaurant.restaurantName}
+                  location={restaurant.address}
+                />
                 <View
                   style={{
                     marginBottom: 10,
@@ -846,7 +840,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                           backgroundColor="#f0f0f0"
                         />
                         <Text style={{ fontWeight: "700" }}>
-                          Avergae Price {restaurant.price}
+                          Average Price {restaurant.price}
                         </Text>
                       </View>
                     </View>
@@ -967,14 +961,12 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                   </View>
                 </View>
-                {/* <Reviews/> */}
                 <Map
                   latitude={restaurant.lat}
                   longitude={restaurant.long}
                   title={restaurant.restaurantName}
                 />
               </View>
-              
             )}
           </View>
         )}
