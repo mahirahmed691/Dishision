@@ -22,6 +22,9 @@ if (process.argv.length < 3) {
 
 const filePath = process.argv[2];
 
+// Function to sanitize the restaurant name to avoid invalid characters in Firestore document path
+const sanitizeDocumentPath = name => name.replace(/[/\\.#$[\]]/g, '_');
+
 // Read the file
 fs.readFile(filePath, 'utf8', (err, data) => {
   if (err) {
@@ -55,9 +58,10 @@ fs.readFile(filePath, 'utf8', (err, data) => {
   // Check and add each restaurant
   const newFileData = [];
   fileData.forEach(restaurant => {
-    checkAndAddRestaurant(restaurant);
+    const sanitizedRestaurantName = sanitizeDocumentPath(restaurant.restaurantName);
+    checkAndAddRestaurant({ ...restaurant, restaurantName: sanitizedRestaurantName });
     // Collect entries that were not duplicates for updating the file
-    const restaurantSnapshot = restaurantsCollection.doc(restaurant.restaurantName).get();
+    const restaurantSnapshot = restaurantsCollection.doc(sanitizedRestaurantName).get();
     if (!restaurantSnapshot.exists) {
       newFileData.push(restaurant);
     }

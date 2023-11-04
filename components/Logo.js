@@ -1,7 +1,7 @@
-import React from 'react';
-import { Image, StyleSheet } from 'react-native';
+import React from "react";
+import { Image, StyleSheet } from "react-native";
 
-import { Images } from '../config';
+import { Images } from "../config";
 
 export const Logo = ({ uri }) => {
   return <Image source={uri} style={styles.image} />;
@@ -11,6 +11,6 @@ const styles = StyleSheet.create({
   image: {
     width: 300,
     height: 300,
-    resizeMode:'contain'
-  }
+    resizeMode: "contain",
+  },
 });

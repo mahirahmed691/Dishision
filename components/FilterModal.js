@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Checkbox, IconButton } from 'react-native-paper';
-import Modal from 'react-native-modal';
-import StarRating from 'react-native-star-rating';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { Checkbox, IconButton } from "react-native-paper";
+import Modal from "react-native-modal";
+import StarRating from "react-native-star-rating";
 
 const FilterModal = ({ visible, onClose, onApplyFilters }) => {
   const [selectedRating, setSelectedRating] = useState(null);
@@ -10,19 +10,19 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
   const [isHalal, setIsHalal] = useState(false);
 
   const foodTypeOptions = [
-    'Italian',
-    'Mexican',
-    'Indian',
-    'American',
-    'Grill',
-    'Turkish',
-    'Chinese',
-    'Thai',
-    'Korean',
-    'British',
-    'Lebanese',
-    'French',
-    'Spanish',
+    "Italian",
+    "Mexican",
+    "Indian",
+    "American",
+    "Grill",
+    "Turkish",
+    "Chinese",
+    "Thai",
+    "Korean",
+    "British",
+    "Lebanese",
+    "French",
+    "Spanish",
   ];
 
   const clearFilters = () => {
@@ -67,7 +67,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
                   >
                     <Checkbox.Android
                       status={
-                        selectedFoodType === foodType ? 'checked' : 'unchecked'
+                        selectedFoodType === foodType ? "checked" : "unchecked"
                       }
                       onPress={() => setSelectedFoodType(foodType)}
                       color="#60BA62"
@@ -82,7 +82,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
             <Text style={styles.filtersTitle}>Dietary:</Text>
             <View style={styles.checkboxOption}>
               <Checkbox.Android
-                status={isHalal ? 'checked' : 'unchecked'}
+                status={isHalal ? "checked" : "unchecked"}
                 onPress={() => setIsHalal(!isHalal)}
                 color="#00CDBC"
               />
@@ -123,18 +123,18 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
-    width: '90%',
+    backgroundColor: "white",
+    width: "90%",
     borderRadius: 8,
     padding: 20,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   filtersContainer: {
@@ -145,21 +145,21 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   checkboxOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 10,
   },
   iconButton: {
     flex: 1,
   },
   column: {
-    flexDirection: 'row', // Display items in two columns
-    flexWrap: 'wrap', // Allow items to wrap to the next row
-    justifyContent: 'space-between',
+    flexDirection: "row", // Display items in two columns
+    flexWrap: "wrap", // Allow items to wrap to the next row
+    justifyContent: "space-between",
   },
 });
 

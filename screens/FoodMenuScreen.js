@@ -7,6 +7,9 @@ import {
   ActivityIndicator,
   Dimensions,
   Share,
+  RefreshControl,
+  Image,
+  Linking,
 } from "react-native";
 import {
   TextInput,
@@ -55,8 +58,9 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   const searchButtonScale = useSharedValue(1);
   const [closingTimes, setClosingTimes] = useState([]);
   const currentDay = new Date().getDay();
-  const [userFavorites, setUserFavorites] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
   const daysOfWeek = [
     "Sunday",
     "Monday",
@@ -543,6 +547,23 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     return null;
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      // Fetch your updated data here
+      const updatedData = await fetchData(); // Fetch new data
+
+      // Update the state with the fetched data
+      setRestaurantData(updatedData); // For instance, setRestaurantData might update the restaurant information
+      // ... other state updates
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const renderKeywords = () => {
     return (
       <ScrollView>
@@ -685,6 +706,12 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     fetchClosingTimes(restaurant.restaurantName);
   }, [restaurant.restaurantName]);
 
+  const openUrlInBrowser = (url) => {
+    Linking.openURL(url).catch((err) =>
+      console.error("Error opening URL: ", err)
+    );
+  };
+
   return (
     <SafeAreaView style={styles.foodMenuContainer}>
       {(!apiResponse || searchText.length > 0) && (
@@ -728,7 +755,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
             style={styles.snackbar}
             onDismiss={() => setSnackbarVisible(false)}
           >
-            Please enter a food-related query.
+            Please enter a food-related search term.
           </Snackbar>
 
           {searchText == "" ? (
@@ -743,7 +770,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                 icon="share"
                 size={22}
                 iconColor="#00CDBC"
-                onPress={shareMenu} // Add this line to trigger sharing
+                onPress={shareMenu}
               />
             </>
           ) : null}
@@ -762,7 +789,15 @@ export const FoodMenuScreen = ({ navigation, route }) => {
         renderApiResponse()
       )}
 
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#00CDBC"
+          />
+        }
+      >
         {searchText.length > 0 && !apiResponse ? renderKeywords() : null}
         {!apiResponse && searchText.length <= 0 && (
           <View style={styles.restaurantCard}>
@@ -787,9 +822,21 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                       marginLeft: "5%",
                     }}
                   >
+                    <Image
+                      src={restaurant.logo}
+                      style={{
+                        width: 80,
+                        height: 80,
+                        marginRight: 8,
+                        marginBottom: 10,
+                        resizeMode: "contain",
+                      }}
+                    />
+
                     <Text style={styles.restaurantName}>
                       {restaurant.restaurantName}
                     </Text>
+
                     <View
                       style={{
                         marginBottom: 10,
@@ -806,6 +853,35 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                         />
                         <Text style={{ fontWeight: "700" }}>
                           {restaurant.address}
+                        </Text>
+                      </View>
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Icon
+                          name="phone"
+                          size={20}
+                          style={{ marginRight: 5, padding: 3 }}
+                          backgroundColor="#f0f0f0"
+                        />
+                        <Text style={{ fontWeight: "700" }}>
+                          {restaurant.phone}
+                        </Text>
+                      </View>
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Icon
+                          name="web"
+                          size={20}
+                          style={{ marginRight: 5, padding: 3 }}
+                          backgroundColor="#f0f0f0"
+                        />
+                        <Text
+                          style={{ fontWeight: "700", color: "#00CBDC" }}
+                          onPress={() => openUrlInBrowser(restaurant.url)}
+                        >
+                          {restaurant.url}
                         </Text>
                       </View>
                       <View
@@ -853,7 +929,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                   {closingTimes.map((restaurant, index) => (
                     <View key={index}>
                       <Text style={styles.closingTimesText}>
-                        Closing Times:
+                        Opening Times:
                       </Text>
                       <View>
                         {daysOfWeek.map((day, dayIndex) => (

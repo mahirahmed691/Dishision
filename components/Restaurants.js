@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,17 +7,30 @@ import {
   Image,
   TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
+  Animated, // Import Animated from react-native
+  Easing,
 } from "react-native";
+import * as Speech from 'expo-speech';
 import { Button, IconButton, TextInput } from "react-native-paper";
-import { Icon } from "@rneui/themed";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faFire } from "@fortawesome/free-solid-svg-icons";
 import DropDownPicker from "react-native-dropdown-picker";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  getDocs,
+  collection,
+  where,
+  query,
+  limit,
+  push,
+} from "firebase/firestore";
 import { db } from "../config/firebase";
 import FilterModal from "../components/FilterModal";
 import RestaurantForm from "../components/RestaurantForm";
 import Branded from "./Branded";
 import LocationServices from "./Location";
 import * as Location from "expo-location";
+import styles from "../screens/styles";
 
 export const Restaurants = ({ navigation }) => {
   const [restaurants, setRestaurants] = useState([]);
@@ -32,75 +45,219 @@ export const Restaurants = ({ navigation }) => {
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("Manchester");
+  const [selectedLocation, setSelectedLocation] = useState("");
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [visibleCategories, setVisibleCategories] = useState(3);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const prevScrollY = useRef(0);
+  const animatedScrollY = useRef(new Animated.Value(0)).current;
+  const [fetchCount, setFetchCount] = useState(0);
+  const [readCount, setReadCount] = useState(0);
+  const [voiceInputText, setVoiceInputText] = useState('');
 
-  useEffect(() => {
-    if (currentLocation) {
-      const currentLocationItem = {
-        label: "Current Location",
-        value: currentLocation, // Update with the current location name
-      };
+  // Function to load more categories
+  const handleLoadMoreCategories = () => {
+    setLoadingMore(true);
 
-      const reverseGeocode = async () => {
-        try {
-          const reverseGeocoding = await Location.reverseGeocodeAsync({
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-          });
+    setTimeout(() => {
+      setVisibleCategories((prevCount) => prevCount + 3);
+      setLoadingMore(false);
+      fetchMoreRestaurants(); // Fetch more data
+    }, 1000);
+  };
 
-          const cityName = reverseGeocoding[0].city; // Access the city name from the reverse geocoding result
-          const updatedItems = [
-            currentLocationItem,
-            { label: "All Locations", value: "All Locations" },
-            { label: "Manchester", value: "Manchester" },
-            { label: "London", value: "London" },
-            { label: "Birmingham", value: "Birmingham" },
-            { label: "Liverpool", value: "Liverpool" },
-          ];
+  // Check if the user is close to the bottom of the scroll
+  const isCloseToBottom = ({
+    layoutMeasurement,
+    contentOffset,
+    contentSize,
+  }) => {
+    return (
+      layoutMeasurement.height + contentOffset.y >= contentSize.height - 20
+    );
+  };
 
-          setItems(updatedItems);
-          setSelectedLocation(cityName); // Set the selected location to the current location's city
-        } catch (error) {
-          console.error("Error fetching city name: ", error);
-          // Fallback or error handling if there's an issue with reverse geocoding
-        }
-      };
+  // Event listener for scrolling to load more categories
+  const handleScroll = ({ nativeEvent }) => {
+    const paddingToBottom = 20;
+    const currentOffset = nativeEvent.contentOffset.y;
+    const contentHeight = nativeEvent.contentSize.height;
+    const layoutHeight = nativeEvent.layoutMeasurement.height;
 
-      reverseGeocode(); // Perform reverse geocoding to get the city name
+    // Check if the user is close to the bottom and not already loading more data
+    if (
+      layoutHeight + currentOffset >= contentHeight - paddingToBottom &&
+      !loadingMore
+    ) {
+      handleLoadMoreCategories();
     }
-  }, [currentLocation]);
-
-  // Function to fetch restaurants from Firestore
-  const fetchRestaurantsFromFirestore = async () => {
-    const restaurantsCollection = collection(db, "restaurant");
-    const querySnapshot = await getDocs(restaurantsCollection);
-
-    const restaurantsData = [];
-    querySnapshot.forEach((doc) => {
-      const restaurant = doc.data();
-      restaurantsData.push(restaurant);
-    });
-
-    setRestaurants(restaurantsData);
-    setFilteredRestaurants(restaurantsData);
-    setIsDataLoaded(true);
   };
 
   useEffect(() => {
-    fetchRestaurantsFromFirestore();
+    prevScrollY.current = 0;
+    setVisibleCategories(5);
+  }, []);
+
+  const getMicrophonePermission = async () => {
+    const { status } = await Speech.requestPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Permission to access microphone was denied');
+      return;
+    }
+  };
+
+  const captureVoiceInput = async () => {
+    try {
+      const spokenText = await Speech.recognize(); // Use Speech.recognize instead of Speech.recognizeAsync
+      if (spokenText) {
+        setSearchText(spokenText); // Assuming you want to use the spoken text for search
+        setVoiceInputText(spokenText); // Set the spoken text in the state
+        applyFilters(null, null, isHalal, spokenText); // Apply filters based on spoken text
+      } else {
+        Speech.speak('Please try again', { language: 'en-US' }); // Ask the user to repeat
+      }
+    } catch (error) {
+      console.error('Speech recognition error:', error);
+      Speech.speak('An error occurred. Please try again.', { language: 'en-US' });
+    }
+  };
+
+  useEffect(() => {
+    getMicrophonePermission();
+  }, []);
+
+
+  useEffect(() => {
+    const getLocation = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          console.log("Permission to access location was denied");
+          // You might need to prompt the user to grant permission here
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        setCurrentLocation(location.coords);
+      } catch (error) {
+        console.error("Error getting location: ", error);
+        // Specific error handling based on the caught error
+        if (error.code === "E_LOCATION_SERVICES_DISABLED") {
+          // Provide a message for disabled location services
+        } else if (error.code === "E_NO_LOCATION_PERMISSION") {
+          // Handle when permission is not granted
+        } else {
+          // Handle other location-related errors
+        }
+      }
+    };
+
+    getLocation();
   }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
-
     try {
-      // Fetch your data again here
       await fetchRestaurantsFromFirestore();
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (currentLocation && fetchCount === 0) {
+      setSelectedLocation("Manchester"); // Set the initial selected location to "All Locations"
+      fetchRestaurantsFromFirestore(currentLocation);
+      setFetchCount(1);
+    }
+  }, [currentLocation, fetchCount]);
+
+  const fetchRestaurantsFromFirestore = async (locationCoords) => {
+    try {
+      const restaurantsCollection = collection(db, "restaurant");
+
+      const querySnapshot = await getDocs(
+        query(restaurantsCollection, where("city", "==", "Manchester"))
+      );
+      setReadCount((prevCount) => prevCount + querySnapshot.size);
+
+      const restaurantsData = [];
+      querySnapshot.forEach((doc) => {
+        const restaurant = doc.data();
+        restaurantsData.push(restaurant);
+      });
+
+      setRestaurants(restaurantsData);
+      setFilteredRestaurants(restaurantsData);
+      setIsDataLoaded(true);
+    } catch (error) {
+      console.error("Error fetching restaurants:", error);
+
+      if (error.code === "permission-denied") {
+        console.log("Permission denied to access Firestore.");
+      } else {
+        console.log("Using fallback data due to Firestore error.");
+        const fallbackData = require("/Users/mahirahmed/Dishision/collectionData.json");
+        setRestaurants(fallbackData);
+        setFilteredRestaurants(fallbackData);
+        setIsDataLoaded(true);
+      }
+    }
+  };
+
+  // Function to fetch restaurant data from Firestore
+  const fetchMoreRestaurants = async () => {
+    try {
+      const restaurantsCollection = collection(db, "restaurant");
+      const querySnapshot = await getDocs(
+        query(
+          restaurantsCollection,
+          where("city", "==", "Manchester"),
+          limit(10) // Limit the number of documents to fetch
+          // Add an offset here for pagination if needed
+        )
+      );
+
+      setReadCount((prevCount) => prevCount + querySnapshot.size);
+
+      const newRestaurants = [];
+      querySnapshot.forEach((doc) => {
+        const restaurant = doc.data();
+        newRestaurants.push(restaurant);
+      });
+
+      // Filter out duplicates before adding to state
+      setRestaurants((prevRestaurants) => {
+        const updatedRestaurants = [
+          ...prevRestaurants,
+          ...newRestaurants.filter(
+            (newRestaurant) =>
+              !prevRestaurants.some(
+                (existingRestaurant) =>
+                  existingRestaurant.id === newRestaurant.id // Assuming an 'id' field
+              )
+          ),
+        ];
+        return updatedRestaurants;
+      });
+
+      setFilteredRestaurants((prevRestaurants) => {
+        const updatedFilteredRestaurants = [
+          ...prevRestaurants,
+          ...newRestaurants.filter(
+            (newRestaurant) =>
+              !prevRestaurants.some(
+                (existingRestaurant) =>
+                  existingRestaurant.id === newRestaurant.id // Assuming an 'id' field
+              )
+          ),
+        ];
+        return updatedFilteredRestaurants;
+      });
+    } catch (error) {
+      console.error("Error fetching more restaurants:", error);
     }
   };
 
@@ -135,8 +292,6 @@ export const Restaurants = ({ navigation }) => {
     }
 
     setFilteredRestaurants(filtered);
-
-    // Check if there are no search results
     setIsFilterActive(true); // Set the filter state to active
   };
 
@@ -187,17 +342,19 @@ export const Restaurants = ({ navigation }) => {
   };
 
   const handleLocationChange = (location) => {
-    setSelectedLocation(location);
+    setOpen(false); // Close the drop-down
+    setValue(location); // Set the selected value directly
+
+    // Apply filtering based on the selected location
+    setSelectedLocation(location); // Set the selected location in the state
 
     if (location === "All Locations") {
       setFilteredRestaurants(restaurants); // Show all restaurants if "All Locations" is selected
     } else {
       const filteredByLocation = filterByLocation(restaurants, location);
-      if (filteredByLocation.length === 0) {
-        setFilteredRestaurants(restaurants); // If no items found, show all restaurants
-      } else {
-        setFilteredRestaurants(filteredByLocation);
-      }
+      setFilteredRestaurants(
+        filteredByLocation.length > 0 ? filteredByLocation : restaurants
+      ); // Set filtered restaurants based on the location
     }
   };
 
@@ -222,19 +379,20 @@ export const Restaurants = ({ navigation }) => {
     { label: "London", value: "London" },
     { label: "Birmingham", value: "Birmingham" },
     { label: "Liverpool", value: "Liverpool" },
+    { label: "Leeds", value: "Leeds" },
   ]);
 
   const groupedRestaurants = groupRestaurantsByCuisine(filteredRestaurants);
-
+  console.log("Reads from Firestore:", readCount);
   return (
-    <View style={styles.container}>
+    <View style={styles.restaurantContainer}>
       <View style={styles.filterContainer}>
         <TextInput
           theme={{
             roundness: 30,
             colors: {
-              primary: "white",
-              primaryContainer: "#fff",
+              primary: "#00CDBC",
+              background: "#fff",
             },
           }}
           mode="outlined"
@@ -242,31 +400,29 @@ export const Restaurants = ({ navigation }) => {
           value={searchText}
           onChangeText={handleInputChange}
           style={styles.searchInput}
-          clearButtonMode="always"
-          right={
-            searchText.length > 0 && (
-              <TextInput.Icon
-                icon="close"
-                color="black"
-                onPress={() => [
-                  setSearchText(""),
-                  setFilteredRestaurants(restaurants), // Display all restaurants
-                  setIsFilterActive(false), // Hide the filter status
-                ]}
-              />
-            )
-          }
           dense
+        />
+        <IconButton
+          icon={searchText.length > 0 ? "close" : "microphone"}
+          color="#00CDBC"
+          size={20}
+          onPress={() => {
+            if (searchText.length > 0) {
+              setSearchText("");
+              setFilteredRestaurants(restaurants);
+              setIsFilterActive(false);
+            } else {
+              captureVoiceInput() // Speak function called here
+            }
+          }}
         />
         <IconButton
           icon="tune"
           onPress={openFilterModal}
-          style={{ marginTop: 10, marginLeft: 10 }}
+          style={{ marginTop: 10, marginRight: 10 }}
           iconColor="#fff"
           size={30}
-        >
-          Filter
-        </IconButton>
+        />
         <FilterModal
           visible={isFilterModalVisible}
           onClose={closeFilterModal}
@@ -303,20 +459,20 @@ export const Restaurants = ({ navigation }) => {
               setOpen={setOpen}
               setValue={setValue}
               setItems={setItems}
-              defaultValue={selectedLocation} // Set default value to the selectedLocation state
+              defaultValue={selectedLocation}
               containerStyle={{ height: 40, width: "50%" }}
               style={{ backgroundColor: "#fafafa" }}
               itemStyle={{
                 justifyContent: "flex-start",
               }}
               dropDownStyle={{ backgroundColor: "#fafafa" }}
-              onChangeItem={(item) => handleLocationChange(value)}
+              onChangeItem={(item) => handleLocationChange(item.value)} // Pass the item's value to handleLocationChange
               zIndex={5000}
               searchable={true}
               searchablePlaceholder="Search for location"
               searchablePlaceholderTextColor="gray"
               onChangeValue={(value) => {
-                handleLocationChange(value);
+                handleLocationChange(value); // Make sure to call handleLocationChange with the value
               }}
             />
           </View>
@@ -324,68 +480,90 @@ export const Restaurants = ({ navigation }) => {
           <View style={styles.brandedContainer}>
             <Branded />
           </View>
-          {Object.keys(groupedRestaurants).map((cuisineType, index) => (
-            <View key={index}>
-              <View style={{flexDirection:'row', alignItems:'center'}}>
-                <Text style={styles.cuisineHeader}>
-                  {" "}
-                  {cuisineType
-                    .split(" ")
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(" ")}{" "}
-                </Text>
-                <Text style={{ fontSize: 12, fontWeight:'700' }}>
-                  ({groupedRestaurants[cuisineType].length})
-                </Text>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.restaurantHorizontalList}
-              >
-                {groupedRestaurants[cuisineType].map((restaurant, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={styles.restaurantCardHorizontal}
-                    onPress={() => navigateToFoodScreen(restaurant)}
-                  >
-                    <View>
-                      <Image
-                        source={{ uri: restaurant.logo }}
-                        style={styles.logoHorizontal}
-                      />
-                      <View style={styles.restaurantInfoHorizontal}>
-                        <Text style={styles.restaurantNameHorizontal}>
-                          {restaurant.restaurantName}
-                        </Text>
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            marginTop: 0,
-                          }}
-                        >
-                          <Text style={styles.restaurantRating}>
-                            {(restaurant.rating * 2).toFixed(1)}
+          {Object.keys(groupedRestaurants)
+            .slice(0, visibleCategories)
+            .map((cuisineType, index) => (
+              <View key={index}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Text style={styles.cuisineHeader}>
+                    {" "}
+                    {cuisineType
+                      .split(" ")
+                      .map(
+                        (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                      )
+                      .join(" ")}{" "}
+                  </Text>
+                  <Text style={{ fontSize: 12, fontWeight: "700" }}>
+                    ({groupedRestaurants[cuisineType].length})
+                  </Text>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.restaurantHorizontalList}
+                >
+                  {groupedRestaurants[cuisineType].map((restaurant, idx) => (
+                    <TouchableOpacity
+                      key={idx}
+                      style={styles.restaurantCardHorizontal}
+                      onPress={() => navigateToFoodScreen(restaurant)}
+                    >
+                      <View>
+                        <Image
+                          source={{ uri: restaurant.logo }}
+                          style={styles.logoHorizontal}
+                        />
+                        <View style={styles.restaurantInfoHorizontal}>
+                          <Text style={styles.restaurantNameHorizontal}>
+                            {restaurant.restaurantName}
                           </Text>
-                          {restaurant.rating >= 4.5 ? (
-                            <Icon
-                              name="fire-circle"
-                              size={8}
-                              iconColor="orange"
-                            />
-                          ) : null}
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              marginTop: 0,
+                            }}
+                          >
+                            <Text style={styles.restaurantRating}>
+                              {(restaurant.rating * 2).toFixed(1)}
+                            </Text>
+                            {restaurant.rating >= 4.5 ? (
+                              <FontAwesomeIcon
+                                icon={faFire}
+                                size={12}
+                                color="orange"
+                              />
+                            ) : null}
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          ))}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            ))}
         </ScrollView>
       ) : null}
+      <Animated.View
+        style={{
+          opacity: animatedScrollY.interpolate({
+            inputRange: [0, 100],
+            outputRange: [1, 0], // Fading out when the user scrolls
+            extrapolate: "clamp",
+          }),
+        }}
+      >
+        <IconButton
+          icon="arrow-down" // Replace with your desired arrow icon
+          onPress={handleLoadMoreCategories} // Trigger loading more data on button press
+          color="#00CDBC" // Change the arrow color as needed
+          size={10} // Adjust the size of the arrow icon
+          style={{ alignSelf: "center" }} // Align the button/icon to the center
+        />
+      </Animated.View>
+
       {isFilterActive && filteredRestaurants.length === 0 ? (
         <View>
           <Image source={require("../assets/no-food.gif")} style={styles.gif} />
@@ -401,132 +579,5 @@ export const Restaurants = ({ navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  filterContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#00CDBC",
-    margin: -10,
-    marginBottom: 10,
-    alignItems: "center",
-  },
-  brandedContainer: {
-    marginVertical: 10,
-  },
-  cuisineHeader: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  restaurantHorizontalList: {
-    backgroundColor: "#fff",
-  },
-  restaurantCardHorizontal: {
-    borderRadius: 12,
-    marginRight: 12,
-    marginBottom: 10,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.27,
-    shadowRadius: 4.65,
-  },
-  logoHorizontal: {
-    width: 100,
-    height: 100,
-    borderRadius: 12,
-    marginBottom: 10,
-    resizeMode: "cover",
-  },
-  restaurantInfoHorizontal: {
-    padding: 10,
-  },
-  restaurantNameHorizontal: {
-    fontSize: 11,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  restaurantRating: {
-    color: "#00CDBC",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginRight: 5,
-  },
-  noFoodContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 50,
-  },
-  gif: {
-    width: "100%",
-    height: 300,
-    marginBottom: 20,
-  },
-  showAllButton: {
-    borderColor: "#00CDBC",
-  },
-  showAllButtonLabel: {
-    color: "#00CDBC",
-  },
-  searchInput: {
-    width: "80%",
-    margin: 10,
-  },
-  locationContainer: {
-    flexDirection: "row",
-  },
-  pickerWrapper: {
-    flexDirection: "row",
-  },
-  pickerContent: {
-    marginTop: 10,
-    backgroundColor: "#f0f0f0",
-  },
-  dropdownContainer: {
-    borderWidth: 1,
-    borderColor: "#00CDBC",
-    borderRadius: 8,
-    zIndex: 1000,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  dropdownText: {
-    fontSize: 16,
-    marginRight: 10,
-  },
-  pickerContainer: {
-    top: 40,
-    right: 0,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    zIndex: 100, // Adjust the z-index value as needed
-  },
-  pickerOverlay: {
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "transparent",
-  },
-  pickerItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  pickerItemText: {
-    fontSize: 16,
-    color: "#333",
-  },
-});
 
 export default Restaurants;

@@ -1,5 +1,5 @@
 Arguments: 
-  /Users/mahirahmed/.nvm/versions/node/v18.12.0/bin/node /Users/mahirahmed/.nvm/versions/node/v18.12.0/bin/yarn add @react-native-geolocation/geolocation
+  /Users/mahirahmed/.nvm/versions/node/v18.12.0/bin/node /Users/mahirahmed/.nvm/versions/node/v18.12.0/bin/yarn add @fortawesome/sharp-light-svg-icons
 
 PATH: 
   /opt/homebrew/opt/openjdk/bin:/Users/mahirahmed/.nvm/versions/node/v18.12.0/bin:/opt/homebrew/bin:/Users/mahirahmed/.pyenv/shims:/opt/homebrew/sbin:/opt/homebrew/anaconda3/bin:/usr/local/anaconda3/bin:/Users/mahirahmed/.rbenv/shims:/usr/bin/ruby:/opt/homebrew/bin:/Users/mahirahmed/bin:/usr/local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/usr/local/go/bin:/Users/mahirahmed/.spicetify
@@ -14,7 +14,7 @@ Platform:
   darwin arm64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@react-native-geolocation%2fgeolocation: Not found
+  Error: https://registry.yarnpkg.com/@fortawesome%2fsharp-light-svg-icons: Not found
       at params.callback [as _callback] (/Users/mahirahmed/.nvm/versions/node/v18.12.0/lib/node_modules/yarn/lib/cli.js:66145:18)
       at self.callback (/Users/mahirahmed/.nvm/versions/node/v18.12.0/lib/node_modules/yarn/lib/cli.js:140890:22)
       at Request.emit (node:events:513:28)
@@ -51,11 +51,18 @@ npm manifest:
     "dependencies": {
       "@clerk/clerk-expo": "^0.19.14",
       "@expo/vector-icons": "^13.0.0",
+      "@fortawesome/fontawesome-svg-core": "^6.4.2",
+      "@fortawesome/free-brands-svg-icons": "^6.4.2",
+      "@fortawesome/free-regular-svg-icons": "^6.4.2",
+      "@fortawesome/free-solid-svg-icons": "^6.4.2",
+      "@fortawesome/react-fontawesome": "^0.2.0",
       "@google-cloud/secret-manager": "^5.0.1",
       "@react-native-async-storage/async-storage": "1.18.2",
       "@react-native-picker/picker": "^2.5.1",
       "@react-navigation/native": "^6.1.9",
       "@react-navigation/stack": "^6.3.20",
+      "@rneui/base": "^4.0.0-rc.8",
+      "@rneui/themed": "^4.0.0-rc.8",
       "@types/react": "~18.2.14",
       "axios": "^1.6.0",
       "deprecated-react-native-prop-types": "^5.0.0",
@@ -2213,6 +2220,46 @@ Lockfile:
     resolved "https://registry.npmjs.org/@floating-ui/utils/-/utils-0.1.6.tgz"
     integrity sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==
   
+  "@fortawesome/fontawesome-common-types@6.4.2":
+    version "6.4.2"
+    resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-common-types/-/fontawesome-common-types-6.4.2.tgz#1766039cad33f8ad87f9467b98e0d18fbc8f01c5"
+    integrity sha512-1DgP7f+XQIJbLFCTX1V2QnxVmpLdKdzzo2k8EmvDOePfchaIGQ9eCHj2up3/jNEbZuBqel5OxiaOJf37TWauRA==
+  
+  "@fortawesome/fontawesome-svg-core@^6.4.2":
+    version "6.4.2"
+    resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-svg-core/-/fontawesome-svg-core-6.4.2.tgz#37f4507d5ec645c8b50df6db14eced32a6f9be09"
+    integrity sha512-gjYDSKv3TrM2sLTOKBc5rH9ckje8Wrwgx1CxAPbN5N3Fm4prfi7NsJVWd1jklp7i5uSCVwhZS5qlhMXqLrpAIg==
+    dependencies:
+      "@fortawesome/fontawesome-common-types" "6.4.2"
+  
+  "@fortawesome/free-brands-svg-icons@^6.4.2":
+    version "6.4.2"
+    resolved "https://registry.yarnpkg.com/@fortawesome/free-brands-svg-icons/-/free-brands-svg-icons-6.4.2.tgz#9b8e78066ea6dd563da5dfa686615791d0f7cc71"
+    integrity sha512-LKOwJX0I7+mR/cvvf6qIiqcERbdnY+24zgpUSouySml+5w8B4BJOx8EhDR/FTKAu06W12fmUIcv6lzPSwYKGGg==
+    dependencies:
+      "@fortawesome/fontawesome-common-types" "6.4.2"
+  
+  "@fortawesome/free-regular-svg-icons@^6.4.2":
+    version "6.4.2"
+    resolved "https://registry.yarnpkg.com/@fortawesome/free-regular-svg-icons/-/free-regular-svg-icons-6.4.2.tgz#aee79ed76ce5dd04931352f9d83700761b8b1b25"
+    integrity sha512-0+sIUWnkgTVVXVAPQmW4vxb9ZTHv0WstOa3rBx9iPxrrrDH6bNLsDYuwXF9b6fGm+iR7DKQvQshUH/FJm3ed9Q==
+    dependencies:
+      "@fortawesome/fontawesome-common-types" "6.4.2"
+  
+  "@fortawesome/free-solid-svg-icons@^6.4.2":
+    version "6.4.2"
+    resolved "https://registry.yarnpkg.com/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-6.4.2.tgz#33a02c4cb6aa28abea7bc082a9626b7922099df4"
+    integrity sha512-sYwXurXUEQS32fZz9hVCUUv/xu49PEJEyUOsA51l6PU/qVgfbTb2glsTEaJngVVT8VqBATRIdh7XVgV1JF1LkA==
+    dependencies:
+      "@fortawesome/fontawesome-common-types" "6.4.2"
+  
+  "@fortawesome/react-fontawesome@^0.2.0":
+    version "0.2.0"
+    resolved "https://registry.yarnpkg.com/@fortawesome/react-fontawesome/-/react-fontawesome-0.2.0.tgz#d90dd8a9211830b4e3c08e94b63a0ba7291ddcf4"
+    integrity sha512-uHg75Rb/XORTtVt7OS9WoK8uM276Ufi7gCzshVWkUJbHhh3svsUUeqXerrM96Wm7fRiDzfKRwSoahhMIkGAYHw==
+    dependencies:
+      prop-types "^15.8.1"
+  
   "@gar/promisify@^1.0.1":
     version "1.1.3"
     resolved "https://registry.npmjs.org/@gar/promisify/-/promisify-1.1.3.tgz"
@@ -2799,6 +2846,23 @@ Lockfile:
       color "^4.2.3"
       warn-once "^0.1.0"
   
+  "@rneui/base@^4.0.0-rc.8":
+    version "4.0.0-rc.8"
+    resolved "https://registry.yarnpkg.com/@rneui/base/-/base-4.0.0-rc.8.tgz#6fbf9b3049a9207d47c3c53b70c0f68f3627a170"
+    integrity sha512-teJ6bUki+TQ+r+abefEWYb2wRUaMgRhp1oxtKa84UfDqTiCF0ItyJ0L8FhMb6AAkTOkWC34301T7j3H4df6ueA==
+    dependencies:
+      "@types/react-native-vector-icons" "^6.4.10"
+      color "^3.2.1"
+      deepmerge "^4.2.2"
+      hoist-non-react-statics "^3.3.2"
+      react-native-ratings "^8.1.0"
+      react-native-size-matters "^0.4.0"
+  
+  "@rneui/themed@^4.0.0-rc.8":
+    version "4.0.0-rc.8"
+    resolved "https://registry.yarnpkg.com/@rneui/themed/-/themed-4.0.0-rc.8.tgz#5c0e1aaa3d190ead88936693c5cef50ec404cd05"
+    integrity sha512-8L/XOrL9OK/r+/iBLvx63TbIdZOXF8SIjN9eArMYm6kRbMr8m4BitXllDN8nBhBsSPNYvL6EAgjk+i2MfY4sBA==
+  
   "@segment/loosely-validate-event@^2.0.0":
     version "2.0.0"
     resolved "https://registry.npmjs.org/@segment/loosely-validate-event/-/loosely-validate-event-2.0.0.tgz"
@@ -3010,7 +3074,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.6.tgz#7cb33992049fd7340d5b10c0098e104184dfcd2a"
     integrity sha512-+0autS93xyXizIYiyL02FCY8N+KkKPhILhcUSA276HxzreZ16kl+cmwvV2qAM/PuCCwPXzOXOWhiPcw20uSFcA==
   
-  "@types/react-native-vector-icons@^6.4.6":
+  "@types/react-native-vector-icons@^6.4.10", "@types/react-native-vector-icons@^6.4.6":
     version "6.4.16"
     resolved "https://registry.npmjs.org/@types/react-native-vector-icons/-/react-native-vector-icons-6.4.16.tgz"
     integrity sha512-27p1tItacE/0yYKCs+nmGxtO5hiA9nhUSg9W+ipnq9PFS1NMQ+Cjf6Y+tFQgE4u0wF412xkgA40MIGLuocgqCg==
@@ -3908,7 +3972,7 @@ Lockfile:
       color-name "^1.0.0"
       simple-swizzle "^0.2.2"
   
-  color@^3.1.2:
+  color@^3.1.2, color@^3.2.1:
     version "3.2.1"
     resolved "https://registry.npmjs.org/color/-/color-3.2.1.tgz"
     integrity sha512-aBl7dZI9ENN6fUGC7mWpMTPNHmWUSNan9tuWN6ahh5ZLNk9baLJOnSMlrQkHcrfFgz2/RigjUVAjdx36VcemKA==
@@ -8124,6 +8188,13 @@ Lockfile:
     dependencies:
       lodash "^4.17.15"
   
+  react-native-ratings@^8.1.0:
+    version "8.1.0"
+    resolved "https://registry.yarnpkg.com/react-native-ratings/-/react-native-ratings-8.1.0.tgz#3fa9ad29128dc3a88e59518ba151e61c59dd0647"
+    integrity sha512-+QOJ4G3NjVkI1D+tk4EGx1dCvVfbD2nQdkrj9cXrcAoEiwmbep4z4bZbCKmWMpQ5h2dqbxABU8/eBnbDmvAc3g==
+    dependencies:
+      lodash "^4.17.15"
+  
   react-native-reanimated@~3.3.0:
     version "3.3.0"
     resolved "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-3.3.0.tgz"
@@ -8143,6 +8214,11 @@ Lockfile:
     version "0.3.1"
     resolved "https://registry.npmjs.org/react-native-size-matters/-/react-native-size-matters-0.3.1.tgz"
     integrity sha512-mKOfBLIBFBcs9br1rlZDvxD5+mAl8Gfr5CounwJtxI6Z82rGrMO+Kgl9EIg3RMVf3G855a85YVqHJL2f5EDRlw==
+  
+  react-native-size-matters@^0.4.0:
+    version "0.4.2"
+    resolved "https://registry.yarnpkg.com/react-native-size-matters/-/react-native-size-matters-0.4.2.tgz#4348bdd6fc47383f60326d58ad69870c998a5f9a"
+    integrity sha512-DKE3f/sdcozd24oASgkP1iGg+YU3HoajRa5k3a4wkRzpiqREq8SGX12Y5zBgAt/8IivLQoTMYkyQu1/Giuy+zQ==
   
   react-native-star-rating@^1.0.8:
     version "1.1.0"

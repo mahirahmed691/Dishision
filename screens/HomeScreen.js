@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
-import { firestore, auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
+import { collection, getDocs } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { View, Dimensions, RefreshControl, Text } from "react-native";
 
@@ -108,7 +109,6 @@ export const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      
       <DrawerSlider
         userName={userName}
         userPhotoURL={userPhotoURL}

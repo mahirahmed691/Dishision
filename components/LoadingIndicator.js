@@ -1,5 +1,5 @@
-import React from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import React from "react";
+import { ActivityIndicator, StyleSheet } from "react-native";
 import {
   BallIndicator,
   BarIndicator,
@@ -10,15 +10,15 @@ import {
   SkypeIndicator,
   UIActivityIndicator,
   WaveIndicator,
-} from 'react-native-indicators';
+} from "react-native-indicators";
 
-import { Colors } from '../config';
-import { View } from './View';
+import { Colors } from "../config";
+import { View } from "./View";
 
 export const LoadingIndicator = () => {
   return (
     <View style={styles.container}>
-      <BarIndicator animationDuration={5000 }color={Colors.white} /> 
+      <BarIndicator animationDuration={2000} color={Colors.white} />
     </View>
   );
 };
@@ -26,8 +26,8 @@ export const LoadingIndicator = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor:Colors.green
-  }
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.green,
+  },
 });

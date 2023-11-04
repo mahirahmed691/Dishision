@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Button } from "react-native";
 import * as Location from "expo-location";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const LocationServices = () => {
   const [location, setLocation] = useState(null);
@@ -51,17 +51,15 @@ const LocationServices = () => {
           onPress={requestLocationPermission}
         />
       ) : location ? (
-        <View style={{ }}>
+        <View style={{}}>
           {address ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
               <MaterialCommunityIcons
                 name="map-marker"
                 size={15}
                 color="black"
               />
-              <Text
-                style={{ fontSize: 20, fontWeight: "bold", marginLeft: 5 }}
-              >
+              <Text style={{ fontSize: 20, fontWeight: "bold", marginLeft: 5 }}>
                 {address.city}
               </Text>
             </View>

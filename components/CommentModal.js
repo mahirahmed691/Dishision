@@ -1,36 +1,41 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, Dimensions } from 'react-native';
-import { IconButton, Button, TextInput } from 'react-native-paper';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import StarRating from 'react-native-star-rating';
-import { Colors } from '../config';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Modal, Dimensions } from "react-native";
+import { IconButton, Button, TextInput } from "react-native-paper";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import StarRating from "react-native-star-rating";
+import { Colors } from "../config";
 
-export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName }) => {
-  const [userName, setUserName] = useState('');
+export const CommentModal = ({
+  isVisible,
+  onClose,
+  onAddComment,
+  restaurantName,
+}) => {
+  const [userName, setUserName] = useState("");
   const [restaurantRating, setRestaurantRating] = useState(0);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
 
   const db = getFirestore();
-  
+
   const addComment = () => {
     const commentData = {
       userName,
       restaurantRating,
       comment,
       date: new Date().toISOString(),
-      restaurantName, 
+      restaurantName,
     };
-  
-    addDoc(collection(db, 'comments'), commentData)
+
+    addDoc(collection(db, "comments"), commentData)
       .then((docRef) => {
-        setUserName('');
+        setUserName("");
         setRestaurantRating(0);
-        setComment('');
+        setComment("");
         onClose();
         onAddComment(commentData);
       })
       .catch((error) => {
-        console.error('Error adding comment to Firestore:', error);
+        console.error("Error adding comment to Firestore:", error);
       });
   };
 
@@ -44,31 +49,32 @@ export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName 
         <IconButton
           icon="close"
           style={styles.closeButton}
-          mode='outlined'
+          mode="outlined"
           backgroundColor="#00CDBC"
-          iconColor='white'
-          onPress={onClose}>
+          iconColor="white"
+          onPress={onClose}
+        >
           Close
         </IconButton>
         <Text style={styles.title}>Add a Comment</Text>
         <TextInput
           theme={{
             colors: {
-              primary: '#444', 
-              placeholder: 'white', 
-              text: 'black',         
-              background: 'white',
-            }
+              primary: "#444",
+              placeholder: "white",
+              text: "black",
+              background: "white",
+            },
           }}
           style={styles.input}
-          mode='contained'
-          backgroundColor='white'
+          mode="contained"
+          backgroundColor="white"
           placeholder="Your Name"
           value={userName}
           onChangeText={(text) => setUserName(text)}
         />
         <Text style={styles.label}>Restaurant Rating (1-5):</Text>
-        <View style={{width:170}}>
+        <View style={{ width: 170 }}>
           <StarRating
             maxStars={5}
             rating={restaurantRating}
@@ -81,14 +87,14 @@ export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName 
         <TextInput
           theme={{
             colors: {
-              primary: '#00CDBC',       
-              placeholder: 'white',
-              text: 'black',
-              background: 'white',
-            }
+              primary: "#00CDBC",
+              placeholder: "white",
+              text: "black",
+              background: "white",
+            },
           }}
           style={styles.commentInput}
-          mode='outlined'
+          mode="outlined"
           placeholder="Your Comment"
           placeholderTextColor={Colors.textSecondary}
           value={comment}
@@ -108,29 +114,29 @@ export const CommentModal = ({ isVisible, onClose, onAddComment, restaurantName 
   );
 };
 
-width = Dimensions.get('window').width;
-height = Dimensions.get('window').height;
+width = Dimensions.get("window").width;
+height = Dimensions.get("window").height;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
     borderRadius: 16,
-    justifyContent: 'center',
-    backgroundColor: '#FFF',
+    justifyContent: "center",
+    backgroundColor: "#FFF",
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 40,
     left: 20,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     color: Colors.primary,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
-    color: 'black'
+    color: "black",
   },
   input: {
     marginBottom: 16,
@@ -138,7 +144,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
-    fontWeight: '700',
+    fontWeight: "700",
     color: "black",
   },
   commentInput: {
@@ -149,6 +155,6 @@ const styles = StyleSheet.create({
   addButton: {
     paddingVertical: 5,
     borderRadius: 8,
-    backgroundColor:'#00CDBC'
+    backgroundColor: "#00CDBC",
   },
 });

@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
     marginBottom: 10,
     resizeMode: "cover",
-    zIndex:0,
+    zIndex: 0,
   },
   sectionTitle: {
     fontSize: 30,
