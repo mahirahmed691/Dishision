@@ -11,7 +11,8 @@ import {
   Animated, // Import Animated from react-native
   Easing,
 } from "react-native";
-import * as Speech from 'expo-speech';
+import * as Speech from "expo-speech";
+import * as Location from "expo-location";
 import { Button, IconButton, TextInput } from "react-native-paper";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFire } from "@fortawesome/free-solid-svg-icons";
@@ -29,7 +30,6 @@ import FilterModal from "../components/FilterModal";
 import RestaurantForm from "../components/RestaurantForm";
 import Branded from "./Branded";
 import LocationServices from "./Location";
-import * as Location from "expo-location";
 import styles from "../screens/styles";
 
 export const Restaurants = ({ navigation }) => {
@@ -53,44 +53,17 @@ export const Restaurants = ({ navigation }) => {
   const animatedScrollY = useRef(new Animated.Value(0)).current;
   const [fetchCount, setFetchCount] = useState(0);
   const [readCount, setReadCount] = useState(0);
-  const [voiceInputText, setVoiceInputText] = useState('');
+  const [voiceInputText, setVoiceInputText] = useState("");
+  const [isPermissionGranted, setIsPermissionGranted] = useState(false);
 
-  // Function to load more categories
   const handleLoadMoreCategories = () => {
     setLoadingMore(true);
 
     setTimeout(() => {
       setVisibleCategories((prevCount) => prevCount + 3);
       setLoadingMore(false);
-      fetchMoreRestaurants(); // Fetch more data
+      fetchMoreRestaurants();
     }, 1000);
-  };
-
-  // Check if the user is close to the bottom of the scroll
-  const isCloseToBottom = ({
-    layoutMeasurement,
-    contentOffset,
-    contentSize,
-  }) => {
-    return (
-      layoutMeasurement.height + contentOffset.y >= contentSize.height - 20
-    );
-  };
-
-  // Event listener for scrolling to load more categories
-  const handleScroll = ({ nativeEvent }) => {
-    const paddingToBottom = 20;
-    const currentOffset = nativeEvent.contentOffset.y;
-    const contentHeight = nativeEvent.contentSize.height;
-    const layoutHeight = nativeEvent.layoutMeasurement.height;
-
-    // Check if the user is close to the bottom and not already loading more data
-    if (
-      layoutHeight + currentOffset >= contentHeight - paddingToBottom &&
-      !loadingMore
-    ) {
-      handleLoadMoreCategories();
-    }
   };
 
   useEffect(() => {
@@ -98,62 +71,68 @@ export const Restaurants = ({ navigation }) => {
     setVisibleCategories(5);
   }, []);
 
+  const getLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+  
+      let location = await Location.getCurrentPositionAsync({});
+      setCurrentLocation(location.coords);
+      const city = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      setSelectedLocation(city[0].city); // Assuming city is available in reverse geocoded data
+    } catch (error) {
+      console.error("Error getting location: ", error);
+      if (error.code === "E_LOCATION_SERVICES_DISABLED") {
+        // Handle location services disabled error
+      } else if (error.code === "E_NO_LOCATION_PERMISSION") {
+        // Handle no location permission error
+      } else {
+        // Handle other location error cases
+      }
+    }
+  };
+
   const getMicrophonePermission = async () => {
-    const { status } = await Speech.requestPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Permission to access microphone was denied');
-      return;
+    try {
+      const { status } = await Speech.requestDeviceAudioRecordingPermissionAsync();
+      if (status === "granted") {
+        console.log("Microphone permission granted");
+        setIsPermissionGranted(true);
+      } else {
+        console.log("Microphone permission denied");
+      }
+    } catch (error) {
+      console.error("Error getting microphone permission:", error);
     }
   };
 
   const captureVoiceInput = async () => {
     try {
-      const spokenText = await Speech.recognize(); // Use Speech.recognize instead of Speech.recognizeAsync
-      if (spokenText) {
-        setSearchText(spokenText); // Assuming you want to use the spoken text for search
-        setVoiceInputText(spokenText); // Set the spoken text in the state
-        applyFilters(null, null, isHalal, spokenText); // Apply filters based on spoken text
-      } else {
-        Speech.speak('Please try again', { language: 'en-US' }); // Ask the user to repeat
+      const { status } = await Speech.getPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to access the microphone is required for voice input");
+        return;
       }
+  
+      let spokenText = await Speech.recognizeAsync();
     } catch (error) {
-      console.error('Speech recognition error:', error);
-      Speech.speak('An error occurred. Please try again.', { language: 'en-US' });
+      console.error("Error capturing voice input:", error);
+      alert("An error occurred while capturing voice input. Please try again.");
     }
   };
+  
 
-  useEffect(() => {
-    getMicrophonePermission();
-  }, []);
+  const checkAndRequestPermissions = async () => {
+    await getMicrophonePermission();
+  };
 
-
-  useEffect(() => {
-    const getLocation = async () => {
-      try {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          console.log("Permission to access location was denied");
-          // You might need to prompt the user to grant permission here
-          return;
-        }
-
-        let location = await Location.getCurrentPositionAsync({});
-        setCurrentLocation(location.coords);
-      } catch (error) {
-        console.error("Error getting location: ", error);
-        // Specific error handling based on the caught error
-        if (error.code === "E_LOCATION_SERVICES_DISABLED") {
-          // Provide a message for disabled location services
-        } else if (error.code === "E_NO_LOCATION_PERMISSION") {
-          // Handle when permission is not granted
-        } else {
-          // Handle other location-related errors
-        }
-      }
-    };
-
-    getLocation();
-  }, []);
+  checkAndRequestPermissions();
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -168,7 +147,7 @@ export const Restaurants = ({ navigation }) => {
 
   useEffect(() => {
     if (currentLocation && fetchCount === 0) {
-      setSelectedLocation("Manchester"); // Set the initial selected location to "All Locations"
+      setSelectedLocation("Manchester");
       fetchRestaurantsFromFirestore(currentLocation);
       setFetchCount(1);
     }
@@ -176,36 +155,44 @@ export const Restaurants = ({ navigation }) => {
 
   const fetchRestaurantsFromFirestore = async (locationCoords) => {
     try {
-      const restaurantsCollection = collection(db, "restaurant");
-
-      const querySnapshot = await getDocs(
-        query(restaurantsCollection, where("city", "==", "Manchester"))
-      );
+      let city = "Manchester"; // Default city value
+  
+      if (locationCoords) {
+        const cityData = await Location.reverseGeocodeAsync({
+          latitude: locationCoords.latitude,
+          longitude: locationCoords.longitude,
+        });
+  
+        if (cityData.length > 0) {
+          city = cityData[0].city; // Assuming city is available in reverse geocoded data
+        }
+      }
+  
+      const restaurantsCollection = collection(db, "restaurants");
+      const querySnapshot = await getDocs(query(restaurantsCollection, where("city", "==", city)));
+      console.log(city)
+  
       setReadCount((prevCount) => prevCount + querySnapshot.size);
-
+  
       const restaurantsData = [];
       querySnapshot.forEach((doc) => {
         const restaurant = doc.data();
         restaurantsData.push(restaurant);
       });
-
+  
       setRestaurants(restaurantsData);
       setFilteredRestaurants(restaurantsData);
       setIsDataLoaded(true);
     } catch (error) {
       console.error("Error fetching restaurants:", error);
-
-      if (error.code === "permission-denied") {
-        console.log("Permission denied to access Firestore.");
-      } else {
-        console.log("Using fallback data due to Firestore error.");
-        const fallbackData = require("/Users/mahirahmed/Dishision/collectionData.json");
-        setRestaurants(fallbackData);
-        setFilteredRestaurants(fallbackData);
-        setIsDataLoaded(true);
-      }
+      // Handle error cases
     }
   };
+  
+  useEffect(() => {
+    getLocation();
+  }, []);
+  
 
   // Function to fetch restaurant data from Firestore
   const fetchMoreRestaurants = async () => {
@@ -215,8 +202,7 @@ export const Restaurants = ({ navigation }) => {
         query(
           restaurantsCollection,
           where("city", "==", "Manchester"),
-          limit(10) // Limit the number of documents to fetch
-          // Add an offset here for pagination if needed
+          limit(10)
         )
       );
 
@@ -228,7 +214,6 @@ export const Restaurants = ({ navigation }) => {
         newRestaurants.push(restaurant);
       });
 
-      // Filter out duplicates before adding to state
       setRestaurants((prevRestaurants) => {
         const updatedRestaurants = [
           ...prevRestaurants,
@@ -236,7 +221,7 @@ export const Restaurants = ({ navigation }) => {
             (newRestaurant) =>
               !prevRestaurants.some(
                 (existingRestaurant) =>
-                  existingRestaurant.id === newRestaurant.id // Assuming an 'id' field
+                  existingRestaurant.id === newRestaurant.id
               )
           ),
         ];
@@ -250,7 +235,7 @@ export const Restaurants = ({ navigation }) => {
             (newRestaurant) =>
               !prevRestaurants.some(
                 (existingRestaurant) =>
-                  existingRestaurant.id === newRestaurant.id // Assuming an 'id' field
+                  existingRestaurant.id === newRestaurant.id
               )
           ),
         ];
@@ -261,11 +246,9 @@ export const Restaurants = ({ navigation }) => {
     }
   };
 
-  // Function to handle filtered search
   const applyFilters = (rating, foodType, isHalal, searchText, location) => {
     let filtered = [...restaurants];
 
-    // Apply search filter first
     if (searchText.trim() !== "") {
       const searchLowerCase = searchText.toLowerCase();
       filtered = filtered.filter((restaurant) => {
@@ -292,23 +275,22 @@ export const Restaurants = ({ navigation }) => {
     }
 
     setFilteredRestaurants(filtered);
-    setIsFilterActive(true); // Set the filter state to active
+    setIsFilterActive(true);
   };
 
   const handleInputChange = (text) => {
     setSearchText(text);
     applyFilters(null, null, isHalal, text);
 
-    // Check if the search input is empty, and if it is, reset the list
     if (text.trim() === "") {
-      setIsFilterActive(false); // Reset the filter state
+      setIsFilterActive(false);
     }
   };
 
   const handleShowAll = () => {
-    setFilteredRestaurants(restaurants); // Reset filtered restaurants
-    setSearchText(""); // Clear the search input
-    setIsFilterActive(false); // Reset the filter state
+    setFilteredRestaurants(restaurants);
+    setSearchText("");
+    setIsFilterActive(false);
   };
 
   const openFilterModal = () => {
@@ -327,7 +309,7 @@ export const Restaurants = ({ navigation }) => {
     const groupedRestaurants = {};
 
     restaurants.forEach((restaurant) => {
-      const cuisineType = restaurant.cuisine.toLowerCase(); // Normalize to lowercase
+      const cuisineType = restaurant.cuisine.toLowerCase();
       if (!groupedRestaurants[cuisineType]) {
         groupedRestaurants[cuisineType] = [];
       }
@@ -342,19 +324,18 @@ export const Restaurants = ({ navigation }) => {
   };
 
   const handleLocationChange = (location) => {
-    setOpen(false); // Close the drop-down
-    setValue(location); // Set the selected value directly
+    setOpen(false);
+    setValue(location);
 
-    // Apply filtering based on the selected location
-    setSelectedLocation(location); // Set the selected location in the state
+    setSelectedLocation(location);
 
     if (location === "All Locations") {
-      setFilteredRestaurants(restaurants); // Show all restaurants if "All Locations" is selected
+      setFilteredRestaurants(restaurants);
     } else {
       const filteredByLocation = filterByLocation(restaurants, location);
       setFilteredRestaurants(
         filteredByLocation.length > 0 ? filteredByLocation : restaurants
-      ); // Set filtered restaurants based on the location
+      );
     }
   };
 
@@ -412,7 +393,7 @@ export const Restaurants = ({ navigation }) => {
               setFilteredRestaurants(restaurants);
               setIsFilterActive(false);
             } else {
-              captureVoiceInput() // Speak function called here
+              captureVoiceInput();
             }
           }}
         />
@@ -466,13 +447,13 @@ export const Restaurants = ({ navigation }) => {
                 justifyContent: "flex-start",
               }}
               dropDownStyle={{ backgroundColor: "#fafafa" }}
-              onChangeItem={(item) => handleLocationChange(item.value)} // Pass the item's value to handleLocationChange
+              onChangeItem={(item) => handleLocationChange(item.value)}
               zIndex={5000}
               searchable={true}
               searchablePlaceholder="Search for location"
               searchablePlaceholderTextColor="gray"
               onChangeValue={(value) => {
-                handleLocationChange(value); // Make sure to call handleLocationChange with the value
+                handleLocationChange(value);
               }}
             />
           </View>
@@ -550,17 +531,17 @@ export const Restaurants = ({ navigation }) => {
         style={{
           opacity: animatedScrollY.interpolate({
             inputRange: [0, 100],
-            outputRange: [1, 0], // Fading out when the user scrolls
+            outputRange: [1, 0],
             extrapolate: "clamp",
           }),
         }}
       >
         <IconButton
-          icon="arrow-down" // Replace with your desired arrow icon
-          onPress={handleLoadMoreCategories} // Trigger loading more data on button press
-          color="#00CDBC" // Change the arrow color as needed
-          size={10} // Adjust the size of the arrow icon
-          style={{ alignSelf: "center" }} // Align the button/icon to the center
+          icon="arrow-down"
+          onPress={handleLoadMoreCategories}
+          color="#00CDBC"
+          size={10}
+          style={{ alignSelf: "center" }}
         />
       </Animated.View>
 
