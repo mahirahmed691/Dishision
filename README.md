@@ -37,9 +37,9 @@ expo start
 
 ### Dependencies
 
-- React Native
-- ChatGPT API
-- Stripe
+<span style="color:blue">React Native</span>
+<span style="color:red">ChatGPT API</span>
+<span style="color:green">Stripe</span>
   
 ### Configuration
 
