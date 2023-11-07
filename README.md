@@ -1,7 +1,7 @@
 # DishDecision
 *Decisions made easier.*
 
-![Example Image](https://www.example.com/image.jpg)
+![Example Image](https://github.com/mahirahmed691/Dishision/blob/main/assets/logo4.png)
 
 ### Overview
 
