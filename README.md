@@ -8,7 +8,7 @@ Decisions made easier.
 
 DishDecision is an AI-powered application that assists in making decisions related to choosing dishes, restaurants, and more. The app uses ChatGPT, an AI language model, to analyze preferences and suggest suitable options.
 
-### Features
+## Features
 
 - **Decision Assistance:** Provides suggestions for meals, dishes, or restaurant choices based on user input.
 - **AI-Powered Recommendations:** Utilizes ChatGPT to process preferences and generate personalized recommendations.
