@@ -1,7 +1,7 @@
 # DishDecision
 *Decisions made easier.*
 
-<img src="https://github.com/mahirahmed691/Dishision/blob/main/assets/logo4.png" alt="Example Image" width="200" />
+<img src="assets/logo4.png" alt="Example Image" width="200" />
 
 ### Overview
 
@@ -13,6 +13,13 @@ DishDecision is an AI-powered application that assists in making decisions relat
 - **AI-Powered Recommendations:** Utilizes ChatGPT to process preferences and generate personalized recommendations.
 - **Multiple Cuisine Support:** Covers a wide range of cuisines and dining options.
 - **User-Friendly Interface:** Simple and intuitive design for an easy user experience.
+
+# Screenshots
+
+<img src="assets/homescreen.png" alt="Example Image" width="100" />
+<img src="assets/rewards.png" alt="Example Image" width="100" />
+<img src="assets/profile.png" alt="Example Image" width="100" />
+<img src="assets/elvet.png" alt="Example Image" width="100" />
 
 ## Installation
 ```
@@ -51,10 +58,6 @@ We welcome contributions! Please follow these guidelines:
 - Fork the repository
 - Create a new branch for your feature or improvement
 - Open a pull request
-
-### License
-
-This project is licensed under the [MIT License](link-to-license).
 
 ### Support
 
