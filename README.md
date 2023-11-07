@@ -23,7 +23,7 @@ DishDecision is an AI-powered application that assists in making decisions relat
 # Installation
 - *yarn install*
 
-### Usage
+### Setup
 
 # Start Application
 - *expo start*
