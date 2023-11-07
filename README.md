@@ -1,4 +1,4 @@
-[# DishDecision
+# DishDecision
 
 ## Tagline
 
