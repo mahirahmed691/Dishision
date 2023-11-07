@@ -37,11 +37,9 @@ expo start
 
 ### Dependencies
 
-<div style="display: inline;">
-React Native
-ChatGPT API
-Stripe
-</div>
+- React Native
+- ChatGPT API
+- Stripe
   
 ### Configuration
 
