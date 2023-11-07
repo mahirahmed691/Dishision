@@ -2,7 +2,7 @@
 
 ## Tagline
 
-Decisions made easier.
+*Decisions made easier.*
 
 ### Overview
 
