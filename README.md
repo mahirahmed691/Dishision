@@ -15,17 +15,16 @@ DishDecision is an AI-powered application that assists in making decisions relat
 - **Multiple Cuisine Support:** Covers a wide range of cuisines and dining options.
 - **User-Friendly Interface:** Simple and intuitive design for an easy user experience.
 
-### Installation
-
+## Installation
 - **Clone Repository:**
 ### git clone https://github.com/yourusername/DishDecision.git
 
-# Installation
+### Setup
 - *yarn install*
 
-# Start Application
+### Start Application
 - *expo start*
-
+- 
 ### Technology Stack
 
 - **React Native:** Framework for building the mobile app
