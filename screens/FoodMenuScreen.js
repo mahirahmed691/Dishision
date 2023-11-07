@@ -224,7 +224,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     fetchAllRestaurantData();
   }, []);
 
-  const handleSearch = async (restaurantData) => {
+  const handleSearch = async () => {
     if (searchText) {
       // Check if the query contains food-related keywords
       const containsFoodKeyword = foodKeywords.some((keyword) =>
@@ -237,10 +237,8 @@ export const FoodMenuScreen = ({ navigation, route }) => {
       }
 
       setLoading(true);
-
       const requestData = {
         model: "gpt-4",
-        restaurantData: restaurantData,
         messages: [
           {
             role: "system",
@@ -248,33 +246,24 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           },
           {
             role: "user",
-            content: `Search for the menu of ${restaurant.restaurantName}: ${searchText}  
-              output the content as a list of max 5 items, don't print out a big paragraph,
-              don't use bullet points, only numbers. do not display any other text besides 
-              the list of 5`,
+            content: `Search for information about ${searchText}`,
+            content: `Search for the menu of ${route.params.restaurant.restaurantName}: ${searchText}
+             output the content as list of max 5 items don't print out big paragraph,
+             dont not bullet point list only number.
+             `,
           },
         ],
       };
 
-      // Print the requestData JSON
-      console.log("Request Data:", requestData);
-
-      // Convert the requestData to a JSON string
-      const requestDataJSON = JSON.stringify(requestData);
-
       try {
-        const response = await axiosGPT.post("", requestDataJSON, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
+        setLoading(true);
+        const response = await axiosGPT.post("", requestData);
         const choices = response.data.choices[0].message.content;
         setApiResponse(choices);
-        animateSearchButton();
+
         setLoading(false);
       } catch (error) {
-        console.error(error);
+        console.log(error);
         setLoading(false);
       }
     }
@@ -877,10 +866,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
                           style={{ marginRight: 5, padding: 3 }}
                           backgroundColor="#f0f0f0"
                         />
-                        <Text
-                          style={{ fontWeight: "700", color: "#00CBDC" }}
-                          onPress={() => openUrlInBrowser(restaurant.url)}
-                        >
+                        <Text style={{ fontWeight: "700" }}>
                           {restaurant.url}
                         </Text>
                       </View>

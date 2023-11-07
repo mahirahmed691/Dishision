@@ -31,4 +31,13 @@ export default {
       projectId: "f43ab566-c910-4b69-a519-f890be3420a4",
     },
   },
+  plugins: [
+    [
+      "@stripe/stripe-react-native",
+      {
+        merchantIdentifier: "MERCHANT_IDENTIFIER",
+        enableGooglePay: true,
+      },
+    ],
+  ],
 };

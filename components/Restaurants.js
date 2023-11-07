@@ -78,7 +78,7 @@ export const Restaurants = ({ navigation }) => {
         console.log("Permission to access location was denied");
         return;
       }
-  
+
       let location = await Location.getCurrentPositionAsync({});
       setCurrentLocation(location.coords);
       const city = await Location.reverseGeocodeAsync({
@@ -100,7 +100,8 @@ export const Restaurants = ({ navigation }) => {
 
   const getMicrophonePermission = async () => {
     try {
-      const { status } = await Speech.requestDeviceAudioRecordingPermissionAsync();
+      const { status } =
+        await Speech.requestDeviceAudioRecordingPermissionAsync();
       if (status === "granted") {
         console.log("Microphone permission granted");
         setIsPermissionGranted(true);
@@ -116,17 +117,18 @@ export const Restaurants = ({ navigation }) => {
     try {
       const { status } = await Speech.getPermissionsAsync();
       if (status !== "granted") {
-        alert("Permission to access the microphone is required for voice input");
+        alert(
+          "Permission to access the microphone is required for voice input"
+        );
         return;
       }
-  
+
       let spokenText = await Speech.recognizeAsync();
     } catch (error) {
       console.error("Error capturing voice input:", error);
       alert("An error occurred while capturing voice input. Please try again.");
     }
   };
-  
 
   const checkAndRequestPermissions = async () => {
     await getMicrophonePermission();
@@ -155,31 +157,33 @@ export const Restaurants = ({ navigation }) => {
 
   const fetchRestaurantsFromFirestore = async (locationCoords) => {
     try {
-      let city = "Manchester"; // Default city value
-  
+      let city = ""; // Default city value
+
       if (locationCoords) {
         const cityData = await Location.reverseGeocodeAsync({
           latitude: locationCoords.latitude,
           longitude: locationCoords.longitude,
         });
-  
+
         if (cityData.length > 0) {
           city = cityData[0].city; // Assuming city is available in reverse geocoded data
         }
       }
-  
-      const restaurantsCollection = collection(db, "restaurants");
-      const querySnapshot = await getDocs(query(restaurantsCollection, where("city", "==", city)));
-      console.log(city)
-  
+
+      const restaurantsCollection = collection(db, "restaurant"); // change to restaurant
+      const querySnapshot = await getDocs(
+        query(restaurantsCollection, where("city", "==", city))
+      );
+      console.log(city);
+
       setReadCount((prevCount) => prevCount + querySnapshot.size);
-  
+
       const restaurantsData = [];
       querySnapshot.forEach((doc) => {
         const restaurant = doc.data();
         restaurantsData.push(restaurant);
       });
-  
+
       setRestaurants(restaurantsData);
       setFilteredRestaurants(restaurantsData);
       setIsDataLoaded(true);
@@ -188,11 +192,10 @@ export const Restaurants = ({ navigation }) => {
       // Handle error cases
     }
   };
-  
+
   useEffect(() => {
     getLocation();
   }, []);
-  
 
   // Function to fetch restaurant data from Firestore
   const fetchMoreRestaurants = async () => {
@@ -380,30 +383,31 @@ export const Restaurants = ({ navigation }) => {
           label="Search for a food place"
           value={searchText}
           onChangeText={handleInputChange}
-          style={styles.searchInput}
-          dense
+          style={{ width: 270, margin: 10 }}
         />
-        <IconButton
-          icon={searchText.length > 0 ? "close" : "microphone"}
-          color="#00CDBC"
-          size={20}
-          onPress={() => {
-            if (searchText.length > 0) {
-              setSearchText("");
-              setFilteredRestaurants(restaurants);
-              setIsFilterActive(false);
-            } else {
-              captureVoiceInput();
-            }
-          }}
-        />
-        <IconButton
-          icon="tune"
-          onPress={openFilterModal}
-          style={{ marginTop: 10, marginRight: 10 }}
-          iconColor="#fff"
-          size={30}
-        />
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <IconButton
+            icon={searchText.length > 0 ? "close" : "microphone"}
+            iconColor="white"
+            size={20}
+            onPress={() => {
+              if (searchText.length > 0) {
+                setSearchText("");
+                setFilteredRestaurants(restaurants);
+                setIsFilterActive(false);
+              } else {
+                captureVoiceInput();
+              }
+            }}
+          />
+          <IconButton
+            icon="tune"
+            onPress={openFilterModal}
+            style={{ marginTop: 10, marginRight: 10 }}
+            iconColor="#fff"
+            size={20}
+          />
+        </View>
         <FilterModal
           visible={isFilterModalVisible}
           onClose={closeFilterModal}
@@ -422,41 +426,8 @@ export const Restaurants = ({ navigation }) => {
       </View>
 
       {isDataLoaded && filteredRestaurants.length > 0 ? (
-        <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#00CDBC"
-            />
-          }
-        >
-          <View style={{ flexDirection: "row", zIndex: 9999 }}>
-            <LocationServices />
-            <DropDownPicker
-              value={value}
-              items={items}
-              open={open}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setItems}
-              defaultValue={selectedLocation}
-              containerStyle={{ height: 40, width: "50%" }}
-              style={{ backgroundColor: "#fafafa" }}
-              itemStyle={{
-                justifyContent: "flex-start",
-              }}
-              dropDownStyle={{ backgroundColor: "#fafafa" }}
-              onChangeItem={(item) => handleLocationChange(item.value)}
-              zIndex={5000}
-              searchable={true}
-              searchablePlaceholder="Search for location"
-              searchablePlaceholderTextColor="gray"
-              onChangeValue={(value) => {
-                handleLocationChange(value);
-              }}
-            />
-          </View>
+        <ScrollView>
+          <LocationServices />
 
           <View style={styles.brandedContainer}>
             <Branded />

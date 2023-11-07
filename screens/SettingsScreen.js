@@ -27,10 +27,14 @@ export const SettingsScreen = ({ navigation }) => {
   }, []);
 
   const settingsItems = [
-    { icon: "language", text: "Language" },
-    { icon: "notifications", text: "Notifications" },
-    { icon: "lock", text: "Security" },
-    { icon: "question-answer", text: "Ask a Question" },
+    { icon: "language", text: "Language", navigation: "Language" },
+    {
+      icon: "notifications",
+      text: "Notifications",
+      navigation: "Notifications",
+    },
+    { icon: "lock", text: "Security", navigation: "Security" },
+    { icon: "chat", text: "FAQ", navigation: "FAQ" },
   ];
 
   return (
@@ -43,7 +47,11 @@ export const SettingsScreen = ({ navigation }) => {
       />
       <ScrollView style={styles.content}>
         {settingsItems.map((item, index) => (
-          <TouchableOpacity style={styles.listItem} key={index}>
+          <TouchableOpacity
+            style={styles.listItem}
+            key={index}
+            onPress={() => navigation.navigate(item.navigation)}
+          >
             <View style={styles.listItemContent}>
               <View style={styles.iconContainer}>
                 <Icon name={item.icon} style={styles.icon} />

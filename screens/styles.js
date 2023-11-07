@@ -501,6 +501,7 @@ export const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+
   },
   brandedContainer: {
     marginVertical: 10,

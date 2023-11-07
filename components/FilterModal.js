@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Checkbox, IconButton } from "react-native-paper";
 import Modal from "react-native-modal";
-import StarRating from "react-native-star-rating";
+import { AirbnbRating } from "react-native-ratings";
 
 const FilterModal = ({ visible, onClose, onApplyFilters }) => {
-  const [selectedRating, setSelectedRating] = useState(null);
+  const [selectedRating, setSelectedRating] = useState(0);
   const [selectedFoodType, setSelectedFoodType] = useState(null);
   const [isHalal, setIsHalal] = useState(false);
 
@@ -26,7 +26,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
   ];
 
   const clearFilters = () => {
-    setSelectedRating(null);
+    setSelectedRating(0);
     setSelectedFoodType(null);
     setIsHalal(false);
   };
@@ -45,12 +45,14 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
           <Text style={styles.modalTitle}>Filter Options</Text>
           <View style={styles.filtersContainer}>
             <Text style={styles.filtersTitle}>Select Rating:</Text>
-            <StarRating
-              maxStars={5}
-              rating={selectedRating}
-              selectedStar={(rating) => setSelectedRating(rating)}
-              fullStarColor="#00CDBC"
-              starSize={30}
+            <AirbnbRating
+              count={5}
+              reviews={[]}
+              size={20}
+              defaultRating={3}    
+              onFinishRating={setSelectedRating}
+              selectedColor="#00CDBC"
+              reviewSize={2}
             />
           </View>
           <View style={styles.filtersContainer}>
@@ -70,7 +72,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
                         selectedFoodType === foodType ? "checked" : "unchecked"
                       }
                       onPress={() => setSelectedFoodType(foodType)}
-                      color="#60BA62"
+                      color="#00CDBC"
                     />
                     <Text>{foodType}</Text>
                   </View>
@@ -157,8 +159,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   column: {
-    flexDirection: "row", // Display items in two columns
-    flexWrap: "wrap", // Allow items to wrap to the next row
+    flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
   },
 });

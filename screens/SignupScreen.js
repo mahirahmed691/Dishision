@@ -5,8 +5,9 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
+  Modal,
 } from "react-native";
-import { Card, IconButton } from "react-native-paper";
+import { Card, IconButton, Button } from "react-native-paper";
 import { Formik } from "formik";
 import {
   createUserWithEmailAndPassword,
@@ -18,8 +19,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { TextInput } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import defaultAvatar from "../assets/avatar.png";
-
-import { View, Button, FormErrorMessage } from "../components";
+import SelectCuisinesModal from "../components/SelectCuisinesModal.js";
+import { View, FormErrorMessage } from "../components";
 import { Colors, auth, db } from "../config";
 import { useTogglePasswordVisibility } from "../hooks";
 import * as Yup from "yup";
@@ -27,6 +28,12 @@ import * as Yup from "yup";
 export const SignupScreen = ({ navigation }) => {
   const [errorState, setErrorState] = useState("");
   const [profileImage, setProfileImage] = useState(defaultAvatar);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [showCuisinesModal, setShowCuisinesModal] = useState(false);
+
+  const handleOpenCuisinesModal = () => {
+    setShowCuisinesModal(true);
+  };
 
   const {
     passwordVisibility,
@@ -110,18 +117,6 @@ export const SignupScreen = ({ navigation }) => {
     <>
       <KeyboardAwareScrollView enableOnAndroid={true}>
         <Card style={styles.container} isSafe>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <IconButton
-              style={{
-                border: "solid",
-                borderWidth: 2,
-                marginLeft: 25,
-                borderRadius: 10,
-              }}
-              icon="keyboard-backspace"
-            />
-          </TouchableOpacity>
-          <Text style={styles.screenTitle}>Sign up now to get rolling</Text>
           <TouchableOpacity
             onPress={handleImagePicker}
             style={styles.profileImagePicker}
@@ -250,6 +245,7 @@ export const SignupScreen = ({ navigation }) => {
                     onBlur={handleBlur("confirmPassword")}
                     style={styles.textInput}
                   />
+
                   <FormErrorMessage
                     error={errors.confirmPassword}
                     visible={touched.confirmPassword}
@@ -258,9 +254,36 @@ export const SignupScreen = ({ navigation }) => {
                   {errorState !== "" ? (
                     <FormErrorMessage error={errorState} visible={true} />
                   ) : null}
-                  <Button style={styles.button} onPress={handleSubmit}>
+
+                  <Button
+                    style={styles.button}
+                    theme={{
+                      roundness: 0,
+                    }}
+                    mode="contained"
+                    icon="food"
+                    onPress={handleOpenCuisinesModal}
+                  >
+                    Select Cuisines
+                  </Button>
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={showCuisinesModal}
+                    onRequestClose={() => setShowCuisinesModal(false)} // Android back button behavior
+                  >
+                    <SelectCuisinesModal
+                      onClose={() => setShowCuisinesModal(false)}
+                    />
+                  </Modal>
+
+                  <Button
+                    style={styles.button}
+                    onPress={handleSubmit}
+                  >
                     <Text style={styles.buttonText}>Signup</Text>
                   </Button>
+
                   <TouchableOpacity
                     style={styles.touchableOpacityButton}
                     onPress={() => navigation.navigate("Login")}
@@ -350,7 +373,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: 8,
     backgroundColor: "#00CDBC",
-    padding: 15,
     borderRadius: 8,
   },
   buttonText: {
@@ -377,9 +399,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.black,
   },
-  touchableOpacityButton: {
-    marginTop: 40,
-  },
+  touchableOpacityButton: {},
   textInput: {
     width: width * 0.9,
     alignSelf: "center",
