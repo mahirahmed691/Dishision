@@ -18,16 +18,15 @@ DishDecision is an AI-powered application that assists in making decisions relat
 ### Installation
 
 - **Clone Repository:**
+### git clone https://github.com/yourusername/DishDecision.git
 
-git clone https://github.com/yourusername/DishDecision.git
-
-- **Installation:**
-### yarn install
+# Installation
+- *yarn install*
 
 ### Usage
 
 # Start Application
-*expo start*
+- *expo start*
 
 ### Technology Stack
 
