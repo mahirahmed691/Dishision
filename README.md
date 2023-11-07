@@ -22,10 +22,15 @@ cd Dishision
 ```
 
 ### Setup
-- *yarn install*
+```
+yarn install
+```
 
 ### Start Application
-- *expo start*
+```
+expo start
+```
+
 ### Technology Stack
 
 - **React Native:** Framework for building the mobile app
