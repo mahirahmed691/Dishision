@@ -15,7 +15,6 @@ DishDecision is an AI-powered application that assists in making decisions relat
 - **User-Friendly Interface:** Simple and intuitive design for an easy user experience.
 
 ## Installation
-- **Clone Repository:**
 ```
 git clone https://github.com/mahirahmed691/Dishision.git
 cd Dishision
