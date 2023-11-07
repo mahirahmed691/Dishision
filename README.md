@@ -65,7 +65,7 @@ For any queries or support, contact [mahirahmed691@gmail.com](mailto:mahirahmed6
 - Acknowledge any contributors or tools used in the project development.
 
 <div style="display: flex; flex-direction: row;">
-    <img src="https://media.licdn.com/dms/image/C4E03AQHtqec7iPC0XQ/profile-displayphoto-shrink_400_400/0/1656085518557?e=1704931200&v=beta&t=9zwk4-7giJLHcRSOcrZsG1ea5Y5fkHP5bD5FXYQ7LX8" alt="Example Image" width="100" />
-    <img src="https://media.licdn.com/dms/image/C5603AQHrZrhA1Us7qA/profile-displayphoto-shrink_800_800/0/1517398677029?e=1704931200&v=beta&t=Ja7jfPIwnFbgBVfD-_yl4PaLEqI5mfjXgRtLVEz13D4" alt="Example Image" width="100" />
+    <img src="https://media.licdn.com/dms/image/C4E03AQHtqec7iPC0XQ/profile-displayphoto-shrink_400_400/0/1656085518557?e=1704931200&v=beta&t=9zwk4-7giJLHcRSOcrZsG1ea5Y5fkHP5bD5FXYQ7LX8" alt="Example Image" width="200" />
+    <img src="https://media.licdn.com/dms/image/C5603AQHrZrhA1Us7qA/profile-displayphoto-shrink_800_800/0/1517398677029?e=1704931200&v=beta&t=Ja7jfPIwnFbgBVfD-_yl4PaLEqI5mfjXgRtLVEz13D4" alt="Example Image" width="200" />
 </div>
 
