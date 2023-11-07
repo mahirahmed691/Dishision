@@ -1,7 +1,4 @@
 # DishDecision
-
-## Tagline
-
 *Decisions made easier.*
 
 ### Overview
