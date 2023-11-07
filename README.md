@@ -1,4 +1,4 @@
-# DishDecision
+[# DishDecision
 
 ## Tagline
 
@@ -22,8 +22,6 @@ DishDecision is an AI-powered application that assists in making decisions relat
 
 # Installation
 - *yarn install*
-
-### Setup
 
 # Start Application
 - *expo start*
@@ -61,3 +59,4 @@ For any queries or support, contact [email@example.com](mailto:email@example.com
 ### Acknowledgments
 
 - Acknowledge any contributors or tools used in the project development.
+](url)
