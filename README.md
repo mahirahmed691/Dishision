@@ -57,3 +57,6 @@ For any queries or support, contact [email@example.com](mailto:email@example.com
 
 - Acknowledge any contributors or tools used in the project development.
 ](url)
+
+<img src="https://media.licdn.com/dms/image/C4E03AQHtqec7iPC0XQ/profile-displayphoto-shrink_400_400/0/1656085518557?e=1704931200&v=beta&t=9zwk4-7giJLHcRSOcrZsG1ea5Y5fkHP5bD5FXYQ7LX8" alt="Example Image" width="300" />
+
