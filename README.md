@@ -24,7 +24,6 @@ DishDecision is an AI-powered application that assists in making decisions relat
 
 ### Start Application
 - *expo start*
-- 
 ### Technology Stack
 
 - **React Native:** Framework for building the mobile app
