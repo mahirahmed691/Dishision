@@ -22,12 +22,12 @@ DishDecision is an AI-powered application that assists in making decisions relat
 git clone https://github.com/yourusername/DishDecision.git
 
 - **Installation:**
-- yarn install
+### yarn install
 
 ### Usage
 
 - **Start Application:**
-- expo start 
+### expo start 
 
 ### Technology Stack
 
@@ -39,8 +39,7 @@ git clone https://github.com/yourusername/DishDecision.git
 - React Native
 - ChatGPT API
 - Stripe
-- 
-
+  
 ### Configuration
 
 - **ChatGPT API Key:** Get the API key for ChatGPT and set it in the configuration file.
