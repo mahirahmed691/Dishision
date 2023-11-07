@@ -1,4 +1,4 @@
-# DishDecision
+# DishDecide
 
 *Decisions made easier.*
 
