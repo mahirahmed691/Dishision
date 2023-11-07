@@ -26,8 +26,8 @@ git clone https://github.com/yourusername/DishDecision.git
 
 ### Usage
 
-- **Start Application:**
-### expo start 
+# Start Application
+*expo start*
 
 ### Technology Stack
 
