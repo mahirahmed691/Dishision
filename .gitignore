@@ -70,3 +70,6 @@ dist/
 web-build/
 
 .env
+
+/ios/
+/android/

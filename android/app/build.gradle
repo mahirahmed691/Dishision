@@ -81,7 +81,7 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.dishdecide"
+    namespace 'com.mahir93.dishdecide'
     defaultConfig {
         applicationId 'com.mahir93.dishdecide'
         minSdkVersion rootProject.ext.minSdkVersion

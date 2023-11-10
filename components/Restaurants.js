@@ -3,11 +3,9 @@ import {
   View,
   Text,
   ScrollView,
-  StyleSheet,
+  Modal,
   Image,
   TouchableOpacity,
-  RefreshControl,
-  ActivityIndicator,
   Animated, // Import Animated from react-native
   Easing,
 } from "react-native";
@@ -15,8 +13,8 @@ import * as Speech from "expo-speech";
 import * as Location from "expo-location";
 import { Button, IconButton, TextInput } from "react-native-paper";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faFire } from "@fortawesome/free-solid-svg-icons";
-import DropDownPicker from "react-native-dropdown-picker";
+import { faFire, faStar } from "@fortawesome/free-solid-svg-icons";
+import { Audio } from "expo-av";
 import {
   getDocs,
   collection,
@@ -31,6 +29,7 @@ import RestaurantForm from "../components/RestaurantForm";
 import Branded from "./Branded";
 import LocationServices from "./Location";
 import styles from "../screens/styles";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export const Restaurants = ({ navigation }) => {
   const [restaurants, setRestaurants] = useState([]);
@@ -55,6 +54,88 @@ export const Restaurants = ({ navigation }) => {
   const [readCount, setReadCount] = useState(0);
   const [voiceInputText, setVoiceInputText] = useState("");
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedRestaurants, setSelectedRestaurants] = useState([]);
+
+  // Function to handle "Show More" button press
+  const handleShowMore = (category) => {
+    setSelectedCategory(category);
+    setModalVisible(true);
+    // Get the restaurants for the selected category
+    setSelectedRestaurants(groupedRestaurants[category]);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    // Other necessary state updates or functionality upon modal close
+  };
+
+  // Function to close the modal
+  const FullScreenModal = ({
+    selectedCategory,
+    selectedRestaurants,
+    onClose,
+    navigateToFoodScreen,
+    navigation,
+  }) => {
+    return (
+      <Modal visible={modalVisible} animationType="slide">
+        <SafeAreaView style={{ flex: 1, marginTop: 40 }}>
+          <IconButton
+            icon="chevron-left"
+            title="Go Back"
+            onPress={() => {
+              setModalVisible(false); // Update the state to close the modal
+            }}
+          />
+          <Text style={{ fontSize: 30, fontWeight: "900", marginLeft: 20 }}>
+            {selectedCategory}
+          </Text>
+          <View style={styles.fullScreenModalContainer}>
+            <ScrollView contentContainerStyle={styles.restaurantListContainer}>
+              {selectedRestaurants.map((restaurant, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.restaurantCardFullScreen}
+                  onPress={() => {
+                    navigateToFoodScreen(restaurant);
+                    navigation.navigate("Menu", { restaurant });
+                  }}
+                >
+                  <View style={{ flexDirection: "row" }}>
+                    <View style={{ width: "30%" }}>
+                      <Image
+                        source={{ uri: restaurant.logo }}
+                        style={styles.restaurantImage}
+                      />
+                    </View>
+                    <View style={styles.restaurantInfo}>
+                      <Text style={styles.restaurantName}>
+                        {restaurant.restaurantName}
+                      </Text>
+                      <View style={{ flexDirection: "row", marginTop: 10 }}>
+                        <FontAwesomeIcon
+                          icon={faStar}
+                          size={12}
+                          color="#00CDBC"
+                          style={{ marginRight: 5 }}
+                        />
+                        <Text style={styles.ratingText}>
+                          {(restaurant.rating * 2).toFixed(2)}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </SafeAreaView>
+      </Modal>
+    );
+  };
 
   const handleLoadMoreCategories = () => {
     setLoadingMore(true);
@@ -98,54 +179,37 @@ export const Restaurants = ({ navigation }) => {
     }
   };
 
-  const getMicrophonePermission = async () => {
-    try {
-      const { status } =
-        await Speech.requestDeviceAudioRecordingPermissionAsync();
-      if (status === "granted") {
-        console.log("Microphone permission granted");
-        setIsPermissionGranted(true);
-      } else {
-        console.log("Microphone permission denied");
-      }
-    } catch (error) {
-      console.error("Error getting microphone permission:", error);
-    }
-  };
-
   const captureVoiceInput = async () => {
     try {
-      const { status } = await Speech.getPermissionsAsync();
-      if (status !== "granted") {
-        alert(
-          "Permission to access the microphone is required for voice input"
-        );
-        return;
-      }
-
-      let spokenText = await Speech.recognizeAsync();
+      // ... your existing logic to capture voice input
     } catch (error) {
       console.error("Error capturing voice input:", error);
-      alert("An error occurred while capturing voice input. Please try again.");
     }
   };
 
-  const checkAndRequestPermissions = async () => {
-    await getMicrophonePermission();
-  };
+  useEffect(() => {
+    const handleCaptureVoiceInput = async () => {
+      try {
+        const { status } = await Audio.requestPermissionsAsync();
+        if (status !== "granted") {
+          console.log("Permission to access the microphone was denied");
+          return;
+        }
 
-  checkAndRequestPermissions();
+        // Set audio mode and start capturing voice input
+        await Audio.setAudioModeAsync({
+          allowsRecording: true,
+          playsInSilentModeIOS: true,
+        });
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await fetchRestaurantsFromFirestore();
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
+        await captureVoiceInput(); // Start capturing voice input
+      } catch (error) {
+        console.error("Error initiating voice input:", error);
+      }
+    };
+
+    handleCaptureVoiceInput(); // Trigger voice input capturing
+  }, []);
 
   useEffect(() => {
     if (currentLocation && fetchCount === 0) {
@@ -157,7 +221,7 @@ export const Restaurants = ({ navigation }) => {
 
   const fetchRestaurantsFromFirestore = async (locationCoords) => {
     try {
-      let city = ""; // Default city value
+      let city = "";
 
       if (locationCoords) {
         const cityData = await Location.reverseGeocodeAsync({
@@ -166,11 +230,11 @@ export const Restaurants = ({ navigation }) => {
         });
 
         if (cityData.length > 0) {
-          city = cityData[0].city; // Assuming city is available in reverse geocoded data
+          city = cityData[0].city;
         }
       }
 
-      const restaurantsCollection = collection(db, "restaurant"); // change to restaurant
+      const restaurantsCollection = collection(db, "restaurant");
       const querySnapshot = await getDocs(
         query(restaurantsCollection, where("city", "==", city))
       );
@@ -202,11 +266,7 @@ export const Restaurants = ({ navigation }) => {
     try {
       const restaurantsCollection = collection(db, "restaurant");
       const querySnapshot = await getDocs(
-        query(
-          restaurantsCollection,
-          where("city", "==", "Manchester"),
-          limit(10)
-        )
+        query(restaurantsCollection, where("city", "==", city), limit(10))
       );
 
       setReadCount((prevCount) => prevCount + querySnapshot.size);
@@ -306,6 +366,7 @@ export const Restaurants = ({ navigation }) => {
 
   const navigateToFoodScreen = (restaurant) => {
     navigation.navigate("Menu", { restaurant });
+    setModalVisible(false);
   };
 
   const groupRestaurantsByCuisine = (restaurants) => {
@@ -432,72 +493,112 @@ export const Restaurants = ({ navigation }) => {
           <View style={styles.brandedContainer}>
             <Branded />
           </View>
+
           {Object.keys(groupedRestaurants)
             .slice(0, visibleCategories)
-            .map((cuisineType, index) => (
-              <View key={index}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={styles.cuisineHeader}>
-                    {" "}
-                    {cuisineType
-                      .split(" ")
-                      .map(
-                        (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                      )
-                      .join(" ")}{" "}
-                  </Text>
-                  <Text style={{ fontSize: 12, fontWeight: "700" }}>
-                    ({groupedRestaurants[cuisineType].length})
-                  </Text>
-                </View>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.restaurantHorizontalList}
-                >
-                  {groupedRestaurants[cuisineType].map((restaurant, idx) => (
-                    <TouchableOpacity
-                      key={idx}
-                      style={styles.restaurantCardHorizontal}
-                      onPress={() => navigateToFoodScreen(restaurant)}
-                    >
-                      <View>
-                        <Image
-                          source={{ uri: restaurant.logo }}
-                          style={styles.logoHorizontal}
-                        />
-                        <View style={styles.restaurantInfoHorizontal}>
-                          <Text style={styles.restaurantNameHorizontal}>
-                            {restaurant.restaurantName}
-                          </Text>
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              marginTop: 0,
-                            }}
-                          >
-                            <Text style={styles.restaurantRating}>
-                              {(restaurant.rating * 2).toFixed(1)}
-                            </Text>
-                            {restaurant.rating >= 4.5 ? (
-                              <FontAwesomeIcon
-                                icon={faFire}
-                                size={12}
-                                color="orange"
-                              />
-                            ) : null}
+            .map((cuisineType, index) => {
+              const restaurantsInCategory = groupedRestaurants[cuisineType];
+
+              return (
+                <View key={index}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text style={styles.cuisineHeader}>
+                      {cuisineType
+                        .split(" ")
+                        .map(
+                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" ")}
+                    </Text>
+                    <IconButton
+                      style={{ marginTop: 0 }}
+                      iconColor="#00CDBC"
+                      icon="arrow-right"
+                      size={20}
+                      animated={true}
+                      onPress={() => {
+                        handleShowMore(cuisineType);
+                      }}
+                    />
+                  </View>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.restaurantHorizontalList}
+                  >
+                    {restaurantsInCategory
+                      .slice(0, 5) // Show 10 restaurants
+                      .map((restaurant, idx) => (
+                        <TouchableOpacity
+                          key={idx}
+                          style={styles.restaurantCardHorizontal}
+                          onPress={() => navigateToFoodScreen(restaurant)}
+                        >
+                          <View>
+                            <Image
+                              source={{ uri: restaurant.logo }}
+                              style={styles.logoHorizontal}
+                            />
+                            <View style={styles.restaurantInfoHorizontal}>
+                              <Text style={styles.restaurantNameHorizontal}>
+                                {restaurant.restaurantName}
+                              </Text>
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  marginTop: 0,
+                                }}
+                              >
+                                <Text style={styles.restaurantRating}>
+                                  {(restaurant.rating * 2).toFixed(1)}
+                                </Text>
+                                {restaurant.rating >= 4.5 ? (
+                                  <FontAwesomeIcon
+                                    icon={faFire}
+                                    size={12}
+                                    color="orange"
+                                  />
+                                ) : null}
+                              </View>
+                            </View>
                           </View>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            ))}
+                        </TouchableOpacity>
+                      ))}
+                    {restaurantsInCategory.length > 5 && (
+                      <IconButton
+                        style={{ marginTop: 40 }}
+                        containerColor="#00CDBC"
+                        iconColor="white"
+                        icon="chevron-right"
+                        size={10}
+                        animated={true}
+                        onPress={() => {
+                          handleShowMore(cuisineType);
+                        }}
+                      />
+                    )}
+                  </ScrollView>
+                </View>
+              );
+            })}
         </ScrollView>
       ) : null}
+
+      <FullScreenModal
+        selectedCategory={selectedCategory}
+        selectedRestaurants={selectedRestaurants}
+        onClose={handleCloseModal}
+        navigateToFoodScreen={navigateToFoodScreen}
+        navigation={navigation}
+      />
       <Animated.View
         style={{
           opacity: animatedScrollY.interpolate({
