@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { IconButton, Button } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import StarRating from "react-native-star-rating";
+import StarRating from "react-native-star-rating-view";
 import {
   getFirestore,
   collection,

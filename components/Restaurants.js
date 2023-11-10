@@ -213,7 +213,7 @@ export const Restaurants = ({ navigation }) => {
 
   useEffect(() => {
     if (currentLocation && fetchCount === 0) {
-      setSelectedLocation("Manchester");
+      setSelectedLocation("");
       fetchRestaurantsFromFirestore(currentLocation);
       setFetchCount(1);
     }
@@ -266,7 +266,7 @@ export const Restaurants = ({ navigation }) => {
     try {
       const restaurantsCollection = collection(db, "restaurant");
       const querySnapshot = await getDocs(
-        query(restaurantsCollection, where("city", "==", city), limit(10))
+        query(restaurantsCollection, where("city", "==", "Manchester"), limit(10))
       );
 
       setReadCount((prevCount) => prevCount + querySnapshot.size);

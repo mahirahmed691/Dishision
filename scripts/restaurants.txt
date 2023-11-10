@@ -1,0 +1,314 @@
+[
+  {
+    "restaurantName": "Meat and Shake",
+    "address": "London, UK",
+    "isHalal": true,
+    "hygiene": 4.6,
+    "rating": 4.4,
+    "cuisine": "Burgers",
+    "city": "London",
+    "starters": [
+      "Chicken Wings",
+      "Mozzarella Sticks",
+      "Onion Rings"
+    ],
+    "mains": [
+      "Classic Beef Burger",
+      "Spicy Chicken Burger",
+      "Veggie Burger"
+    ],
+    "desserts": [
+      "Brownie Sundae",
+      "Milkshakes",
+      "Apple Pie"
+    ],
+    "drinks": [
+      "Craft Beers",
+      "Sodas",
+      "Shakes"
+    ],
+    "vegan": false,
+    "long": -0.1276,
+    "lat": 51.5074
+  },
+  {
+    "restaurantName": "Hankies",
+    "address": "Location not specified",
+    "isHalal": false,
+    "hygiene": 4.5,
+    "rating": 4.2,
+    "cuisine": "Indian",
+    "city": "Location not specified",
+    "starters": [
+      "Papad",
+      "Samosa",
+      "Pani Puri"
+    ],
+    "mains": [
+      "Chicken Tikka Masala",
+      "Lamb Biryani",
+      "Paneer Butter Masala"
+    ],
+    "desserts": [
+      "Gulab Jamun",
+      "Kheer",
+      "Ras Malai"
+    ],
+    "drinks": [
+      "Lassi",
+      "Mango Lassi",
+      "Masala Chai"
+    ],
+    "vegan": false,
+    "long": 0,
+    "lat": 0
+  },
+  {
+    "restaurantName": "Inamo",
+    "address": "Location not specified",
+    "isHalal": false,
+    "hygiene": 4.4,
+    "rating": 4.3,
+    "cuisine": "Asian Fusion",
+    "city": "Location not specified",
+    "starters": [
+      "Dim Sum",
+      "Sushi",
+      "Edamame"
+    ],
+    "mains": [
+      "Katsu Curry",
+      "Sushi Rolls",
+      "Bibimbap"
+    ],
+    "desserts": [
+      "Matcha Cake",
+      "Mochi",
+      "Sesame Balls"
+    ],
+    "drinks": [
+      "Sake",
+      "Asian Beers",
+      "Cocktails"
+    ],
+    "vegan": false,
+    "long": 0,
+    "lat": 0
+  },
+  {
+    "restaurantName": "Chapatti And Karak",
+    "address": "Location not specified",
+    "isHalal": true,
+    "hygiene": 4.6,
+    "rating": 4.5,
+    "cuisine": "Indian, Middle Eastern",
+    "city": "Location not specified",
+    "starters": [
+      "Hummus",
+      "Vegetable Pakora",
+      "Falafel"
+    ],
+    "mains": [
+      "Chicken Shawarma",
+      "Lamb Biryani",
+      "Palak Paneer"
+    ],
+    "desserts": [
+      "Baklava",
+      "Karak Tea Cake",
+      "Rasmalai"
+    ],
+    "drinks": [
+      "Karak Tea",
+      "Masala Chai",
+      "Falooda"
+    ],
+    "vegan": false,
+    "long": 0,
+    "lat": 0
+  },
+  {
+    "restaurantName": "Angus Steakhouse",
+    "address": "Location not specified",
+    "isHalal": false,
+    "hygiene": 4.4,
+    "rating": 4.2,
+    "cuisine": "Steakhouse",
+    "city": "Location not specified",
+    "starters": [
+      "Garlic Bread",
+      "Caesar Salad",
+      "Prawn Cocktail"
+    ],
+    "mains": [
+      "Sirloin Steak",
+      "Ribeye Steak",
+      "T-Bone Steak"
+    ],
+    "desserts": [
+      "Cheesecake",
+      "Chocolate Brownie",
+      "Apple Pie"
+    ],
+    "drinks": [
+      "Wines",
+      "Cocktails",
+      "Beers"
+    ],
+    "vegan": false,
+    "long": 0,
+    "lat": 0
+  },
+  {
+    "restaurantName": "Gaucho",
+    "address": "Location not specified",
+    "isHalal": true,
+    "hygiene": 4.7,
+    "rating": 4.6,
+    "cuisine": "Steakhouse",
+    "city": "Location not specified",
+    "starters": [
+      "Empanadas",
+      "Beef Carpaccio",
+      "Grilled Provolone"
+    ],
+    "mains": [
+      "Ancho Steak",
+      "Sirloin Steak",
+      "Ribeye Steak"
+    ],
+    "desserts": [
+      "Dulce de Leche",
+      "Churros",
+      "Flan"
+    ],
+    "drinks": [
+      "Malbec Wine",
+      "Craft Cocktails",
+      "Pisco Sours"
+    ],
+    "vegan": false,
+    "long": 0,
+    "lat": 0
+  },
+  {
+    "restaurantName": "GIF",
+    "address": "Location not specified",
+    "isHalal": false,
+    "hygiene": 4.5,
+    "rating": 4.3,
+    "cuisine": "Cuisine not specified",
+    "city": "Location not specified",
+    "starters": [
+      "Starter not specified"
+    ],
+    "mains": [
+      "Main course not specified"
+    ],
+    "desserts": [
+      "Dessert not specified"
+    ],
+    "drinks": [
+      "Drinks not specified"
+    ],
+    "vegan": false,
+    "long": 0,
+    "lat": 0
+  },
+  {
+    "restaurantName": "Chiquito",
+    "address": "Location not specified",
+    "isHalal": false,
+    "hygiene": 4.6,
+    "rating": 4.4,
+    "cuisine": "Mexican",
+    "city": "Location not specified",
+    "starters": [
+      "Guacamole",
+      "Quesadillas",
+      "Nachos"
+    ],
+    "mains": [
+      "Burritos",
+      "Enchiladas",
+      "Tacos"
+    ],
+    "desserts": [
+      "Churros",
+      "Sopapillas",
+      "Flan"
+    ],
+    "drinks": [
+      "Margaritas",
+      "Mexican Beers",
+      "Tequila"
+    ],
+    "vegan": false,
+    "long": 0,
+    "lat": 0
+  },
+  {
+    "restaurantName": "Mak Grillz",
+    "address": "Location not specified",
+    "isHalal": false,
+    "hygiene": 4.3,
+    "rating": 4.1,
+    "cuisine": "Grill",
+    "city": "Location not specified",
+    "starters": [
+      "Grilled Vegetables",
+      "Garlic Bread",
+      "Chicken Wings"
+    ],
+    "mains": [
+      "Mixed Grill",
+      "Grilled Chicken",
+      "Lamb Chops"
+    ],
+    "desserts": [
+      "Baklava",
+      "Rice Pudding",
+      "Ice Cream"
+    ],
+    "drinks": [
+      "Soft Drinks",
+      "Juices",
+      "Shakes"
+    ],
+    "vegan": false,
+    "long": 0,
+    "lat": 0
+  },
+  {
+    "restaurantName": "The Great Chase - Finsbury",
+    "address": "Location not specified",
+    "isHalal": true,
+    "hygiene": 4.8,
+    "rating": 4.7,
+    "cuisine": "Modern European",
+    "city": "Location not specified",
+    "starters": [
+      "Chase Charcuterie",
+      "Seared Scallops",
+      "Vegetable Tempura"
+    ],
+    "mains": [
+      "Truffle Risotto",
+      "Lamb Shank",
+      "Pan-Seared Salmon"
+    ],
+    "desserts": [
+      "Chocolate Fondant",
+      "Panna Cotta",
+      "Tiramisu"
+    ],
+    "drinks": [
+      "Cocktails",
+      "Wines",
+      "Mocktails"
+    ],
+    "vegan": false,
+    "long": 0,
+    "lat": 0
+  }
+]

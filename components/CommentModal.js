@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Modal, Dimensions } from "react-native";
 import { IconButton, Button, TextInput } from "react-native-paper";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
-import StarRating from "react-native-star-rating";
+import StarRating from "react-native-star-rating-view";
 import { Colors } from "../config";
 
 export const CommentModal = ({
