@@ -25,6 +25,7 @@ function generateRestaurantData(restaurantNames, existingRestaurants) {
         const restaurant = {
           restaurantName: trimmedName,
           address: "Address Placeholder",
+          logo:"https://static.wixstatic.com/media/bf242e_6133b4ae6a104cc2b50d70179f35efea~mv2.jpg/v1/fill/w_500,h_376,al_c,lg_1,q_80,enc_auto/food-placeholder.jpg",
           isHalal: false,
           hygiene: Number((Math.random() * (5 - 1) + 1).toFixed(1)), // Random hygiene with one decimal point
           rating: Number((Math.random() * (5 - 1) + 1).toFixed(1)), // Random rating with one decimal point

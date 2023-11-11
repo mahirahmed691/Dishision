@@ -216,7 +216,10 @@ EastZEast
 The Bradford Hotel – Brasserie 
 Ziya Asian Grill 
 Royal Balti House
-Feilden's Arms 
+Feilden's Arms
+Tim Hortons
+Starbucks
+Cafe Néro
 Amalfi Restaurant 
 Lal Qila 
 King George's Hall Café Bar 
@@ -281,3 +284,30 @@ Anejo
 Baro 
 Rosina’s
 Myth
+Grindsmith
+Takk
+Pot Kettle Black (PKB)
+Federal Cafe & Bar
+Ezra & Gil
+North Tea Power
+Java Bar Espresso
+Idle Hands Coffee
+Siop Shop
+Oat Chai
+Lupo Caffè Italiano
+Foundation Coffee House
+Fig + Sparrow
+Proper Tea at Manchester Cathedral
+Evelyn's Cafe Bar
+Chapter One Books
+Idle Hands Coffee Company
+Caffeine & Co.
+Eighth Day Vegetarian Healthfood Shop & Café
+Ancoats Coffee Co.
+Umezushi
+Shoryu Ramen
+Yuzu
+Zumu Sushi
+Sakana
+Wasabi
+Tampopo
