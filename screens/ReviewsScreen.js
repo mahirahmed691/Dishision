@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { IconButton, Button } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import StarRating from "react-native-star-rating-view";
@@ -25,7 +25,7 @@ export const ReviewsScreen = ({ route }) => {
 
   const fetchComments = async (restaurantName) => {
     try {
-      const commentsCollection = collection(db, "comments"); // Use your actual collection name
+      const commentsCollection = collection(db, "comments"); 
       const q = query(
         commentsCollection,
         where("restaurantName", "==", restaurantName)
