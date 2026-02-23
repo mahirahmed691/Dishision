@@ -16,7 +16,7 @@ const RestaurantMenu = ({ restaurantName }) => {
         const restaurantRef = collection(db, "restaurant");
         const q = query(
           restaurantRef,
-          where("restaurantName", "==", restaurantName)
+          where("restaurantName", "==", restaurantName),
         );
         const querySnapshot = await getDocs(q);
 

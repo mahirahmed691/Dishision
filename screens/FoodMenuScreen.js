@@ -150,7 +150,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
       const commentsCollection = collection(db, "comments");
       const q = query(
         commentsCollection,
-        where("restaurantName", "==", restaurantName)
+        where("restaurantName", "==", restaurantName),
       );
       const querySnapshot = await getDocs(q);
 
@@ -181,7 +181,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     // Toggle the selected state of the prompt
     if (selectedKeywords.includes(prompt)) {
       setSelectedKeywords((prevSelectedKeywords) =>
-        prevSelectedKeywords.filter((keyword) => keyword !== prompt)
+        prevSelectedKeywords.filter((keyword) => keyword !== prompt),
       );
     } else {
       setSelectedKeywords((prevSelectedKeywords) => [
@@ -228,7 +228,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     if (searchText) {
       // Check if the query contains food-related keywords
       const containsFoodKeyword = foodKeywords.some((keyword) =>
-        searchText.toLowerCase().includes(keyword)
+        searchText.toLowerCase().includes(keyword),
       );
 
       if (!containsFoodKeyword) {
@@ -289,7 +289,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
   const animateSearchButton = () => {
     searchButtonScale.value = withSequence(
       withTiming(1.1, { duration: 200, easing: Easing.out(Easing.quad) }),
-      withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) })
+      withTiming(1, { duration: 200, easing: Easing.out(Easing.quad) }),
     );
   };
 
@@ -297,7 +297,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
     try {
       const restaurantNameToQuery = restaurant.restaurantName;
       const length = await fetchCommentsLengthForRestaurant(
-        restaurantNameToQuery
+        restaurantNameToQuery,
       );
       setCommentsLength(length);
     } catch (error) {
@@ -359,7 +359,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           await setDoc(userFavoriteDoc, favoriteRestaurant, { merge: true });
 
           console.log(
-            `Added ${restaurant.restaurantName} to favorites for ${userEmail}.`
+            `Added ${restaurant.restaurantName} to favorites for ${userEmail}.`,
           );
         } else {
           console.error("The restaurant or restaurantName is not defined.");
@@ -413,7 +413,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
           const restaurantName = restaurant.restaurantName;
           console.log("restaurantName:", restaurantName);
           console.log(
-            `Removing ${restaurantName} from favorites for ${userEmail}`
+            `Removing ${restaurantName} from favorites for ${userEmail}`,
           );
 
           const favoritesRef = collection(db, "favorites");
@@ -428,11 +428,11 @@ export const FoodMenuScreen = ({ navigation, route }) => {
               await setDoc(userFavoriteDoc, userFavoriteData); // Update the document
 
               console.log(
-                `Removed ${restaurantName} from favorites for ${userEmail}.`
+                `Removed ${restaurantName} from favorites for ${userEmail}.`,
               );
             } else {
               console.error(
-                `Restaurant ${restaurantName} is not in user favorites.`
+                `Restaurant ${restaurantName} is not in user favorites.`,
               );
             }
           } else {
@@ -673,7 +673,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
       const closingTimeCollection = collection(db, "restaurant");
       const q = query(
         closingTimeCollection,
-        where("restaurantName", "==", restaurantName)
+        where("restaurantName", "==", restaurantName),
       );
       const querySnapshot = await getDocs(q);
 
@@ -697,7 +697,7 @@ export const FoodMenuScreen = ({ navigation, route }) => {
 
   const openUrlInBrowser = (url) => {
     Linking.openURL(url).catch((err) =>
-      console.error("Error opening URL: ", err)
+      console.error("Error opening URL: ", err),
     );
   };
 

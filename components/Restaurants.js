@@ -236,7 +236,7 @@ export const Restaurants = ({ navigation }) => {
 
       const restaurantsCollection = collection(db, "restaurant");
       const querySnapshot = await getDocs(
-        query(restaurantsCollection, where("city", "==", city))
+        query(restaurantsCollection, where("city", "==", city)),
       );
       console.log(city);
 
@@ -266,7 +266,11 @@ export const Restaurants = ({ navigation }) => {
     try {
       const restaurantsCollection = collection(db, "restaurant");
       const querySnapshot = await getDocs(
-        query(restaurantsCollection, where("city", "==", "Manchester"), limit(10))
+        query(
+          restaurantsCollection,
+          where("city", "==", "Manchester"),
+          limit(10),
+        ),
       );
 
       setReadCount((prevCount) => prevCount + querySnapshot.size);
@@ -284,8 +288,8 @@ export const Restaurants = ({ navigation }) => {
             (newRestaurant) =>
               !prevRestaurants.some(
                 (existingRestaurant) =>
-                  existingRestaurant.id === newRestaurant.id
-              )
+                  existingRestaurant.id === newRestaurant.id,
+              ),
           ),
         ];
         return updatedRestaurants;
@@ -298,8 +302,8 @@ export const Restaurants = ({ navigation }) => {
             (newRestaurant) =>
               !prevRestaurants.some(
                 (existingRestaurant) =>
-                  existingRestaurant.id === newRestaurant.id
-              )
+                  existingRestaurant.id === newRestaurant.id,
+              ),
           ),
         ];
         return updatedFilteredRestaurants;
@@ -329,7 +333,7 @@ export const Restaurants = ({ navigation }) => {
     if (foodType !== null) {
       filtered = filtered.filter(
         (restaurant) =>
-          restaurant.cuisine.toLowerCase() === foodType.toLowerCase()
+          restaurant.cuisine.toLowerCase() === foodType.toLowerCase(),
       );
     }
 
@@ -398,7 +402,7 @@ export const Restaurants = ({ navigation }) => {
     } else {
       const filteredByLocation = filterByLocation(restaurants, location);
       setFilteredRestaurants(
-        filteredByLocation.length > 0 ? filteredByLocation : restaurants
+        filteredByLocation.length > 0 ? filteredByLocation : restaurants,
       );
     }
   };
@@ -407,7 +411,7 @@ export const Restaurants = ({ navigation }) => {
     setSelectedLocation(currentLocation);
     const filteredByCurrentLocation = filterByLocation(
       restaurants,
-      currentLocation
+      currentLocation,
     );
     if (filteredByCurrentLocation.length === 0) {
       setFilteredRestaurants(restaurants);
@@ -512,7 +516,8 @@ export const Restaurants = ({ navigation }) => {
                       {cuisineType
                         .split(" ")
                         .map(
-                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                          (word) =>
+                            word.charAt(0).toUpperCase() + word.slice(1),
                         )
                         .join(" ")}
                     </Text>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Text,
   StyleSheet,
@@ -10,13 +10,14 @@ import {
 import { Formik } from "formik";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { TextInput, Button, Card, Icon } from "react-native-paper";
+import { TextInput, Button, Card } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { FormErrorMessage } from "../components";
-import { Colors, auth } from "../config";
+import { Colors } from "../config";
+import { auth } from "../config/firebase"; // ✅ correct singleton
 import { useTogglePasswordVisibility } from "../hooks";
 import { loginValidationSchema } from "../utils";
 
@@ -24,19 +25,21 @@ WebBrowser.maybeCompleteAuthSession();
 
 export const LoginScreen = ({ navigation }) => {
   const [errorState, setErrorState] = useState("");
-  const [token, setToken] = useState("");
   const [userInfo, setUserInfo] = useState(null);
 
   const { passwordVisibility, handlePasswordVisibility, rightIcon } =
     useTogglePasswordVisibility();
 
-  const handleLogin = (values) => {
+  // ✅ email/password login
+  const handleLogin = useCallback((values) => {
     const { email, password } = values;
-    signInWithEmailAndPassword(auth, email, password).catch((error) =>
-      setErrorState(error.message)
-    );
-  };
 
+    signInWithEmailAndPassword(auth, email, password).catch((error) =>
+      setErrorState(error.message),
+    );
+  }, []);
+
+  // ✅ Google auth request
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "",
     iosClientId:
@@ -44,45 +47,46 @@ export const LoginScreen = ({ navigation }) => {
     webClientId: "",
   });
 
+  // ✅ handle Google response safely
   useEffect(() => {
-    handleEffect();
-  }, [response, token]);
+    if (!response) return;
 
-  async function handleEffect() {
-    const user = await getLocalUser();
-    console.log("user", user);
-    if (!user) {
-      if (response?.type === "success") {
-        // setToken(response.authentication.accessToken);
-        getUserInfo(response.authentication.accessToken);
+    const run = async () => {
+      const localUser = await getLocalUser();
+
+      if (!localUser && response?.type === "success") {
+        await getUserInfo(response.authentication?.accessToken);
+      } else if (localUser) {
+        setUserInfo(localUser);
       }
-    } else {
-      setUserInfo(user);
-      console.log("loaded locally");
-    }
-  }
+    };
+
+    run();
+  }, [response]);
 
   const getLocalUser = async () => {
-    const data = await AsyncStorage.getItem("@user");
-    if (!data) return null;
-    return JSON.parse(data);
+    try {
+      const data = await AsyncStorage.getItem("@user");
+      if (!data) return null;
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
   };
 
   const getUserInfo = async (token) => {
     if (!token) return;
-    try {
-      const response = await fetch(
-        "https://www.googleapis.com/userinfo/v2/me",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
 
-      const user = await response.json();
+    try {
+      const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const user = await res.json();
       await AsyncStorage.setItem("@user", JSON.stringify(user));
       setUserInfo(user);
     } catch (error) {
-      // Add your own error handler here
+      console.log("Google user fetch failed:", error);
     }
   };
 
@@ -91,16 +95,14 @@ export const LoginScreen = ({ navigation }) => {
       source={require("../assets/burgerUnsplash.png")}
       style={styles.backgroundImage}
     >
-      <KeyboardAwareScrollView enableOnAndroid={true}>
+      <KeyboardAwareScrollView enableOnAndroid>
         <Card style={styles.container}>
-          <Text style={styles.title}> Welcome to Dish Decide </Text>
+          <Text style={styles.title}>Welcome to Dish Decide</Text>
+
           <Formik
-            initialValues={{
-              email: "",
-              password: "",
-            }}
+            initialValues={{ email: "", password: "" }}
             validationSchema={loginValidationSchema}
-            onSubmit={(values) => handleLogin(values)}
+            onSubmit={handleLogin}
           >
             {({
               values,
@@ -111,6 +113,7 @@ export const LoginScreen = ({ navigation }) => {
               handleBlur,
             }) => (
               <View style={{ width: width * 0.9, alignSelf: "center" }}>
+                {/* Email */}
                 <TextInput
                   label="Email"
                   mode="outlined"
@@ -118,42 +121,46 @@ export const LoginScreen = ({ navigation }) => {
                   autoCapitalize="none"
                   keyboardType="email-address"
                   textContentType="emailAddress"
-                  autoFocus={true}
-                  left={<Icon name="email" />} 
+                  autoFocus
+                  left={<TextInput.Icon icon="email" />}
                   value={values.email}
                   onChangeText={handleChange("email")}
                   onBlur={handleBlur("email")}
                   style={styles.textInput}
                 />
+
                 <FormErrorMessage
                   error={errors.email}
                   visible={touched.email}
                   style={styles.errorText}
                 />
+
+                {/* Password */}
                 <TextInput
                   label="Password"
-                  placeholder="Password"
                   mode="outlined"
-                  theme={{
-                    roundness: 14,
-                    colors: {
-                      placeholder: "white",
-                      backgroundColor: "transparent",
-                    },
-                  }}
+                  theme={{ roundness: 14 }}
                   autoCapitalize="none"
-                  secureTextEntry
-                  left={<Icon name="lock" />} 
+                  secureTextEntry={passwordVisibility}
+                  left={<TextInput.Icon icon="lock" />}
+                  right={
+                    <TextInput.Icon
+                      icon={rightIcon}
+                      onPress={handlePasswordVisibility}
+                    />
+                  }
                   value={values.password}
                   onChangeText={handleChange("password")}
                   onBlur={handleBlur("password")}
                   style={styles.textInput}
                 />
+
                 <FormErrorMessage
                   error={errors.password}
                   visible={touched.password}
                   style={styles.errorText}
                 />
+
                 <TouchableOpacity
                   style={styles.touchableOpacityButton}
                   onPress={() => navigation.navigate("ForgotPassword")}
@@ -162,9 +169,11 @@ export const LoginScreen = ({ navigation }) => {
                     Forgot Password?
                   </Text>
                 </TouchableOpacity>
-                {errorState !== "" ? (
-                  <FormErrorMessage error={errorState} visible={true} />
-                ) : null}
+
+                {errorState !== "" && (
+                  <FormErrorMessage error={errorState} visible />
+                )}
+
                 <Button
                   mode="contained"
                   style={styles.loginButton}
@@ -175,6 +184,8 @@ export const LoginScreen = ({ navigation }) => {
               </View>
             )}
           </Formik>
+
+          {/* Footer */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.touchableOpacityButton}
@@ -189,17 +200,18 @@ export const LoginScreen = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            <View style={{ width: "80%", alignSelf: 'center' }}>
-              <Text style={{ alignSelf: 'center', marginTop: 20 }}>Or</Text>
+            <View style={{ width: "80%", alignSelf: "center" }}>
+              <Text style={{ alignSelf: "center", marginTop: 20 }}>Or</Text>
+
               <Button
                 mode="contained"
                 style={styles.googleButton}
                 disabled={!request}
-                onPress={() => {
-                  promptAsync();
-                }}
+                onPress={promptAsync}
               >
-                <Text style={{ color: 'red', fontWeight: '800' }}>Sign in with Google</Text>
+                <Text style={{ color: "red", fontWeight: "800" }}>
+                  Sign in with Google
+                </Text>
               </Button>
             </View>
           </View>

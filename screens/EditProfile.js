@@ -89,7 +89,7 @@ export const EditProfile = () => {
           },
           () => {
             alert("Profile and profile picture updated successfully!");
-          }
+          },
         );
       } else {
         alert("Profile updated successfully!");

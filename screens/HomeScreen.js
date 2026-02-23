@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { signOut } from "firebase/auth";
 import { auth, db } from "../config/firebase";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { View, Dimensions, RefreshControl, Text } from "react-native";
+import { View } from "react-native";
 
 import { DrawerSlider } from "./DrawerSlider";
 import { BottomNavBar } from "./BottomNavBar";
 import { styles } from "./styles";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export const HomeScreen = ({ navigation }) => {
   const [inputText, setInputText] = useState("");
@@ -28,31 +26,44 @@ export const HomeScreen = ({ navigation }) => {
   const [restaurantFormMode, setRestaurantFormMode] = useState("add");
   const [searchText, setSearchText] = useState("");
 
-  const [user] = useAuthState(auth);
+  const [user, setUser] = useState(null);
 
+  // ✅ Auth listener (safe)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // ✅ Update profile info
   useEffect(() => {
     if (user) {
-      setUserName(user.displayName);
-      setUserPhotoURL(user.photoURL);
+      setUserName(user.displayName || "");
+      setUserPhotoURL(user.photoURL || "");
+    } else {
+      setUserName("");
+      setUserPhotoURL("");
     }
   }, [user]);
 
+  // ✅ Fetch restaurants
   useEffect(() => {
     const fetchRestaurantData = async () => {
       try {
-        const restaurantsCollection = collection(db, "restaurant"); // Updated syntax
-        const snapshot = await getDocs(restaurantsCollection); // Updated syntax
+        const restaurantsCollection = collection(db, "restaurant");
+        const snapshot = await getDocs(restaurantsCollection);
 
-        if (snapshot && snapshot.docs) {
+        if (snapshot?.docs) {
           const restaurants = snapshot.docs.map((doc) => doc.data());
           setFilteredRestaurants(restaurants);
-        } else {
-          console.error("No data retrieved from Firestore.");
         }
       } catch (error) {
         console.error("Error fetching restaurant data:", error);
       }
     };
+
     fetchRestaurantData();
   }, []);
 
@@ -65,47 +76,33 @@ export const HomeScreen = ({ navigation }) => {
   };
 
   const toggleRestaurantForm = (mode) => {
-    // Set the mode when toggling the form
     setRestaurantFormMode(mode);
     setIsRestaurantFormVisible(true);
   };
 
   const toggleDrawer = () => {
     if (isDrawerOpen) {
-      const activeTab = "Home";
-      setActiveTab(activeTab);
+      setActiveTab("Home");
     }
     setDrawerOpen(!isDrawerOpen);
-  };
-
-  const openFilterModal = () => {
-    setFilterModalVisible(true);
-  };
-
-  const closeFilterModal = () => {
-    setFilterModalVisible(false);
   };
 
   const filterRestaurantsByFavorites = () => {
     let filtered = showFavoritesOnly
       ? filteredRestaurants.filter((restaurant) =>
-          favorites.includes(restaurant.name)
+          favorites.includes(restaurant.name),
         )
       : [...filteredRestaurants];
 
     if (inputText) {
       filtered = filtered.filter((restaurant) =>
-        restaurant.name.toLowerCase().includes(inputText.toLowerCase())
+        restaurant.name.toLowerCase().includes(inputText.toLowerCase()),
       );
     }
 
     setFilteredRestaurants(filtered);
     setFilterResultsEmpty(filtered.length === 0);
   };
-
-  const favoriteRestaurants = filteredRestaurants.filter((restaurant) =>
-    favorites.includes(restaurant.name)
-  );
 
   return (
     <View style={styles.container}>
@@ -135,7 +132,7 @@ export const HomeScreen = ({ navigation }) => {
         showFavoritesOnly={showFavoritesOnly}
         setShowFavoritesOnly={setShowFavoritesOnly}
         navigation={navigation}
-      ></BottomNavBar>
+      />
     </View>
   );
 };

@@ -1,18 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView } from "react-native";
-import { IconButton, Button } from "react-native-paper";
+import { IconButton, Button, Icon } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import StarRating from "react-native-star-rating-view";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  where,
-  query,
-} from "firebase/firestore";
+import { db } from "../config/firebase";
+import { collection, getDocs, where, query } from "firebase/firestore";
 import { Colors } from "../config";
 import styles from "./styles";
 import { CommentModal } from "../components/CommentModal";
+
+const StarRow = ({ rating = 0, size = 18, color = "#00CDBC" }) => {
+  const rounded = Math.round(Number(rating) || 0);
+
+  return (
+    <View style={{ flexDirection: "row" }}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Icon
+          key={i}
+          source={i <= rounded ? "star" : "star-outline"}
+          size={size}
+          color={color}
+        />
+      ))}
+    </View>
+  );
+};
 
 export const ReviewsScreen = ({ route }) => {
   const { restaurant } = route.params;
@@ -21,14 +32,12 @@ export const ReviewsScreen = ({ route }) => {
   const [comments, setComments] = useState([]);
   const [totalComments, setTotalComments] = useState(0);
 
-  const db = getFirestore();
-
   const fetchComments = async (restaurantName) => {
     try {
-      const commentsCollection = collection(db, "comments"); 
+      const commentsCollection = collection(db, "comments");
       const q = query(
         commentsCollection,
-        where("restaurantName", "==", restaurantName)
+        where("restaurantName", "==", restaurantName),
       );
       const querySnapshot = await getDocs(q);
 
@@ -53,6 +62,7 @@ export const ReviewsScreen = ({ route }) => {
   };
 
   const capitalizeFirstWord = (sentence) => {
+    if (!sentence) return "";
     return sentence.charAt(0).toUpperCase() + sentence.slice(1).toLowerCase();
   };
 
@@ -63,97 +73,48 @@ export const ReviewsScreen = ({ route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>{restaurant.restaurantName}</Text>
+
+      {/* ⭐ Restaurant Rating */}
       <View style={styles.ratingContainer}>
         <View style={styles.ratingInfo}>
           <Text style={styles.ratingValue}>{restaurant.rating}</Text>
-          <StarRating
-            style={styles.rating}
-            disabled={true}
-            maxStars={5}
-            rating={restaurant.rating}
-            fullStarColor="#00CDBC"
-            starSize={18}
-          />
+          <View style={styles.rating}>
+            <StarRow rating={restaurant.rating} size={18} />
+          </View>
         </View>
         <Text style={styles.reviewCount}>{totalComments} reviews</Text>
       </View>
 
       {comments.length > 0 && (
         <View>
-          <ScrollView style={{ height: '80%', marginTop:20 }}>
-            {isExpanded
-              ? comments.map((comment, index) => {
-                  return (
-                    <View key={index} style={styles.review}>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Text style={styles.reviewName}>
-                          {comment.userName}
-                        </Text>
-                        <StarRating
-                          disabled
-                          starSize={15}
-                          maxStars={5}
-                          rating={comment.restaurantRating}
-                          fullStarColor="#00CDBC"
-                        />
-                      </View>
-                      <Text style={styles.reviewText}>
-                        {capitalizeFirstWord(comment.comment)}
-                      </Text>
-                      <View
-                        style={{ flexDirection: "row", alignSelf: "flex-end" }}
-                      >
-                        <IconButton icon="thumb-up" size={20} color="#00CDBC" />
-                        <IconButton
-                          icon="thumb-down"
-                          size={20}
-                          color="#00CDBC"
-                        />
-                      </View>
-                    </View>
-                  );
-                })
-              : comments.slice(0, 4).map((comment, index) => {
-                  return (
-                    <View key={index} style={styles.review}>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Text style={styles.reviewName}>
-                          {comment.userName}
-                        </Text>
-                        <StarRating
-                          disabled
-                          starSize={15}
-                          maxStars={5}
-                          rating={comment.restaurantRating}
-                          fullStarColor="#00CDBC"
-                        />
-                      </View>
-                      <Text style={styles.reviewText}>
-                        {capitalizeFirstWord(comment.comment)}
-                      </Text>
-                      <View
-                        style={{ flexDirection: "row", alignSelf: "flex-end" }}
-                      >
-                        <IconButton icon="thumb-up" size={20} color="#00CDBC" />
-                        <IconButton
-                          icon="thumb-down"
-                          size={20}
-                          color="#00CDBC"
-                        />
-                      </View>
-                    </View>
-                  );
-                })}
+          <ScrollView style={{ height: "80%", marginTop: 20 }}>
+            {(isExpanded ? comments : comments.slice(0, 4)).map(
+              (comment, index) => (
+                <View key={index} style={styles.review}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text style={styles.reviewName}>{comment.userName}</Text>
+
+                    {/* ⭐ Comment Rating */}
+                    <StarRow rating={comment.restaurantRating} size={15} />
+                  </View>
+
+                  <Text style={styles.reviewText}>
+                    {capitalizeFirstWord(comment.comment)}
+                  </Text>
+
+                  <View style={{ flexDirection: "row", alignSelf: "flex-end" }}>
+                    <IconButton icon="thumb-up" size={20} color="#00CDBC" />
+                    <IconButton icon="thumb-down" size={20} color="#00CDBC" />
+                  </View>
+                </View>
+              ),
+            )}
+
             {comments.length > 4 && (
               <IconButton
                 style={styles.toggleButton}
@@ -165,16 +126,17 @@ export const ReviewsScreen = ({ route }) => {
           </ScrollView>
         </View>
       )}
+
       <View>
         <Button
           mode="contained"
           style={{ backgroundColor: Colors.black, marginTop: 20 }}
-          title="Add Comment"
           onPress={toggleModal}
         >
           Add Comment
         </Button>
       </View>
+
       <CommentModal
         isVisible={isModalVisible}
         onClose={toggleModal}

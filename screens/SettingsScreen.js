@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { BottomNavBar } from "./BottomNavBar";
 import styles from "./styles";
-import { auth } from "../config";
-import { SafeAreaView } from "react-native-safe-area-context";
+
+// ✅ CRITICAL — correct firebase import
+import { auth } from "../config/firebase";
 
 export const SettingsScreen = ({ navigation }) => {
   const [userName, setUserName] = useState("");
@@ -19,8 +16,9 @@ export const SettingsScreen = ({ navigation }) => {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   useEffect(() => {
-    if (auth.currentUser) {
-      const user = auth.currentUser;
+    const user = auth.currentUser;
+
+    if (user) {
       setUserName(user.displayName || "");
       setUserPhotoURL(user.photoURL || "");
     }
@@ -45,6 +43,7 @@ export const SettingsScreen = ({ navigation }) => {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       />
+
       <ScrollView style={styles.content}>
         {settingsItems.map((item, index) => (
           <TouchableOpacity
@@ -62,12 +61,15 @@ export const SettingsScreen = ({ navigation }) => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
       <BottomNavBar
         activeTab={activeTab}
         showFavoritesOnly={showFavoritesOnly}
         setShowFavoritesOnly={setShowFavoritesOnly}
         navigation={navigation}
-      ></BottomNavBar>
+      />
     </SafeAreaView>
   );
 };
+
+export default SettingsScreen;

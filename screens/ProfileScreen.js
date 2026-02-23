@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Avatar, IconButton, Badge } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { BottomNavBar } from "./BottomNavBar";
 import styles from "./styles";
 
-import { auth } from "../config";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView } from "react-native-gesture-handler";
+// ✅ CRITICAL — correct import
+import { auth } from "../config/firebase";
 
 export const ProfileScreen = ({ navigation }) => {
   const [userName, setUserName] = useState("");
@@ -16,8 +17,9 @@ export const ProfileScreen = ({ navigation }) => {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   useEffect(() => {
-    if (auth.currentUser) {
-      const user = auth.currentUser;
+    const user = auth.currentUser;
+
+    if (user) {
       setUserName(user.displayName || "");
       setUserPhotoURL(user.photoURL || "");
     }
@@ -41,6 +43,7 @@ export const ProfileScreen = ({ navigation }) => {
           }
           style={{ alignSelf: "center", borderRadius: 75 }}
         />
+
         <Badge
           size={30}
           style={{
@@ -50,11 +53,11 @@ export const ProfileScreen = ({ navigation }) => {
             bottom: 30,
             left: 30,
           }}
-          paddingHorizontal={10}
         >
           1
         </Badge>
       </View>
+
       <Text
         style={{
           fontSize: 20,
@@ -65,22 +68,19 @@ export const ProfileScreen = ({ navigation }) => {
       >
         {userName}
       </Text>
+
       <View style={{ flexDirection: "row", alignSelf: "center", bottom: 20 }}>
-        <Badge
-          size={30}
-          style={{ backgroundColor: "#111", margin: 5 }}
-          paddingHorizontal={10}
-        >
+        <Badge size={30} style={{ backgroundColor: "#111", margin: 5 }}>
           Maestro
         </Badge>
         <Badge
           size={30}
-          paddingHorizontal={10}
           style={{ backgroundColor: "#111", alignSelf: "center", margin: 5 }}
         >
           453/1000xp
         </Badge>
       </View>
+
       <ScrollView>
         <View style={styles.content}>
           <TouchableOpacity
@@ -95,6 +95,7 @@ export const ProfileScreen = ({ navigation }) => {
               <Icon name="chevron-right" size={24} />
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity
             onPress={() => navigation.navigate("EditProfile")}
             style={styles.listItem}
@@ -107,6 +108,7 @@ export const ProfileScreen = ({ navigation }) => {
               <Icon name="chevron-right" size={24} />
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity
             onPress={() => navigation.navigate("Rewards")}
             style={styles.listItem}
@@ -119,6 +121,7 @@ export const ProfileScreen = ({ navigation }) => {
               <Icon name="chevron-right" size={24} />
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity
             onPress={() => navigation.navigate("Notifications")}
             style={styles.listItem}
@@ -133,12 +136,15 @@ export const ProfileScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
       <BottomNavBar
         activeTab={activeTab}
         showFavoritesOnly={showFavoritesOnly}
         setShowFavoritesOnly={setShowFavoritesOnly}
         navigation={navigation}
-      ></BottomNavBar>
+      />
     </SafeAreaView>
   );
 };
+
+export default ProfileScreen;

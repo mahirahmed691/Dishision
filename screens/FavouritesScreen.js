@@ -12,7 +12,7 @@ import { auth } from "../config/firebase";
 import { collection, getDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { BottomNavBar } from "./BottomNavBar";
-import { Swipeable } from 'react-native-gesture-handler';
+import { Swipeable } from "react-native-gesture-handler";
 import { styles } from "./styles";
 
 export const FavouritesScreen = ({ navigation }) => {
@@ -64,9 +64,9 @@ export const FavouritesScreen = ({ navigation }) => {
 
   const cleanDocumentId = (name) => {
     // Remove spaces and other disallowed characters
-    return name.replace(/[ /#$[\]@&]/g, ''); // You can add more disallowed characters to the regex if needed
+    return name.replace(/[ /#$[\]@&]/g, ""); // You can add more disallowed characters to the regex if needed
   };
-  
+
   const handleDelete = async (restaurantName) => {
     try {
       const user = auth.currentUser;
@@ -74,17 +74,17 @@ export const FavouritesScreen = ({ navigation }) => {
         const userEmail = user.email;
         const favoritesRef = collection(db, "favorites");
         const userFavoriteDoc = doc(favoritesRef, userEmail);
-  
+
         // Clean the restaurant name for use as a document ID
         const cleanedRestaurantName = cleanDocumentId(restaurantName);
-  
+
         // Update the favorite status of the restaurant to false
         const updatedUserFavorites = { ...userFavorites };
         updatedUserFavorites[cleanedRestaurantName].isFavorited = false;
-  
+
         // Update the Firestore document with the updated user favorites
         await updateDoc(userFavoriteDoc, updatedUserFavorites);
-  
+
         // Fetch updated data after unfavoriting
         checkIfFavorited();
       }
@@ -92,8 +92,7 @@ export const FavouritesScreen = ({ navigation }) => {
       console.error("Error unfavoriting restaurant:", error);
     }
   };
-  
-  
+
   useEffect(() => {
     const favoriteRestaurantList = [];
     for (const restaurantName in userFavorites) {

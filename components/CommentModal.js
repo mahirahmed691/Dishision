@@ -1,9 +1,32 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Modal, Dimensions } from "react-native";
-import { IconButton, Button, TextInput } from "react-native-paper";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
-import StarRating from "react-native-star-rating-view";
+import { IconButton, Button, TextInput, Icon } from "react-native-paper";
+import { db } from "../config/firebase";
+import { collection, addDoc } from "firebase/firestore";
 import { Colors } from "../config";
+
+const StarSelector = ({
+  rating = 0,
+  onChange,
+  size = 22,
+  color = "#00CDBC",
+}) => {
+  const current = Number(rating) || 0;
+
+  return (
+    <View style={{ flexDirection: "row" }}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Icon
+          key={i}
+          source={i <= current ? "star" : "star-outline"}
+          size={size}
+          color={color}
+          onPress={() => onChange?.(i)}
+        />
+      ))}
+    </View>
+  );
+};
 
 export const CommentModal = ({
   isVisible,
@@ -15,8 +38,6 @@ export const CommentModal = ({
   const [restaurantRating, setRestaurantRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  const db = getFirestore();
-
   const addComment = () => {
     const commentData = {
       userName,
@@ -27,21 +48,17 @@ export const CommentModal = ({
     };
 
     addDoc(collection(db, "comments"), commentData)
-      .then((docRef) => {
+      .then(() => {
         setUserName("");
         setRestaurantRating(0);
         setComment("");
         onClose();
-        onAddComment(commentData);
+        onAddComment?.(commentData);
       })
       .catch((error) => {
         console.error("Error adding comment to Firestore:", error);
       });
   };
-
-  const burgerIcon = (
-    <Text style={{ fontSize: 20 }}>🍔</Text> // Replace with your burger icon
-  );
 
   return (
     <Modal visible={isVisible} animationType="slide">
@@ -50,13 +67,13 @@ export const CommentModal = ({
           icon="close"
           style={styles.closeButton}
           mode="outlined"
-          backgroundColor="#00CDBC"
+          containerColor="#00CDBC"
           iconColor="white"
           onPress={onClose}
-        >
-          Close
-        </IconButton>
+        />
+
         <Text style={styles.title}>Add a Comment</Text>
+
         <TextInput
           theme={{
             colors: {
@@ -68,22 +85,22 @@ export const CommentModal = ({
           }}
           style={styles.input}
           mode="contained"
-          backgroundColor="white"
           placeholder="Your Name"
           value={userName}
-          onChangeText={(text) => setUserName(text)}
+          onChangeText={setUserName}
         />
-        <Text style={styles.label}>Restaurant Rating (1-5):</Text>
-        <View style={{ width: 170 }}>
-          <StarRating
-            maxStars={5}
+
+        <Text style={styles.label}>Restaurant Rating (1–5):</Text>
+
+        {/* ⭐ Interactive rating */}
+        <View style={{ width: 180 }}>
+          <StarSelector
             rating={restaurantRating}
-            fullStarColor="black"
-            emptyStarColor={Colors.textSecondary}
-            starSize={20}
-            selectedStar={(rating) => setRestaurantRating(rating)}
+            onChange={setRestaurantRating}
+            size={24}
           />
         </View>
+
         <TextInput
           theme={{
             colors: {
@@ -98,15 +115,11 @@ export const CommentModal = ({
           placeholder="Your Comment"
           placeholderTextColor={Colors.textSecondary}
           value={comment}
-          onChangeText={(text) => setComment(text)}
+          onChangeText={setComment}
           multiline
         />
-        <Button
-          mode="contained"
-          style={styles.addButton}
-          title="Add Comment"
-          onPress={addComment}
-        >
+
+        <Button mode="contained" style={styles.addButton} onPress={addComment}>
           Add Comment
         </Button>
       </View>
@@ -114,8 +127,8 @@ export const CommentModal = ({
   );
 };
 
-width = Dimensions.get("window").width;
-height = Dimensions.get("window").height;
+const width = Dimensions.get("window").width;
+const height = Dimensions.get("window").height;
 
 const styles = StyleSheet.create({
   container: {
@@ -130,7 +143,6 @@ const styles = StyleSheet.create({
     top: 40,
     left: 20,
     backgroundColor: "transparent",
-    color: Colors.primary,
   },
   title: {
     fontSize: 24,
@@ -149,7 +161,7 @@ const styles = StyleSheet.create({
   },
   commentInput: {
     marginTop: 20,
-    height: 400,
+    height: 220,
     marginBottom: 30,
   },
   addButton: {
