@@ -1,12 +1,21 @@
 import "react-native-get-random-values";
 
-import { initializeApp, getApps, getApp } from "firebase/app";
+import {
+  initializeApp as initializeFirestoreApp,
+  getApps as getFirestoreApps,
+  getApp as getFirestoreApp,
+} from "@firebase/app";
+import {
+  initializeApp as initializeAuthApp,
+  getApps as getAuthApps,
+  getApp as getAuthApp,
+} from "./firebaseApp";
 import {
   initializeAuth,
   getReactNativePersistence,
   getAuth,
-} from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+} from "./firebaseAuth";
+import { getFirestore } from "@firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
@@ -19,16 +28,27 @@ const firebaseConfig = {
   measurementId: "G-FY5LLZ5Z5C",
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const app = getFirestoreApps().length
+  ? getFirestoreApp()
+  : initializeFirestoreApp(firebaseConfig);
+const authAppName = "__dishision_auth_app__";
+const authApp = getAuthApps().some((existingApp) => existingApp.name === authAppName)
+  ? getAuthApp(authAppName)
+  : initializeAuthApp(firebaseConfig, authAppName);
 
 let auth;
 
 try {
-  auth = initializeAuth(app, {
+  auth = initializeAuth(authApp, {
     persistence: getReactNativePersistence(AsyncStorage),
   });
-} catch {
-  auth = getAuth(app);
+} catch (error) {
+  if (error?.code === "auth/already-initialized") {
+    auth = getAuth(authApp);
+  } else {
+    console.error("Firebase auth initialization failed:", error);
+    throw error;
+  }
 }
 
 const db = getFirestore(app);

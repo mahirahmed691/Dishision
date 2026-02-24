@@ -1,12 +1,25 @@
 import React, { useState, useContext, useEffect } from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { onAuthStateChanged } from "firebase/auth";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
+import { onAuthStateChanged } from "../config/firebaseAuth";
 
 import { AuthStack } from "./AuthStack";
 import { AppStack } from "./AppStack";
 import { AuthenticatedUserContext } from "../providers";
 import { LoadingIndicator } from "../components";
 import { auth } from "../config/firebase";
+import { ui } from "../config/designSystem";
+
+const navigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: ui.colors.background,
+    card: ui.colors.surface,
+    text: ui.colors.text,
+    primary: ui.colors.primary,
+    border: ui.colors.border,
+  },
+};
 
 export const RootNavigator = () => {
   const { user, setUser } = useContext(AuthenticatedUserContext);
@@ -27,7 +40,7 @@ export const RootNavigator = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navigationTheme}>
       {user ? <AppStack /> : <AuthStack />}
     </NavigationContainer>
   );

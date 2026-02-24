@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button } from "react-native";
+import { View, Text, Button, StyleSheet } from "react-native";
 import * as Location from "expo-location";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -44,34 +44,56 @@ const LocationServices = () => {
   }, [location]);
 
   return (
-    <View style={{ flex: 1, justifyContent: "center" }}>
+    <View style={styles.container}>
       {permissionStatus !== "granted" ? (
         <Button
           title="Grant Location Permission"
           onPress={requestLocationPermission}
         />
       ) : location ? (
-        <View style={{}}>
+        <View>
           {address ? (
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={styles.locationRow}>
               <MaterialCommunityIcons
                 name="map-marker"
-                size={15}
+                size={18}
                 color="black"
               />
-              <Text style={{ fontSize: 20, fontWeight: "bold", marginLeft: 5 }}>
+              <Text style={styles.cityText}>
                 {address.city}
               </Text>
             </View>
           ) : (
-            <Text>Fetching address...</Text>
+            <Text style={styles.metaText}>Fetching address...</Text>
           )}
         </View>
       ) : (
-        <Text>Fetching location...</Text>
+        <Text style={styles.metaText}>Fetching location...</Text>
       )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 8,
+    marginBottom: 14,
+    paddingHorizontal: 12,
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  cityText: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  metaText: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
+});
 
 export default LocationServices;

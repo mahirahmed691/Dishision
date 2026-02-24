@@ -13,7 +13,6 @@ export const MapScreen = ({route}) => {
   const {width, height} = Dimensions.get('window');
   
   const map = { latitude: restaurant.lat, longitude: restaurant.long };
-  console.log(restaurant.hygieneRating)
   const openMapZoomedOut = createOpenLink({ ...map, zoom: 18, provider:'apple' });
 
   return (
@@ -81,5 +80,4 @@ export const MapScreen = ({route}) => {
     </SafeAreaView>
   );
 };
-
 

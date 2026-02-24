@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  Text,
-  StyleSheet,
-  View,
-  ImageBackground,
   Dimensions,
+  Image,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
+import { Button, TextInput } from "react-native-paper";
 import { Formik } from "formik";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { TextInput, Button, Card } from "react-native-paper";
-import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { SafeAreaView } from "react-native-safe-area-context";
+import { signInWithEmailAndPassword } from "../config/firebaseAuth";
+import { auth } from "../config/firebase";
 import { FormErrorMessage } from "../components";
-import { Colors } from "../config";
-import { auth } from "../config/firebase"; // ✅ correct singleton
 import { useTogglePasswordVisibility } from "../hooks";
 import { loginValidationSchema } from "../utils";
+import { ui } from "../config/designSystem";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -30,7 +30,6 @@ export const LoginScreen = ({ navigation }) => {
   const { passwordVisibility, handlePasswordVisibility, rightIcon } =
     useTogglePasswordVisibility();
 
-  // ✅ email/password login
   const handleLogin = useCallback((values) => {
     const { email, password } = values;
 
@@ -39,7 +38,6 @@ export const LoginScreen = ({ navigation }) => {
     );
   }, []);
 
-  // ✅ Google auth request
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "",
     iosClientId:
@@ -47,9 +45,10 @@ export const LoginScreen = ({ navigation }) => {
     webClientId: "",
   });
 
-  // ✅ handle Google response safely
   useEffect(() => {
-    if (!response) return;
+    if (!response) {
+      return;
+    }
 
     const run = async () => {
       const localUser = await getLocalUser();
@@ -67,7 +66,9 @@ export const LoginScreen = ({ navigation }) => {
   const getLocalUser = async () => {
     try {
       const data = await AsyncStorage.getItem("@user");
-      if (!data) return null;
+      if (!data) {
+        return null;
+      }
       return JSON.parse(data);
     } catch {
       return null;
@@ -75,7 +76,9 @@ export const LoginScreen = ({ navigation }) => {
   };
 
   const getUserInfo = async (token) => {
-    if (!token) return;
+    if (!token) {
+      return;
+    }
 
     try {
       const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
@@ -91,195 +94,234 @@ export const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/burgerUnsplash.png")}
-      style={styles.backgroundImage}
-    >
-      <KeyboardAwareScrollView enableOnAndroid>
-        <Card style={styles.container}>
-          <Text style={styles.title}>Welcome to Dish Decide</Text>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
+      <View style={styles.heroSection}>
+        <Image
+          source={require("../assets/login-burger-hq.jpg")}
+          style={styles.heroImage}
+        />
+      </View>
 
-          <Formik
-            initialValues={{ email: "", password: "" }}
-            validationSchema={loginValidationSchema}
-            onSubmit={handleLogin}
-          >
-            {({
-              values,
-              touched,
-              errors,
-              handleChange,
-              handleSubmit,
-              handleBlur,
-            }) => (
-              <View style={{ width: width * 0.9, alignSelf: "center" }}>
-                {/* Email */}
-                <TextInput
-                  label="Email"
-                  mode="outlined"
-                  theme={{ roundness: 14 }}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  textContentType="emailAddress"
-                  autoFocus
-                  left={<TextInput.Icon icon="email" />}
-                  value={values.email}
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  style={styles.textInput}
-                />
+      <KeyboardAwareScrollView
+        enableOnAndroid
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        bounces={false}
+        alwaysBounceVertical={false}
+        overScrollMode="never"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.container}>
+          <View style={styles.body}>
+            <Text style={styles.eyebrow}>Welcome Back</Text>
 
-                <FormErrorMessage
-                  error={errors.email}
-                  visible={touched.email}
-                  style={styles.errorText}
-                />
-
-                {/* Password */}
-                <TextInput
-                  label="Password"
-                  mode="outlined"
-                  theme={{ roundness: 14 }}
-                  autoCapitalize="none"
-                  secureTextEntry={passwordVisibility}
-                  left={<TextInput.Icon icon="lock" />}
-                  right={
-                    <TextInput.Icon
-                      icon={rightIcon}
-                      onPress={handlePasswordVisibility}
-                    />
-                  }
-                  value={values.password}
-                  onChangeText={handleChange("password")}
-                  onBlur={handleBlur("password")}
-                  style={styles.textInput}
-                />
-
-                <FormErrorMessage
-                  error={errors.password}
-                  visible={touched.password}
-                  style={styles.errorText}
-                />
-
-                <TouchableOpacity
-                  style={styles.touchableOpacityButton}
-                  onPress={() => navigation.navigate("ForgotPassword")}
-                >
-                  <Text style={styles.forgotPasswordText}>
-                    Forgot Password?
-                  </Text>
-                </TouchableOpacity>
-
-                {errorState !== "" && (
-                  <FormErrorMessage error={errorState} visible />
-                )}
-
-                <Button
-                  mode="contained"
-                  style={styles.loginButton}
-                  onPress={handleSubmit}
-                >
-                  <Text style={styles.buttonText}>Sign in</Text>
-                </Button>
-              </View>
-            )}
-          </Formik>
-
-          {/* Footer */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.touchableOpacityButton}
-              onPress={() => navigation.navigate("Signup")}
+            <Formik
+              initialValues={{ email: "", password: "" }}
+              validationSchema={loginValidationSchema}
+              onSubmit={handleLogin}
             >
-              <Text style={styles.createAccountText}>
+              {({
+                values,
+                touched,
+                errors,
+                handleChange,
+                handleSubmit,
+                handleBlur,
+              }) => (
+                <View style={styles.form}>
+                  <TextInput
+                    label="Email"
+                    mode="outlined"
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    textContentType="emailAddress"
+                    outlineColor="#D1D5DB"
+                    activeOutlineColor={ui.colors.primary}
+                    left={<TextInput.Icon icon="email" />}
+                    value={values.email}
+                    onChangeText={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    style={styles.textInput}
+                  />
+                  <FormErrorMessage error={errors.email} visible={touched.email} />
+
+                  <TextInput
+                    label="Password"
+                    mode="outlined"
+                    autoCapitalize="none"
+                    secureTextEntry={passwordVisibility}
+                    outlineColor="#D1D5DB"
+                    activeOutlineColor={ui.colors.primary}
+                    left={<TextInput.Icon icon="lock" />}
+                    right={
+                      <TextInput.Icon
+                        icon={rightIcon}
+                        onPress={handlePasswordVisibility}
+                      />
+                    }
+                    value={values.password}
+                    onChangeText={handleChange("password")}
+                    onBlur={handleBlur("password")}
+                    style={styles.textInput}
+                  />
+                  <FormErrorMessage
+                    error={errors.password}
+                    visible={touched.password}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.inlineLinkWrap}
+                    onPress={() => navigation.navigate("ForgotPassword")}
+                  >
+                    <Text style={styles.inlineLink}>Forgot Password?</Text>
+                  </TouchableOpacity>
+
+                  {errorState !== "" && <FormErrorMessage error={errorState} visible />}
+
+                  <Button
+                    mode="contained"
+                    style={styles.primaryButton}
+                    onPress={handleSubmit}
+                  >
+                    <Text style={styles.primaryButtonText}>Sign in</Text>
+                  </Button>
+                </View>
+              )}
+            </Formik>
+          </View>
+
+          <View style={styles.footer}>
+            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+              <Text style={styles.footerText}>
                 Don't have an account?
-                <Text style={{ color: "#00CDBC", fontWeight: "800" }}>
-                  {" "}
-                  Signup
-                </Text>
+                <Text style={styles.footerLink}> Signup</Text>
               </Text>
             </TouchableOpacity>
 
-            <View style={{ width: "80%", alignSelf: "center" }}>
-              <Text style={{ alignSelf: "center", marginTop: 20 }}>Or</Text>
-
-              <Button
-                mode="contained"
-                style={styles.googleButton}
-                disabled={!request}
-                onPress={promptAsync}
-              >
-                <Text style={{ color: "red", fontWeight: "800" }}>
-                  Sign in with Google
-                </Text>
-              </Button>
-            </View>
+            <Text style={styles.orText}>Or</Text>
+            <Button
+              mode="contained"
+              style={styles.googleButton}
+              disabled={!request}
+              onPress={promptAsync}
+            >
+              <Text style={styles.googleButtonText}>Sign in with Google</Text>
+            </Button>
           </View>
-        </Card>
+        </View>
       </KeyboardAwareScrollView>
-    </ImageBackground>
+    </SafeAreaView>
   );
 };
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
-  backgroundImage: {
+  screen: {
     flex: 1,
-    resizeMode: "contain",
-    height: 280,
-    backgroundColor: "#00CDBC",
+    backgroundColor: ui.colors.primary,
+  },
+  heroSection: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "46%",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: ui.colors.primary,
+    overflow: "hidden",
+  },
+  heroImage: {
+    width: "122%",
+    height: "122%",
+    resizeMode: "cover",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "flex-end",
   },
   container: {
+    width,
+    alignSelf: "center",
+    height: "70%",
+    backgroundColor: ui.colors.surface,
+    borderTopLeftRadius: 34,
+    borderTopRightRadius: 34,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    paddingTop: ui.spacing.md,
+    paddingHorizontal: ui.spacing.lg,
+    paddingBottom: ui.spacing.md,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  body: {
     flex: 1,
-    width: width,
-    height: height * 0.8,
-    backgroundColor: "white",
-    top: height * 0.3,
-    borderRadius: 20,
-    paddingTop: 40,
+    justifyContent: "flex-start",
   },
-  buttonText: {
-    fontSize: 15,
-    color: Colors.white,
-    fontWeight: "900",
-    textAlign: "center",
-    letterSpacing: 2,
-  },
-  createAccountText: {
-    textAlign: "center",
-    fontWeight: "500",
-  },
-  forgotPasswordText: {
-    fontSize: 12,
-    textAlign: "right",
+  eyebrow: {
+    color: ui.colors.primary,
     fontWeight: "600",
-    color: "#888",
+    fontSize: 12,
+    letterSpacing: 0.4,
+    marginBottom: ui.spacing.sm,
   },
-  touchableOpacityButton: {
-    marginTop: 20,
-  },
-  loginButton: {
-    backgroundColor: "#00CDBC",
-    marginTop: 40,
-    padding: 10,
-  },
-  googleButton: {
-    backgroundColor: "#f0f0f0",
-    marginTop: 10,
-    padding: 10,
+  form: {
+    gap: 2,
   },
   textInput: {
-    width: width * 0.9,
-    alignSelf: "center",
-    backgroundColor: "#F7F8F9",
+    backgroundColor: ui.colors.surface,
   },
-  title: {
-    marginBottom: 20,
-    fontSize: 20,
-    letterSpacing: 2,
+  inlineLinkWrap: {
+    marginTop: ui.spacing.xs,
+    alignSelf: "flex-end",
+  },
+  inlineLink: {
+    color: ui.colors.textMuted,
+    fontWeight: "600",
+    fontSize: ui.type.caption,
+  },
+  primaryButton: {
+    marginTop: ui.spacing.md,
+    paddingVertical: 5,
+    borderRadius: ui.radius.md,
+    backgroundColor: ui.colors.primary,
+  },
+  primaryButtonText: {
+    fontWeight: "900",
+    color: ui.colors.white,
+    letterSpacing: 0.5,
+  },
+  footer: {
+    marginTop: ui.spacing.xs,
+    alignItems: "center",
+    gap: ui.spacing.sm,
+    paddingBottom: ui.spacing.sm,
+  },
+  footerText: {
+    color: ui.colors.textMuted,
+    fontWeight: "600",
+  },
+  footerLink: {
+    color: ui.colors.primary,
+    fontWeight: "900",
+  },
+  orText: {
+    color: ui.colors.textMuted,
     fontWeight: "700",
-    marginLeft: 20,
+  },
+  googleButton: {
+    width: Math.min(width * 0.8, 340),
+    backgroundColor: "#F1F5F9",
+    borderRadius: ui.radius.md,
+  },
+  googleButtonText: {
+    color: "#D12E2E",
+    fontWeight: "800",
   },
 });
 

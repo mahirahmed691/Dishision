@@ -1,144 +1,89 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { Avatar, IconButton, Badge } from "react-native-paper";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
+import { Avatar, IconButton } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import { BottomNavBar } from "./BottomNavBar";
-import styles from "./styles";
-
-// ✅ CRITICAL — correct import
 import { auth } from "../config/firebase";
+import { ui } from "../config/designSystem";
+
+const PROFILE_ITEMS = [
+  { key: "Payments", icon: "credit-card", text: "Payment", route: "Payments" },
+  { key: "EditProfile", icon: "edit", text: "Edit Profile", route: "EditProfile" },
+  { key: "Rewards", icon: "gift", text: "Rewards", route: "Rewards" },
+  { key: "Notifications", icon: "bell", text: "Notifications", route: "Notifications" },
+];
 
 export const ProfileScreen = ({ navigation }) => {
   const [userName, setUserName] = useState("");
   const [userPhotoURL, setUserPhotoURL] = useState("");
-  const [activeTab, setActiveTab] = useState("Home");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   useEffect(() => {
     const user = auth.currentUser;
-
     if (user) {
-      setUserName(user.displayName || "");
+      setUserName(user.displayName || "Dish Decide User");
       setUserPhotoURL(user.photoURL || "");
     }
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <IconButton
-        icon="chevron-left"
-        size={24}
-        onPress={() => navigation.goBack()}
-      />
-
-      <View>
-        <Avatar.Image
-          size={80}
-          source={
-            userPhotoURL
-              ? { uri: userPhotoURL }
-              : require("../assets/avatar.png")
-          }
-          style={{ alignSelf: "center", borderRadius: 75 }}
+    <SafeAreaView style={styles.screen} edges={["top"]}>
+      <View style={styles.headerRow}>
+        <IconButton
+          icon="chevron-left"
+          size={24}
+          iconColor={ui.colors.text}
+          onPress={() => navigation.goBack()}
         />
-
-        <Badge
-          size={30}
-          style={{
-            backgroundColor: "black",
-            margin: 5,
-            alignSelf: "center",
-            bottom: 30,
-            left: 30,
-          }}
-        >
-          1
-        </Badge>
+        <Text style={styles.pageTitle}>Profile</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
-      <Text
-        style={{
-          fontSize: 20,
-          color: "black",
-          textAlign: "center",
-          bottom: 30,
-        }}
-      >
-        {userName}
-      </Text>
-
-      <View style={{ flexDirection: "row", alignSelf: "center", bottom: 20 }}>
-        <Badge size={30} style={{ backgroundColor: "#111", margin: 5 }}>
-          Maestro
-        </Badge>
-        <Badge
-          size={30}
-          style={{ backgroundColor: "#111", alignSelf: "center", margin: 5 }}
-        >
-          453/1000xp
-        </Badge>
-      </View>
-
-      <ScrollView>
-        <View style={styles.content}>
-          <TouchableOpacity
-            style={styles.listItem}
-            onPress={() => navigation.navigate("Payments")}
-          >
-            <View style={styles.listItemContent}>
-              <View style={styles.iconContainer}>
-                <Icon name="credit-card" style={styles.icon} />
-              </View>
-              <Text style={styles.listItemText}>Payment</Text>
-              <Icon name="chevron-right" size={24} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.profileCard}>
+          <Avatar.Image
+            size={82}
+            source={
+              userPhotoURL
+                ? { uri: userPhotoURL }
+                : require("../assets/avatar.png")
+            }
+            style={styles.avatar}
+          />
+          <Text style={styles.userName}>{userName}</Text>
+          <View style={styles.badgeRow}>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>Maestro</Text>
             </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate("EditProfile")}
-            style={styles.listItem}
-          >
-            <View style={styles.listItemContent}>
-              <View style={styles.iconContainer}>
-                <Icon name="edit" style={styles.icon} />
-              </View>
-              <Text style={styles.listItemText}>Edit Profile</Text>
-              <Icon name="chevron-right" size={24} />
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>453 / 1000 XP</Text>
             </View>
-          </TouchableOpacity>
+          </View>
+        </View>
 
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Rewards")}
-            style={styles.listItem}
-          >
-            <View style={styles.listItemContent}>
-              <View style={styles.iconContainer}>
-                <Icon name="bell" style={styles.icon} />
+        <View style={styles.menuCard}>
+          {PROFILE_ITEMS.map((item) => (
+            <TouchableOpacity
+              key={item.key}
+              style={styles.menuItem}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate(item.route)}
+            >
+              <View style={styles.menuLeft}>
+                <View style={styles.iconWrap}>
+                  <FontAwesome name={item.icon} size={16} color={ui.colors.primary} />
+                </View>
+                <Text style={styles.menuLabel}>{item.text}</Text>
               </View>
-              <Text style={styles.listItemText}>Rewards</Text>
-              <Icon name="chevron-right" size={24} />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Notifications")}
-            style={styles.listItem}
-          >
-            <View style={styles.listItemContent}>
-              <View style={styles.iconContainer}>
-                <Icon name="bell" style={styles.icon} />
-              </View>
-              <Text style={styles.listItemText}>Notifications</Text>
-              <Icon name="chevron-right" size={24} />
-            </View>
-          </TouchableOpacity>
+              <FontAwesome name="chevron-right" size={14} color={ui.colors.textMuted} />
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
 
       <BottomNavBar
-        activeTab={activeTab}
+        activeTab="Profile"
         showFavoritesOnly={showFavoritesOnly}
         setShowFavoritesOnly={setShowFavoritesOnly}
         navigation={navigation}
@@ -146,5 +91,99 @@ export const ProfileScreen = ({ navigation }) => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: ui.colors.background,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: ui.spacing.sm,
+    paddingTop: ui.spacing.xs,
+  },
+  pageTitle: {
+    fontSize: ui.type.h2,
+    fontWeight: "800",
+    color: ui.colors.text,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  content: {
+    paddingHorizontal: ui.spacing.lg,
+    paddingTop: ui.spacing.sm,
+    paddingBottom: ui.spacing.lg,
+    gap: ui.spacing.md,
+  },
+  profileCard: {
+    backgroundColor: ui.colors.surface,
+    borderRadius: ui.radius.lg,
+    padding: ui.spacing.lg,
+    alignItems: "center",
+    ...ui.shadow.card,
+  },
+  avatar: {
+    backgroundColor: ui.colors.primarySoft,
+  },
+  userName: {
+    marginTop: ui.spacing.sm,
+    fontSize: ui.type.h2,
+    fontWeight: "800",
+    color: ui.colors.text,
+  },
+  badgeRow: {
+    marginTop: ui.spacing.sm,
+    flexDirection: "row",
+    gap: ui.spacing.xs,
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+  badge: {
+    borderRadius: ui.radius.full,
+    backgroundColor: ui.colors.black,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  badgeText: {
+    color: ui.colors.white,
+    fontSize: ui.type.caption,
+    fontWeight: "700",
+  },
+  menuCard: {
+    backgroundColor: ui.colors.surface,
+    borderRadius: ui.radius.lg,
+    paddingHorizontal: ui.spacing.md,
+    ...ui.shadow.card,
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: ui.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: ui.colors.border,
+  },
+  menuLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: ui.spacing.sm,
+  },
+  iconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: ui.colors.primarySoft,
+  },
+  menuLabel: {
+    fontSize: ui.type.body,
+    color: ui.colors.text,
+    fontWeight: "600",
+  },
+});
 
 export default ProfileScreen;

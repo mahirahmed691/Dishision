@@ -1,24 +1,12 @@
 import React from "react";
-import { ActivityIndicator, StyleSheet } from "react-native";
-import {
-  BallIndicator,
-  BarIndicator,
-  DotIndicator,
-  MaterialIndicator,
-  PacmanIndicator,
-  PulseIndicator,
-  SkypeIndicator,
-  UIActivityIndicator,
-  WaveIndicator,
-} from "react-native-indicators";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { Colors } from "../config";
-import { View } from "./View";
 
 export const LoadingIndicator = () => {
   return (
     <View style={styles.container}>
-      <BarIndicator animationDuration={2000} color={Colors.white} />
+      <ActivityIndicator size="large" color={Colors.white} />
     </View>
   );
 };

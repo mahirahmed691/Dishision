@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Modal, Dimensions } from "react-native";
 import { IconButton, Button, TextInput, Icon } from "react-native-paper";
 import { db } from "../config/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc } from "@firebase/firestore";
 import { Colors } from "../config";
 
 const StarSelector = ({

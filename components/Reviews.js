@@ -3,7 +3,7 @@ import { View, Text, ScrollView } from "react-native";
 import { IconButton, Icon } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../config/firebase";
-import { collection, getDocs, where, query } from "firebase/firestore";
+import { collection, getDocs, where, query } from "@firebase/firestore";
 import styles from "../screens/styles";
 
 const StarRow = ({ rating = 0, size = 18, color = "#00CDBC" }) => {

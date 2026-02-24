@@ -16,7 +16,9 @@ const ImageRestaurants = ({ restaurantName }) => {
         );
 
         const data = await response.json();
-        const fetchedImageUrls = data.items.map((item) => item.link);
+        const fetchedImageUrls = Array.isArray(data?.items)
+          ? data.items.map((item) => item.link).filter(Boolean)
+          : [];
         setImageUrls(fetchedImageUrls.slice(0, 10)); // Limit to the first 5 images
       } catch (error) {
         console.error("Error fetching images:", error);

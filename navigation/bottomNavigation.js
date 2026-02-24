@@ -2,7 +2,7 @@
 import React from 'react';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { FavouritesScreen, HomeScreen, ProfileScreen, SettingsScreen, } from '../screens';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { FontAwesome as Icon } from '@expo/vector-icons';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -35,7 +35,7 @@ const bottomNavigation= () => {
         component={FavouritesScreen}
         options={{
           tabBarIcon: ({ color }) => (
-            <Icon name="favorites" size={25} color={color} />
+            <Icon name="heart" size={25} color={color} />
           ),
         }}
       />

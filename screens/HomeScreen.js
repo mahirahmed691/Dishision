@@ -1,43 +1,32 @@
 import React, { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { collection, getDocs } from "@firebase/firestore";
 import { auth, db } from "../config/firebase";
-import { signOut, onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs } from "firebase/firestore";
-import { View } from "react-native";
-
-import { DrawerSlider } from "./DrawerSlider";
+import { onAuthStateChanged, signOut } from "../config/firebaseAuth";
 import { BottomNavBar } from "./BottomNavBar";
-import { styles } from "./styles";
+import { DrawerSlider } from "./DrawerSlider";
+import { ui } from "../config/designSystem";
 
 export const HomeScreen = ({ navigation }) => {
-  const [inputText, setInputText] = useState("");
   const [userName, setUserName] = useState("");
   const [userPhotoURL, setUserPhotoURL] = useState("");
+  const [user, setUser] = useState(null);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Home");
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
-  const [isFilterModalVisible, setFilterModalVisible] = useState(false);
-  const [filterResultsEmpty, setFilterResultsEmpty] = useState(false);
-
   const [favorites, setFavorites] = useState([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-
   const [isRestaurantFormVisible, setIsRestaurantFormVisible] = useState(false);
   const [restaurantFormMode, setRestaurantFormMode] = useState("add");
-  const [searchText, setSearchText] = useState("");
 
-  const [user, setUser] = useState(null);
-
-  // ✅ Auth listener (safe)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
     });
-
     return unsubscribe;
   }, []);
 
-  // ✅ Update profile info
   useEffect(() => {
     if (user) {
       setUserName(user.displayName || "");
@@ -48,15 +37,13 @@ export const HomeScreen = ({ navigation }) => {
     }
   }, [user]);
 
-  // ✅ Fetch restaurants
   useEffect(() => {
     const fetchRestaurantData = async () => {
       try {
         const restaurantsCollection = collection(db, "restaurant");
         const snapshot = await getDocs(restaurantsCollection);
-
         if (snapshot?.docs) {
-          const restaurants = snapshot.docs.map((doc) => doc.data());
+          const restaurants = snapshot.docs.map((docItem) => docItem.data());
           setFilteredRestaurants(restaurants);
         }
       } catch (error) {
@@ -66,10 +53,6 @@ export const HomeScreen = ({ navigation }) => {
 
     fetchRestaurantData();
   }, []);
-
-  useEffect(() => {
-    filterRestaurantsByFavorites();
-  }, [favorites, showFavoritesOnly]);
 
   const handleLogout = () => {
     signOut(auth).catch((error) => console.log("Error logging out: ", error));
@@ -85,23 +68,6 @@ export const HomeScreen = ({ navigation }) => {
       setActiveTab("Home");
     }
     setDrawerOpen(!isDrawerOpen);
-  };
-
-  const filterRestaurantsByFavorites = () => {
-    let filtered = showFavoritesOnly
-      ? filteredRestaurants.filter((restaurant) =>
-          favorites.includes(restaurant.name),
-        )
-      : [...filteredRestaurants];
-
-    if (inputText) {
-      filtered = filtered.filter((restaurant) =>
-        restaurant.name.toLowerCase().includes(inputText.toLowerCase()),
-      );
-    }
-
-    setFilteredRestaurants(filtered);
-    setFilterResultsEmpty(filtered.length === 0);
   };
 
   return (
@@ -127,14 +93,21 @@ export const HomeScreen = ({ navigation }) => {
       />
 
       <BottomNavBar
-        styles={styles.BottomNavBar}
         activeTab={activeTab}
         showFavoritesOnly={showFavoritesOnly}
         setShowFavoritesOnly={setShowFavoritesOnly}
+        setActiveTab={setActiveTab}
         navigation={navigation}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: ui.colors.background,
+  },
+});
 
 export default HomeScreen;

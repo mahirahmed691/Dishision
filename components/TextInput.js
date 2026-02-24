@@ -13,6 +13,7 @@ export const TextInput = ({
   handlePasswordVisibility,
   ...otherProps
 }) => {
+  const { key: _key, ...textInputProps } = otherProps;
   return (
     <View
       style={{
@@ -42,7 +43,7 @@ export const TextInput = ({
           color: Colors.black
         }}
         placeholderTextColor={Colors.mediumGray}
-        {...otherProps}
+        {...textInputProps}
       />
       {rightIcon ? (
         <Button onPress={handlePasswordVisibility}>

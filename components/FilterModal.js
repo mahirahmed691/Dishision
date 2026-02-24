@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Modal, Pressable } from "react-native";
 import { Checkbox, IconButton } from "react-native-paper";
-import Modal from "react-native-modal";
 import { AirbnbRating } from "react-native-ratings";
 
 const FilterModal = ({ visible, onClose, onApplyFilters }) => {
@@ -33,15 +32,13 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
 
   return (
     <Modal
-      isVisible={visible}
-      onBackdropPress={onClose}
-      animationIn="slideInUp"
-      animationOut="slideOutDown"
-      animationOutTiming={300}
-      backdropTransitionOutTiming={300}
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
     >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
+      <Pressable style={styles.modalContainer} onPress={onClose}>
+        <Pressable style={styles.modalContent} onPress={(event) => event.stopPropagation()}>
           <Text style={styles.modalTitle}>Filter Options</Text>
           <View style={styles.filtersContainer}>
             <Text style={styles.filtersTitle}>Select Rating:</Text>
@@ -116,8 +113,8 @@ const FilterModal = ({ visible, onClose, onApplyFilters }) => {
               style={styles.iconButton}
             />
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 };
@@ -127,6 +124,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.45)",
   },
   modalContent: {
     backgroundColor: "white",

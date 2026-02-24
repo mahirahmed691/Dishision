@@ -1,98 +1,91 @@
-import React from 'react';
-import { View, Text, ImageBackground, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ui } from "../config/designSystem";
 
 export const InitialScreen = ({ navigation }) => {
-  return (
-    <ImageBackground
-    source={require('../assets/bigburger.png')}
-    style={styles.backgroundImage}
-    imageStyle={{resizeMode:'contain'}}
-  >
-    <View style={styles.container}>
+  const goToLogin = () => navigation.navigate("Login");
+  const goToSignup = () => navigation.navigate("Signup");
 
-      <Image source={require('../assets/logo4.png')} style={styles.logo} />
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Login')}
-        >
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Signup')}
-        >
-          <Text style={styles.buttonText}>Signup</Text>
-        </TouchableOpacity>
+  return (
+    <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
+      <View style={styles.container}>
+        <Image source={require("../assets/logo4.png")} style={styles.logo} />
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={goToLogin}
+            style={styles.primaryButton}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.primaryButtonText}>Login</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={goToSignup}
+            style={styles.secondaryButton}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.secondaryButtonText}>Signup</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  </ImageBackground>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundImage: {
+  screen: {
     flex: 1,
-    backgroundColor:"#00CDBC",
+    backgroundColor: ui.colors.primary,
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-    width: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: ui.spacing.lg,
   },
-  title: {
-    fontSize: 72,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 20,
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 6,
-  },
-  tagline: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: 'white',
-    marginBottom: 10,
-    position: 'absolute',
-    top: 220,
-    left: 23,
+  logo: {
+    width: "84%",
+    maxWidth: 420,
+    aspectRatio: 1,
+    resizeMode: "contain",
   },
   buttonContainer: {
-    position: 'absolute',
-    bottom:100,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    transform: [{ translateY: 0 }],
+    position: "absolute",
+    bottom: 36,
+    width: "100%",
+    flexDirection: "row",
+    gap: ui.spacing.sm,
   },
-  button: {
-    backgroundColor: 'white',
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    borderRadius: 25,
-    margin: 10,
-    elevation: 3,
+  primaryButton: {
+    flex: 1,
+    borderRadius: ui.radius.full,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: ui.colors.white,
   },
-  buttonText: {
-    color: 'black',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+  secondaryButton: {
+    flex: 1,
+    borderRadius: ui.radius.full,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: ui.colors.white,
+    backgroundColor: "rgba(255,255,255,0.2)",
   },
-  logo:{
-    flex:1,
-    alignContent:'center',
-    width:500,
-    height:500,
-    resizeMode:'contain'
-  }
+  primaryButtonText: {
+    color: ui.colors.text,
+    fontWeight: "800",
+    fontSize: ui.type.body,
+  },
+  secondaryButtonText: {
+    color: ui.colors.white,
+    fontWeight: "800",
+    fontSize: ui.type.body,
+  },
 });
 
-export default styles;
-
+export default InitialScreen;

@@ -1,18 +1,12 @@
 import React, { useState } from "react";
-import { StyleSheet, View, ImageBackground, Text } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Button, IconButton, TextInput } from "react-native-paper";
 import { Formik } from "formik";
-import { sendPasswordResetEmail } from "firebase/auth";
-import {
-  TextInput as PaperTextInput,
-  Button as PaperButton,
-  IconButton,
-} from "react-native-paper";
-import { TouchableOpacity } from "react-native-gesture-handler";
-
-import { passwordResetSchema } from "../utils";
-import { Colors } from "../config"; // ✅ keep Colors here
-import { auth } from "../config/firebase"; // ✅ CRITICAL FIX
+import { sendPasswordResetEmail } from "../config/firebaseAuth";
+import { auth } from "../config/firebase";
 import { FormErrorMessage } from "../components";
+import { passwordResetSchema } from "../utils";
+import { ui } from "../config/designSystem";
 
 export const ForgotPasswordScreen = ({ navigation }) => {
   const [errorState, setErrorState] = useState("");
@@ -22,15 +16,26 @@ export const ForgotPasswordScreen = ({ navigation }) => {
 
     sendPasswordResetEmail(auth, email)
       .then(() => {
-        console.log("Success: Password Reset Email sent.");
         navigation.navigate("Login");
       })
       .catch((error) => setErrorState(error.message));
   };
 
   return (
-    <ImageBackground style={styles.backgroundImage}>
-      <View style={styles.container}>
+    <View style={styles.screen}>
+      <View style={styles.card}>
+        <IconButton
+          style={styles.backButton}
+          icon="keyboard-backspace"
+          iconColor={ui.colors.text}
+          onPress={() => navigation.goBack()}
+        />
+
+        <Text style={styles.title}>Forgot password?</Text>
+        <Text style={styles.subtitle}>
+          Enter the email linked to your account and we'll send reset instructions.
+        </Text>
+
         <Formik
           initialValues={{ email: "" }}
           validationSchema={passwordResetSchema}
@@ -45,27 +50,7 @@ export const ForgotPasswordScreen = ({ navigation }) => {
             handleBlur,
           }) => (
             <>
-              <TouchableOpacity onPress={() => navigation.goBack()}>
-                <IconButton
-                  style={{
-                    borderWidth: 2,
-                    marginBottom: 30,
-                    borderRadius: 10,
-                  }}
-                  icon="keyboard-backspace"
-                />
-              </TouchableOpacity>
-
-              <Text style={{ fontSize: 20, fontWeight: "600" }}>
-                Forgot Password? 😰
-              </Text>
-
-              <Text style={{ marginBottom: 20 }}>
-                Be at ease! Type the email address associated with your account
-                here.
-              </Text>
-
-              <PaperTextInput
+              <TextInput
                 label="Email"
                 mode="outlined"
                 autoCapitalize="none"
@@ -78,61 +63,77 @@ export const ForgotPasswordScreen = ({ navigation }) => {
               />
 
               <FormErrorMessage error={errors.email} visible={touched.email} />
+              {errorState !== "" && <FormErrorMessage error={errorState} visible />}
 
-              {errorState !== "" && (
-                <FormErrorMessage error={errorState} visible />
-              )}
-
-              <PaperButton
+              <Button
                 style={styles.button}
                 mode="contained"
                 onPress={handleSubmit}
-                labelStyle={{ fontWeight: "bold" }}
+                labelStyle={styles.buttonLabel}
               >
                 Send Reset Email
-              </PaperButton>
+              </Button>
             </>
           )}
         </Formik>
 
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text
-            style={{
-              fontWeight: "900",
-              color: "white",
-              fontSize: 20,
-              textAlign: "center",
-              marginTop: 20,
-            }}
-          >
-            Go back to Login
-          </Text>
+          <Text style={styles.loginLink}>Go back to Login</Text>
         </TouchableOpacity>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    paddingHorizontal: 16,
-    resizeMode: "cover",
-    backgroundColor: "#fff",
-    paddingTop: 150,
+    backgroundColor: ui.colors.background,
+    justifyContent: "center",
+    padding: ui.spacing.lg,
   },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: "cover",
+  card: {
+    backgroundColor: ui.colors.surface,
+    borderRadius: ui.radius.lg,
+    padding: ui.spacing.lg,
+    ...ui.shadow.card,
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    margin: 0,
+    borderWidth: 1,
+    borderColor: ui.colors.border,
+  },
+  title: {
+    marginTop: ui.spacing.sm,
+    fontSize: ui.type.h1,
+    fontWeight: "900",
+    color: ui.colors.text,
+  },
+  subtitle: {
+    marginTop: ui.spacing.xs,
+    marginBottom: ui.spacing.md,
+    color: ui.colors.textMuted,
+    fontSize: ui.type.body,
+    lineHeight: 20,
   },
   input: {
-    marginBottom: 16,
+    backgroundColor: ui.colors.surface,
   },
   button: {
-    marginTop: 8,
-    borderRadius: 20,
-    backgroundColor: "#00CDBC",
-    padding: 15,
+    marginTop: ui.spacing.sm,
+    borderRadius: ui.radius.md,
+    backgroundColor: ui.colors.primary,
+  },
+  buttonLabel: {
+    color: ui.colors.white,
+    fontWeight: "800",
+  },
+  loginLink: {
+    marginTop: ui.spacing.md,
+    textAlign: "center",
+    color: ui.colors.primary,
+    fontWeight: "700",
   },
 });
 

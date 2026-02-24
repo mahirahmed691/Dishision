@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, Text } from "react-native";
+import { View, StyleSheet, ScrollView, Text, Modal, Pressable } from "react-native";
 import { Picker } from "react-native-picker";
 import { Input, CheckBox, Icon, Image } from "react-native-elements";
 import { Button } from "react-native-paper";
-import Modal from "react-native-modal";
-import { addDoc, collection, setDoc, doc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, setDoc, doc, updateDoc } from "@firebase/firestore";
 import { db } from "../config/firebase";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -234,9 +233,16 @@ const RestaurantForm = ({
   ];
 
   return (
-    <Modal isVisible={isVisible} style={styles.modal} onBackdropPress={onClose}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <SafeAreaView style={styles.formContainer}>
+    <Modal
+      visible={isVisible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <Pressable style={styles.modalBackdrop} onPress={onClose}>
+        <Pressable style={styles.modal} onPress={(event) => event.stopPropagation()}>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <SafeAreaView style={styles.formContainer}>
           <Text style={styles.formTitle}>{formTitle}</Text>
           <Text style={styles.sectionTitle}>Restaurant</Text>
           <Input
@@ -506,15 +512,25 @@ const RestaurantForm = ({
           <Button mode="contained-tonal" onPress={onClose}>
             <Text>Close</Text>
           </Button>
-        </SafeAreaView>
-      </ScrollView>
+            </SafeAreaView>
+          </ScrollView>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    paddingTop: 60,
+    paddingBottom: 24,
+  },
   modal: {
-    marginTop: 60,
+    maxHeight: "100%",
   },
   scrollContainer: {
     flexGrow: 1,

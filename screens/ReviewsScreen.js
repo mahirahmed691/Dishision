@@ -3,7 +3,7 @@ import { View, Text, ScrollView } from "react-native";
 import { IconButton, Button, Icon } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../config/firebase";
-import { collection, getDocs, where, query } from "firebase/firestore";
+import { collection, getDocs, where, query } from "@firebase/firestore";
 import { Colors } from "../config";
 import styles from "./styles";
 import { CommentModal } from "../components/CommentModal";

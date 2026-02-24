@@ -71,12 +71,11 @@ const Map = ({ latitude, longitude, title }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: "100%",
   },
   map: {
-    flex: 1,
-    height: 300,
-    margin: 10,
+    width: "100%",
+    height: 240,
   },
   modalContainer: {
     flex: 1,

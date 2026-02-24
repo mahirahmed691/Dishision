@@ -1,4 +1,5 @@
-import "react-native-get-random-values"; // ⭐ MUST BE FIRST
+import "react-native-gesture-handler";
+import "react-native-get-random-values";
 
 import { registerRootComponent } from "expo";
 import App from "./App";

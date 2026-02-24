@@ -22,7 +22,7 @@ import {
   query,
   limit,
   push,
-} from "firebase/firestore";
+} from "@firebase/firestore";
 import { db } from "../config/firebase";
 import FilterModal from "../components/FilterModal";
 import RestaurantForm from "../components/RestaurantForm";
@@ -156,7 +156,7 @@ export const Restaurants = ({ navigation }) => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log("Permission to access location was denied");
+        console.error("Permission to access location was denied");
         return;
       }
 
@@ -192,7 +192,7 @@ export const Restaurants = ({ navigation }) => {
       try {
         const { status } = await Audio.requestPermissionsAsync();
         if (status !== "granted") {
-          console.log("Permission to access the microphone was denied");
+          console.error("Permission to access the microphone was denied");
           return;
         }
 
@@ -238,7 +238,6 @@ export const Restaurants = ({ navigation }) => {
       const querySnapshot = await getDocs(
         query(restaurantsCollection, where("city", "==", city)),
       );
-      console.log(city);
 
       setReadCount((prevCount) => prevCount + querySnapshot.size);
 
@@ -432,7 +431,6 @@ export const Restaurants = ({ navigation }) => {
   ]);
 
   const groupedRestaurants = groupRestaurantsByCuisine(filteredRestaurants);
-  console.log("Reads from Firestore:", readCount);
   return (
     <View style={styles.restaurantContainer}>
       <View style={styles.filterContainer}>
@@ -448,7 +446,7 @@ export const Restaurants = ({ navigation }) => {
           label="Search for a food place"
           value={searchText}
           onChangeText={handleInputChange}
-          style={{ width: 270, margin: 10 }}
+          style={styles.searchInput}
         />
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <IconButton
@@ -468,7 +466,7 @@ export const Restaurants = ({ navigation }) => {
           <IconButton
             icon="tune"
             onPress={openFilterModal}
-            style={{ marginTop: 10, marginRight: 10 }}
+            style={{ marginRight: 4 }}
             iconColor="#fff"
             size={20}
           />
@@ -491,7 +489,7 @@ export const Restaurants = ({ navigation }) => {
       </View>
 
       {isDataLoaded && filteredRestaurants.length > 0 ? (
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ paddingBottom: 84 }}>
           <LocationServices />
 
           <View style={styles.brandedContainer}>
@@ -500,16 +498,17 @@ export const Restaurants = ({ navigation }) => {
 
           {Object.keys(groupedRestaurants)
             .slice(0, visibleCategories)
-            .map((cuisineType, index) => {
+            .map((cuisineType) => {
               const restaurantsInCategory = groupedRestaurants[cuisineType];
 
               return (
-                <View key={index}>
+                <View key={cuisineType}>
                   <View
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
                       justifyContent: "space-between",
+                      paddingRight: 8,
                     }}
                   >
                     <Text style={styles.cuisineHeader}>
@@ -541,7 +540,7 @@ export const Restaurants = ({ navigation }) => {
                       .slice(0, 5) // Show 10 restaurants
                       .map((restaurant, idx) => (
                         <TouchableOpacity
-                          key={idx}
+                          key={`${restaurant.restaurantName}-${idx}`}
                           style={styles.restaurantCardHorizontal}
                           onPress={() => navigateToFoodScreen(restaurant)}
                         >
