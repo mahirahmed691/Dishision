@@ -1,12 +1,12 @@
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
-import { Colors } from "../config";
+import { ui } from "../config/designSystem";
 
 export const LoadingIndicator = () => {
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color={Colors.white} />
+      <ActivityIndicator size="large" color={ui.colors.white} />
     </View>
   );
 };
@@ -16,6 +16,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.green,
+    backgroundColor: ui.colors.primary,
   },
 });

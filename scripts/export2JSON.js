@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const path = require('path');
 const serviceAccount = require('../google-service.json');
 
 admin.initializeApp({
@@ -8,6 +9,7 @@ admin.initializeApp({
 
 const db = admin.firestore();
 const collectionRef = db.collection('restaurant');
+const outputPath = path.resolve(__dirname, 'collectionData.json');
 
 const data = [];
 
@@ -20,9 +22,8 @@ collectionRef.get()
     // Write data to a file (JSON, CSV, etc.)
     // For example, write to a JSON file
     const fs = require('fs');
-    fs.writeFileSync('collectionData.json', JSON.stringify(data, null, 2));
+    fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
   })
   .catch(err => {
     console.error('Error getting documents', err);
   });
-

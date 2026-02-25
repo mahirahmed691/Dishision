@@ -4,7 +4,7 @@ import { IconButton, Button, Icon } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../config/firebase";
 import { collection, getDocs, where, query } from "@firebase/firestore";
-import { Colors } from "../config";
+import { ui } from "../config/designSystem";
 import styles from "./styles";
 import { CommentModal } from "../components/CommentModal";
 
@@ -130,7 +130,7 @@ export const ReviewsScreen = ({ route }) => {
       <View>
         <Button
           mode="contained"
-          style={{ backgroundColor: Colors.black, marginTop: 20 }}
+          style={{ backgroundColor: ui.colors.black, marginTop: 20 }}
           onPress={toggleModal}
         >
           Add Comment

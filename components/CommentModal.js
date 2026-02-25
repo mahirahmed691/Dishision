@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Modal, Dimensions } from "react-native";
 import { IconButton, Button, TextInput, Icon } from "react-native-paper";
 import { db } from "../config/firebase";
 import { collection, addDoc } from "@firebase/firestore";
-import { Colors } from "../config";
+import { ui } from "../config/designSystem";
 
 const StarSelector = ({
   rating = 0,
@@ -113,7 +113,7 @@ export const CommentModal = ({
           style={styles.commentInput}
           mode="outlined"
           placeholder="Your Comment"
-          placeholderTextColor={Colors.textSecondary}
+          placeholderTextColor={ui.colors.textMuted}
           value={comment}
           onChangeText={setComment}
           multiline

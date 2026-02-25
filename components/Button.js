@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Pressable, Text, StyleSheet } from 'react-native';
 
-import { Colors } from '../config';
+import { ui } from "../config/designSystem";
 
 export const Button = ({
   children,
@@ -34,6 +34,6 @@ export const Button = ({
 const styles = StyleSheet.create({
   borderlessButtonText: {
     fontSize: 15,
-    color: Colors.black
+    color: ui.colors.black,
   }
 });

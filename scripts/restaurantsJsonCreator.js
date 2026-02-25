@@ -1,4 +1,8 @@
 const fs = require('fs');
+const path = require('path');
+
+const restaurantNamesPath = path.resolve(__dirname, 'restaurantNames.txt');
+const restaurantsOutputPath = path.resolve(__dirname, 'restaurantsOutput.json');
 
 function generateRestaurantData(restaurantNames, existingRestaurants) {
   const locations = ["Manchester", "London", "Birmingham", "Leeds", "Bradford", "Stoke"]; // Array of location names
@@ -46,13 +50,13 @@ function generateRestaurantData(restaurantNames, existingRestaurants) {
   return restaurants;
 }
 
-fs.readFile('restaurantNames.txt', 'utf8', (err, data) => {
+fs.readFile(restaurantNamesPath, 'utf8', (err, data) => {
   if (err) {
     console.error("Error reading the file:", err);
     process.exit(1);
   }
 
-  fs.readFile('restaurantsOutput.json', 'utf8', (err, existingData) => {
+  fs.readFile(restaurantsOutputPath, 'utf8', (err, existingData) => {
     let existingRestaurants = [];
     if (!err) {
       try {
@@ -66,12 +70,12 @@ fs.readFile('restaurantNames.txt', 'utf8', (err, data) => {
     const restaurants = generateRestaurantData(restaurantNames, existingRestaurants);
     const jsonRestaurants = JSON.stringify(restaurants, null, 2);
 
-    fs.writeFile('restaurantsOutput.json', jsonRestaurants, err => {
+    fs.writeFile(restaurantsOutputPath, jsonRestaurants, err => {
       if (err) {
         console.error("Error writing to the file:", err);
         process.exit(1);
       }
-      console.log('Restaurants data saved to restaurantsOutput.json');
+      console.log(`Restaurants data saved to ${restaurantsOutputPath}`);
     });
   });
 });
