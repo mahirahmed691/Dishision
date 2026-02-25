@@ -7,10 +7,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Entypo, FontAwesome } from "@expo/vector-icons";
-import { Avatar, Card, IconButton } from "react-native-paper";
+import { FontAwesome } from "@expo/vector-icons";
+import { Avatar, Card } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import RestaurantForm from "../components/RestaurantForm";
 import Restaurants from "../components/Restaurants";
 import { ui } from "../config/designSystem";
 
@@ -116,36 +115,11 @@ export function DrawerSlider(props) {
       </Modal>
 
       <View style={styles.content}>
-        <View
-          style={[
-            styles.header,
-            { paddingTop: Math.max(insets.top, ui.spacing.md), minHeight: 62 + insets.top },
-          ]}
-        >
-          <IconButton
-            icon="menu"
-            iconColor={ui.colors.white}
-            size={26}
-            onPress={props.toggleDrawer}
-          />
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => {
-              props.toggleRestaurantForm("add");
-              props.setRestaurantFormMode("");
-            }}
-          >
-            <Entypo name="shop" size={20} color={ui.colors.white} />
-            <Text style={styles.addButtonText}>Add</Text>
-          </TouchableOpacity>
-        </View>
-
-        <RestaurantForm
-          isVisible={props.isRestaurantFormVisible}
-          onClose={() => props.setIsRestaurantFormVisible(false)}
-          mode={props.restaurantFormMode}
+        <Restaurants
+          navigation={props.navigation}
+          toggleDrawer={props.toggleDrawer}
+          topInset={Math.max(insets.top, ui.spacing.md)}
         />
-        <Restaurants navigation={props.navigation} />
       </View>
     </View>
   );
@@ -244,31 +218,5 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  header: {
-    backgroundColor: ui.colors.primary,
-    paddingBottom: ui.spacing.sm,
-    paddingHorizontal: ui.spacing.sm,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginRight: ui.spacing.sm,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.35)",
-    borderRadius: ui.radius.full,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-  },
-  addButtonText: {
-    color: ui.colors.white,
-    fontWeight: "700",
-    fontSize: ui.type.caption,
   },
 });

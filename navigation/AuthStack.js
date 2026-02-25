@@ -13,12 +13,28 @@ export const AuthStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="Initial"
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+        animation: "fade",
+        animationDuration: 220,
+      }}
     >
       <Stack.Screen name="Initial" component={InitialScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Signup" component={SignupScreen} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
+        name="Signup"
+        component={SignupScreen}
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ animation: "fade_from_bottom" }}
+      />
     </Stack.Navigator>
   );
 };

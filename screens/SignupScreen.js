@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Dimensions,
   Image,
-  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,20 +12,20 @@ import { Formik } from "formik";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as ImagePicker from "expo-image-picker";
 import * as Yup from "yup";
-import { addDoc, collection } from "@firebase/firestore";
+import { doc, setDoc } from "@firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createUserWithEmailAndPassword, updateProfile } from "../config/firebaseAuth";
 import defaultAvatar from "../assets/avatar.png";
-import SelectCuisinesModal from "../components/SelectCuisinesModal";
 import { FormErrorMessage } from "../components";
-import { auth, db } from "../config/firebase";
+import { auth, db, storage } from "../config/firebase";
 import { useTogglePasswordVisibility } from "../hooks";
 import { ui } from "../config/designSystem";
+import { DEFAULT_USER_PREFERENCES } from "../services/userPreferencesService";
 
 export const SignupScreen = ({ navigation }) => {
   const [errorState, setErrorState] = useState("");
   const [profileImage, setProfileImage] = useState(defaultAvatar);
-  const [showCuisinesModal, setShowCuisinesModal] = useState(false);
 
   const {
     passwordVisibility,
@@ -66,18 +65,39 @@ export const SignupScreen = ({ navigation }) => {
       );
 
       const user = userCredential.user;
+      let profilePhotoURL = null;
+
+      if (profileImage && profileImage !== defaultAvatar && profileImage.uri) {
+        const imageRef = ref(storage, `profileImages/${user.uid}/signup-${Date.now()}.jpg`);
+        const response = await fetch(profileImage.uri);
+        const blob = await response.blob();
+        await uploadBytes(imageRef, blob);
+        profilePhotoURL = await getDownloadURL(imageRef);
+      }
 
       await updateProfile(user, {
         displayName: username,
-        photoURL: profileImage === defaultAvatar ? null : profileImage.uri,
+        photoURL: profilePhotoURL,
       });
 
-      await addDoc(collection(db, "users"), {
-        uid: user.uid,
-        displayName: username,
-      });
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          uid: user.uid,
+          displayName: username,
+          photoURL: profilePhotoURL || "",
+          preferences: DEFAULT_USER_PREFERENCES,
+          onboarding: {
+            preferencesSkipped: false,
+            preferencesCompleted: false,
+            preferencesSetAt: null,
+            createdAt: new Date().toISOString(),
+          },
+        },
+        { merge: true },
+      );
 
-      navigation.navigate("Profile");
+      // Auth state switch will route to AppStack automatically.
     } catch (error) {
       setErrorState(error.message);
     }
@@ -209,24 +229,6 @@ export const SignupScreen = ({ navigation }) => {
                     {errorState !== "" && <FormErrorMessage error={errorState} visible />}
 
                     <Button
-                      style={styles.secondaryButton}
-                      mode="outlined"
-                      textColor={ui.colors.primary}
-                      onPress={() => setShowCuisinesModal(true)}
-                    >
-                      Select Cuisines
-                    </Button>
-
-                    <Modal
-                      visible={showCuisinesModal}
-                      animationType="slide"
-                      presentationStyle="fullScreen"
-                      onRequestClose={() => setShowCuisinesModal(false)}
-                    >
-                      <SelectCuisinesModal onClose={() => setShowCuisinesModal(false)} />
-                    </Modal>
-
-                    <Button
                       style={styles.primaryButton}
                       mode="contained"
                       onPress={handleSubmit}
@@ -340,11 +342,7 @@ const styles = StyleSheet.create({
   textInput: {
     backgroundColor: ui.colors.surface,
   },
-  secondaryButton: {
-    marginTop: ui.spacing.sm,
-    borderColor: ui.colors.primary,
-    borderRadius: ui.radius.md,
-  },
+  secondaryButton: { display: "none" },
   primaryButton: {
     marginTop: ui.spacing.xs,
     backgroundColor: ui.colors.primary,

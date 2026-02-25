@@ -22,6 +22,9 @@ export default {
     bundleIdentifier: "com.mahir93.dishdecide",
     googleServicesFile: "./GoogleService-Info.plist",
     buildNumber: "1.1",
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
   },
   android: {
     package: "com.mahir93.dishdecide",
@@ -35,7 +38,6 @@ export default {
     [
       "@stripe/stripe-react-native",
       {
-        merchantIdentifier: "MERCHANT_IDENTIFIER",
         enableGooglePay: true,
       },
     ],

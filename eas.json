@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": "<= 5.6.0"
+    "version": ">= 18.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -17,8 +18,14 @@
       "distribution": "internal",
       "channel": "preview"
     },
+    "preview-simulator": {
+      "ios": {
+        "simulator": true
+      },
+      "channel": "preview"
+    },
     "production": {
-      "node": "18.17.0",
+      "node": "20.19.4",
       "channel": "production"
     }
   },

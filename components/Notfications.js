@@ -1,28 +1,46 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Switch, StyleSheet } from "react-native";
-import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 
 export const Notification = () => {
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [emailNotificationEnabled, setEmailNotificationEnabled] =
     useState(false);
   const [textAlertsEnabled, setTextAlertsEnabled] = useState(false);
+  const [isNotificationsSupported, setIsNotificationsSupported] = useState(true);
+
+  const isExpoGo = Constants.executionEnvironment === "storeClient";
+
+  const getNotificationsModule = async () => {
+    if (isExpoGo) {
+      return null;
+    }
+    const module = await import("expo-notifications");
+    return module;
+  };
 
   useEffect(() => {
     const checkNotificationStatus = async () => {
+      const Notifications = await getNotificationsModule();
+      if (!Notifications) {
+        setIsNotificationsSupported(false);
+        setNotificationEnabled(false);
+        return;
+      }
       const { status } = await Notifications.getPermissionsAsync();
       setNotificationEnabled(status === "granted");
     };
     checkNotificationStatus();
-
-    // Additional checks for email and text alerts could go here
-    // Fetch data or check the settings for these services to see if they're enabled
-    // Example:
-    // setEmailNotificationEnabled(fetchEmailNotificationSettings());
-    // setTextAlertsEnabled(fetchTextAlertSettings());
   }, []);
 
   const toggleNotification = async () => {
+    const Notifications = await getNotificationsModule();
+    if (!Notifications) {
+      setIsNotificationsSupported(false);
+      setNotificationEnabled(false);
+      return;
+    }
+
     try {
       if (notificationEnabled) {
         await Notifications.requestPermissionsAsync({
@@ -40,21 +58,6 @@ export const Notification = () => {
       console.log("Notification permission error:", error);
     }
   };
-
-  useEffect(() => {
-    const checkNotificationStatus = async () => {
-      const { status } = await Notifications.getPermissionsAsync();
-      setNotificationEnabled(status === 'granted');
-    };
-    checkNotificationStatus();
-
-    // Fetch email notification settings from a database or storage
-    // Example:
-    // const emailNotifications = fetchEmailNotificationSettings();
-    // setEmailNotificationEnabled(emailNotifications);
-    
-    // Additional checks for text alerts could go here
-  }, []);
 
   const toggleTextAlerts = () => {
     const newValue = !textAlertsEnabled;
@@ -75,14 +78,20 @@ export const Notification = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Notification Settings</Text>
+      {!isNotificationsSupported ? (
+        <Text style={styles.supportNote}>
+          Push notifications need a development build. Expo Go has limited support.
+        </Text>
+      ) : null}
       <View style={styles.notificationToggle}>
         <Text style={styles.notificationLabel}>App Notifications</Text>
         <Switch
           trackColor={{ false: "#FFF", true: "#00CDBC" }}
-          thumbColor={notificationEnabled ? "#" : "#f4f3f4"}
+          thumbColor={notificationEnabled ? "#FFFFFF" : "#f4f3f4"}
           ios_backgroundColor="#3e3e3e"
           onValueChange={toggleNotification}
           value={notificationEnabled}
+          disabled={!isNotificationsSupported}
         />
       </View>
       <View style={styles.notificationToggle}>
@@ -120,6 +129,14 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     marginBottom: 20,
+  },
+  supportNote: {
+    width: "80%",
+    marginBottom: 14,
+    fontSize: 14,
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 19,
   },
   notificationToggle: {
     flexDirection: "row",

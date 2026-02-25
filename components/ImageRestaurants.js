@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Image, StyleSheet, ScrollView, Animated } from "react-native";
+import { View, Image, StyleSheet, ScrollView, Animated, Text } from "react-native";
+import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 
 const ImageRestaurants = ({ restaurantName }) => {
   const [imageUrls, setImageUrls] = useState([]);
+  const [failedImages, setFailedImages] = useState({});
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -29,6 +31,7 @@ const ImageRestaurants = ({ restaurantName }) => {
   }, []);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const hasVisibleImages = imageUrls.some((url, index) => url && !failedImages[index]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -40,16 +43,32 @@ const ImageRestaurants = ({ restaurantName }) => {
 
   return (
     <ScrollView horizontal contentContainerStyle={styles.container}>
-      {imageUrls.map((imageUrl, index) =>
-        imageUrl ? (
-          <Animated.View key={index} style={{ opacity: fadeAnim }}>
-            <Image
-              source={{ uri: imageUrl }}
-              style={styles.image}
-              key={index}
-            />
-          </Animated.View>
-        ) : null
+      {imageUrls.length === 0 || !hasVisibleImages ? (
+        <View style={styles.placeholderCard}>
+          <Icon name="image-outline" size={28} color="#6B7280" />
+          <Text style={styles.placeholderText}>Photos unavailable right now</Text>
+        </View>
+      ) : (
+        imageUrls.map((imageUrl, index) => {
+          if (!imageUrl || failedImages[index]) {
+            return null;
+          }
+
+          return (
+            <Animated.View key={index} style={{ opacity: fadeAnim }}>
+              <Image
+                source={{ uri: imageUrl }}
+                style={styles.image}
+                onError={() =>
+                  setFailedImages((prev) => ({
+                    ...prev,
+                    [index]: true,
+                  }))
+                }
+              />
+            </Animated.View>
+          );
+        })
       )}
     </ScrollView>
   );
@@ -67,6 +86,22 @@ const styles = StyleSheet.create({
     height: 200,
     margin: 5,
     marginBottom: 0,
+  },
+  placeholderCard: {
+    width: 300,
+    height: 200,
+    margin: 5,
+    marginBottom: 0,
+    borderRadius: 12,
+    backgroundColor: "#EEF2F7",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  placeholderText: {
+    color: "#6B7280",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
 

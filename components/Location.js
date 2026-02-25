@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, Button, StyleSheet, Linking } from "react-native";
 import * as Location from "expo-location";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -10,11 +10,17 @@ const LocationServices = () => {
 
   const requestLocationPermission = async () => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const { status, canAskAgain } = await Location.requestForegroundPermissionsAsync();
       setPermissionStatus(status);
       if (status === "granted") {
         const userLocation = await Location.getCurrentPositionAsync({});
         setLocation(userLocation);
+        return;
+      }
+
+      // iOS "Never" / blocked permission states won't show the native prompt again.
+      if (!canAskAgain) {
+        await Linking.openSettings();
       }
     } catch (error) {
       console.error("Error getting location:", error);
@@ -47,7 +53,11 @@ const LocationServices = () => {
     <View style={styles.container}>
       {permissionStatus !== "granted" ? (
         <Button
-          title="Grant Location Permission"
+          title={
+            permissionStatus === "denied"
+              ? "Enable Location in Settings"
+              : "Grant Location Permission"
+          }
           onPress={requestLocationPermission}
         />
       ) : location ? (

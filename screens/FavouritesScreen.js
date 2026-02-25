@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Image,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -8,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { IconButton, TextInput, ActivityIndicator } from "react-native-paper";
+import { IconButton, ActivityIndicator } from "react-native-paper";
 import { Swipeable } from "react-native-gesture-handler";
 import {
   collection,
@@ -26,8 +25,9 @@ import { auth, db } from "../config/firebase";
 import { BottomNavBar } from "./BottomNavBar";
 import { ui } from "../config/designSystem";
 import { getRestaurantFallbackMenu } from "../data/restaurantMenus";
-
-const MENU_SECTIONS = ["starters", "mains", "desserts", "drinks"];
+import SearchHeader from "../components/SearchHeader";
+import { hasMenuSections } from "../services/restaurantDataService";
+import RestaurantLogo from "../components/RestaurantLogo";
 
 export const FavouritesScreen = ({ navigation }) => {
   const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
@@ -50,17 +50,10 @@ export const FavouritesScreen = ({ navigation }) => {
     if (!restaurant?.restaurantName) {
       return false;
     }
-
-    const hasDbSections = MENU_SECTIONS.some((section) => {
-      const items = restaurant?.[section];
-      return Array.isArray(items) && items.some((item) => `${item?.name ?? ""}`.trim().length > 0);
-    });
-
-    if (hasDbSections) {
-      return true;
-    }
-
-    return Boolean(getRestaurantFallbackMenu(restaurant.restaurantName));
+    return (
+      hasMenuSections(restaurant) ||
+      hasMenuSections(getRestaurantFallbackMenu(restaurant.restaurantName))
+    );
   };
 
   const getPriceTier = (rawPrice) => {
@@ -267,22 +260,12 @@ export const FavouritesScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.toolbar}>
-        <TextInput
-          mode="outlined"
+        <SearchHeader
           value={searchText}
           onChangeText={setSearchText}
+          onPressClear={() => setSearchText("")}
           placeholder="Search saved places"
-          style={styles.searchInput}
-          left={<TextInput.Icon icon="magnify" />}
-          right={
-            searchText.length > 0 ? <TextInput.Icon icon="close" onPress={() => setSearchText("")} /> : null
-          }
-          theme={{
-            roundness: ui.radius.full,
-            colors: {
-              primary: ui.colors.primary,
-            },
-          }}
+          containerStyle={styles.searchHeader}
         />
       </View>
 
@@ -357,15 +340,13 @@ export const FavouritesScreen = ({ navigation }) => {
                 >
                   <View style={styles.card}>
                     <View style={styles.cardContent}>
-                      {restaurant.image ? (
-                        <Image source={{ uri: restaurant.image }} style={styles.image} />
-                      ) : (
-                        <View style={styles.imageFallback}>
-                          <Text style={styles.imageFallbackText}>
-                            {restaurant.name.slice(0, 1).toUpperCase()}
-                          </Text>
-                        </View>
-                      )}
+                      <RestaurantLogo
+                        uri={restaurant.image}
+                        name={restaurant.name}
+                        style={styles.image}
+                        fallbackStyle={styles.imageFallback}
+                        fallbackTextStyle={styles.imageFallbackText}
+                      />
 
                       <View style={styles.textWrap}>
                         <Text style={styles.restaurantName}>{restaurant.name}</Text>
@@ -423,8 +404,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: ui.spacing.lg,
     paddingTop: ui.spacing.sm,
   },
-  searchInput: {
-    backgroundColor: ui.colors.surface,
+  searchHeader: {
+    width: "100%",
   },
   filterRow: {
     paddingHorizontal: ui.spacing.lg,

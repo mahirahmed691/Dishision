@@ -587,8 +587,8 @@ export const styles = StyleSheet.create({
       width: 0,
       height: 3,
     },
-    shadowOpacity: 0.27,
-    shadowRadius: 4.65,
+    shadowOpacity: 0.12,
+    shadowRadius: 3.6,
   },
 
   restaurantInfoHorizontal: {
@@ -694,14 +694,14 @@ export const styles = StyleSheet.create({
     marginRight: 12,
     marginBottom: 10,
     backgroundColor: "#FFFFFF",
-    elevation: 3,
+    elevation: 2,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
   },
   logoHorizontal: {
     width: 126,
@@ -715,6 +715,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingBottom: 10,
     width: 126,
+    minHeight: 96,
   },
   cuisineHeader: {
     fontSize: 22,
@@ -728,6 +729,7 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#111827",
     marginBottom: 4,
+    minHeight: 36,
   },
   restaurantRating: {
     color: "#00CDBC",
