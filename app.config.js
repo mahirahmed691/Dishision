@@ -19,9 +19,8 @@ export default {
   runtimeVersion: "1.0.0",
   assetBundlePatterns: ["**/*"],
   ios: {
-    bundleIdentifier: "com.mahir93.dishdecide",
+    bundleIdentifier: "com.mahir93.dishdecideapp",
     googleServicesFile: "./GoogleService-Info.plist",
-    buildNumber: "1.1",
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
