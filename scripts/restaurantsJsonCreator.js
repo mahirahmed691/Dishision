@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const restaurantNamesPath = path.resolve(__dirname, 'restaurantNames.txt');
-const restaurantsOutputPath = path.resolve(__dirname, 'restaurantsOutput.json');
+const dataDir = path.resolve(__dirname, "data");
+const restaurantNamesPath = path.join(dataDir, "restaurantNames.txt");
+const restaurantsOutputPath = path.join(dataDir, "restaurantsOutput.json");
 
 function generateRestaurantData(restaurantNames, existingRestaurants) {
   const locations = ["Manchester", "London", "Birmingham", "Leeds", "Bradford", "Stoke"]; // Array of location names

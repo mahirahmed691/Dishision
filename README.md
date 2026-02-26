@@ -1,80 +1,76 @@
 # DishDecide
 
-*Decisions made easier.*
+Find what to eat faster, with less friction.
 
-<img src="assets/logo4.png" alt="Example Image" width="200" />
+<p align="center">
+  <img src="assets/logo4.png" alt="DishDecide logo" width="140" />
+</p>
 
-### Overview
+DishDecide is a mobile app that helps people go from "I don't know what to order" to a confident decision in seconds.  
+Instead of forcing users to scroll endless menus, DishDecide lets them search the menu with natural prompts like:
 
-DishDecision is an AI-powered application that assists in making decisions related to choosing dishes, restaurants, and more. The app uses ChatGPT, an AI language model, to analyze preferences and suggest suitable options.
+- "Something hot and cheesy"
+- "A light high-protein option"
+- "Best spicy main under $$"
 
-## Features
+## Why It Exists
 
-- **Decision Assistance:** Provides suggestions for meals, dishes, or restaurant choices based on user input.
-- **AI-Powered Recommendations:** Utilizes ChatGPT to process preferences and generate personalized recommendations.
-- **Multiple Cuisine Support:** Covers a wide range of cuisines and dining options.
-- **User-Friendly Interface:** Simple and intuitive design for an easy user experience.
+Food discovery today is noisy:
+- Too many restaurants
+- Too many menu items
+- Too little relevance to what the user actually craves
 
-# Screenshots
+DishDecide focuses on intent-first decisioning:
+- prompt-led menu search
+- personalized ranking
+- cuisine-led restaurant discovery
+- fast shortlist sharing with friends
 
-<div style="display: flex; flex-direction: row;">
-    <img src="assets/homescreen.png" alt="Example Image" width="100" />
-    <img src="assets/rewards.png" alt="Example Image" width="100" />
-    <img src="assets/profile.png" alt="Example Image" width="100" />
-    <img src="assets/elvet.png" alt="Example Image" width="100" />
-</div>
+## Product Experience
 
-## Installation
+- **Home discovery**
+  Browse curated cuisine rails and restaurant cards with quality-aware ranking.
 
-```
-git clone https://github.com/mahirahmed691/Dishision.git
-cd Dishision
-```
+- **Restaurant detail + menu intelligence**
+  Search one restaurant's menu directly with natural language and get top picks instantly.
 
-### Setup
+- **Taste profile personalization**
+  Users set cuisine and dietary preferences that shape results across discovery and menu suggestions.
 
-```
-yarn install
-```
+- **Favourites that are actually useful**
+  Saved places are searchable/filterable and ready for quick return visits.
 
-### Start Application
+## Product Preview
 
-```
-expo start
-```
+<p align="center">
+  <img src="assets/homescreen.png" alt="DishDecide home screen" width="200" />
+  <img src="assets/profile.png" alt="DishDecide profile screen" width="200" />
+  <img src="assets/rewards.png" alt="DishDecide rewards screen" width="200" />
+  <img src="assets/elvet.png" alt="DishDecide restaurant screen" width="200" />
+</p>
 
-### Technology Stack
+## Differentiation
 
-- **React Native:** Framework for building the mobile app
-- **ChatGPT:** AI model for processing user queries and generating suggestions
+DishDecide is not a generic food listing UI.  
+It is purpose-built around one core behavior: **decision confidence at ordering time**.
 
-### Dependencies
+That means:
+- less list noise
+- more contextual ranking
+- stronger prompt-to-result relevance
+- cleaner path from craving to checkout decision
 
-- React Native
-- ChatGPT API
-- Stripe
-  
-### Configuration
+## Current Status
 
-- **ChatGPT API Key:** Get the API key for ChatGPT and set it in the configuration file.
+- iOS build and TestFlight pipeline configured through EAS
+- Firebase-backed restaurant/profile data
+- Admin tooling for data quality and enrichment workflows
+- Ongoing refinement of ranking, menu matching, and onboarding UX
 
-### Contributing
+## Vision
 
-We welcome contributions! Please follow these guidelines:
-
-- Fork the repository
-- Create a new branch for your feature or improvement
-- Open a pull request
-
-### Support
-
-For any queries or support, contact [mahirahmed691@gmail.com](mailto:mahirahmed691@gmail.com).
-
-### Acknowledgments
-
-- Acknowledge any contributors or tools used in the project development.
-
-<div style="display: flex; flex-direction: row;">
-    <img src="https://media.licdn.com/dms/image/C4E03AQHtqec7iPC0XQ/profile-displayphoto-shrink_400_400/0/1656085518557?e=1704931200&v=beta&t=9zwk4-7giJLHcRSOcrZsG1ea5Y5fkHP5bD5FXYQ7LX8" alt="Example Image" width="200" />
-    <img src="https://media.licdn.com/dms/image/C5603AQHrZrhA1Us7qA/profile-displayphoto-shrink_800_800/0/1517398677029?e=1704931200&v=beta&t=Ja7jfPIwnFbgBVfD-_yl4PaLEqI5mfjXgRtLVEz13D4" alt="Example Image" width="200" />
-</div>
+DishDecide becomes the intelligent decision layer on top of restaurant menus:
+- personal taste memory
+- context-aware recommendations
+- collaborative ordering flows (shareable picks)
+- increasingly precise menu relevance over time

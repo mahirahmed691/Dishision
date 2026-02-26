@@ -22,6 +22,7 @@ This repository is organized to keep runtime app code separate from data tooling
 
 ## Data tooling
 - `scripts/`: enrichment, normalization, and migration scripts
+  - `scripts/data/`: script input/output data artifacts
   - Script-local inputs/outputs are resolved from `scripts/` to avoid root clutter.
 
 ## Docs

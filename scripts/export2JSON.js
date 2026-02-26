@@ -9,7 +9,7 @@ admin.initializeApp({
 
 const db = admin.firestore();
 const collectionRef = db.collection('restaurant');
-const outputPath = path.resolve(__dirname, 'collectionData.json');
+const outputPath = path.resolve(__dirname, "data", "collectionData.json");
 
 const data = [];
 
