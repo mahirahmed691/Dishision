@@ -22,7 +22,7 @@ import { faFire, faStar } from "@fortawesome/free-solid-svg-icons";
 import FilterModal from "../components/FilterModal";
 import SearchHeader from "../components/SearchHeader";
 import LocationServices from "./Location";
-import styles from "../screens/styles";
+import styles from "../screens/AppStyles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import {

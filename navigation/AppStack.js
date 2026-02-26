@@ -13,7 +13,7 @@ import { Restaurants } from "../components/Restaurants";
 import { InviteFriends } from "../components/InviteFriends";
 import { Language } from "../components/Language.js";
 import FAQ from "../components/FAQ";
-import Notifcation from "../components/Notfications";
+import Notifications from "../components/Notifications";
 import Security from "../components/Security";
 import MissingDataQueueScreen from "../screens/MissingDataQueueScreen";
 import OnboardingPreferencesScreen from "../screens/OnboardingPreferencesScreen";
@@ -44,7 +44,7 @@ export const AppStack = () => {
       <Stack.Screen name="Language" component={Language} />
       <Stack.Screen name="FAQ" component={FAQ} />
       <Stack.Screen name="Security" component={Security} />
-      <Stack.Screen name="Notifications" component={Notifcation} />
+      <Stack.Screen name="Notifications" component={Notifications} />
       <Stack.Screen name="MissingDataQueue" component={MissingDataQueueScreen} />
       <Stack.Screen
         name="OnboardingPreferences"

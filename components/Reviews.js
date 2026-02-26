@@ -4,7 +4,7 @@ import { IconButton, Icon } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../config/firebase";
 import { collection, getDocs, where, query } from "@firebase/firestore";
-import styles from "../screens/styles";
+import styles from "../screens/AppStyles";
 
 const StarRow = ({ rating = 0, size = 18, color = "#00CDBC" }) => {
   const rounded = Math.round(Number(rating) || 0);

@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../config/firebase";
 import { collection, getDocs, where, query } from "@firebase/firestore";
 import { ui } from "../config/designSystem";
-import styles from "./styles";
+import styles from "./AppStyles";
 import { CommentModal } from "../components/CommentModal";
 
 const StarRow = ({ rating = 0, size = 18, color = "#00CDBC" }) => {

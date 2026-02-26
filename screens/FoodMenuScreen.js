@@ -18,7 +18,7 @@ import Animated, {
   withSequence,
 } from "react-native-reanimated";
 import { BottomNavBar } from "./BottomNavBar";
-import { styles } from "./styles";
+import { styles } from "./AppStyles";
 import SearchHeader from "../components/SearchHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { filterMenuItemsByQuery } from "../services/menuSearchService";
@@ -30,11 +30,11 @@ import {
   DEFAULT_USER_PREFERENCES,
   fetchCurrentUserPreferences,
 } from "../services/userPreferencesService";
-import PromptSystemPanel from "../components/foodMenu/PromptSystemPanel";
-import AIPicksStrip from "../components/foodMenu/AIPicksStrip";
-import RestaurantHeroCard from "../components/foodMenu/RestaurantHeroCard";
-import MenuSectionsPanel from "../components/foodMenu/MenuSectionsPanel";
-import fmStyles from "./foodMenuStyles";
+import PromptSystemPanel from "../components/FoodMenu/PromptSystemPanel";
+import AIPicksStrip from "../components/FoodMenu/AIPicksStrip";
+import RestaurantHeroCard from "../components/FoodMenu/RestaurantHeroCard";
+import MenuSectionsPanel from "../components/FoodMenu/MenuSectionsPanel";
+import fmStyles from "./FoodMenuStyles";
 import { foodMenuCopy } from "../constants/foodMenuCopy";
 
 export const FoodMenuScreen = ({ navigation, route }) => {

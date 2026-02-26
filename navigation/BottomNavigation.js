@@ -6,7 +6,7 @@ import { FontAwesome as Icon } from '@expo/vector-icons';
 
 const Tab = createMaterialBottomTabNavigator();
 
-const bottomNavigation= () => {
+const BottomNavigation = () => {
   return (
     <Tab.Navigator
       shifting={true}
@@ -52,4 +52,4 @@ const bottomNavigation= () => {
   );
 };
 
-export default bottomNavigation;
+export default BottomNavigation;

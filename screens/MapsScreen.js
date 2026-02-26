@@ -6,7 +6,7 @@ import { Icon } from 'react-native-elements';
 import { openMap, createOpenLink, createMapLink } from 'react-native-open-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HygieneRating from '../components/HygieneRating';
-import styles from './styles';
+import styles from "./AppStyles";
 
 export const MapScreen = ({route}) => {
   const {restaurant} = route.params;
@@ -80,4 +80,3 @@ export const MapScreen = ({route}) => {
     </SafeAreaView>
   );
 };
-
